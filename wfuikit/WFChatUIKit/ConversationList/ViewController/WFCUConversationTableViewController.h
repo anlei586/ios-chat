@@ -7,7 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
-
+/*
 @interface WFCUConversationTableViewController : UIViewController
 
+@end
+*/
+@interface WFCUConversationTableViewController : UIViewController{
+    
+}
+//- (void)viewWillAppear:(BOOL)animated;
 @end

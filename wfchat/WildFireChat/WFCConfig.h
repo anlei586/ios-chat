@@ -14,6 +14,7 @@ extern NSString *IM_SERVER_HOST;
 extern int IM_SERVER_PORT;
 
 extern NSString *APP_SERVER_ADDRESS;
+extern NSString *APP_SERVER_PHP;
 
 extern NSString *ICE_ADDRESS;
 extern NSString *ICE_USERNAME;

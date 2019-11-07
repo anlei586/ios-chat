@@ -15,6 +15,8 @@
 #import "WFCPrivacyViewController.h"
 #import "WFCPrivacyTableViewController.h"
 
+#import "WFCBaseTabBarController.h"
+
 @interface WFCSettingTableViewController () <UITableViewDataSource, UITableViewDelegate>
 @property (nonatomic, strong)UITableView *tableView;
 @end
@@ -37,6 +39,10 @@
     
 }
 
+-(void)alert:(NSString*) text{
+    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:text delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+    [alert show];
+}
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
@@ -61,18 +67,26 @@
             mvc.hidesBottomBarWhenPushed = YES;
             [self.navigationController pushViewController:mvc animated:YES];
         } else if (indexPath.row == 2) {
-            WFCAboutViewController *avc = [[WFCAboutViewController alloc] init];
-            [self.navigationController pushViewController:avc animated:YES];
+            //WFCAboutViewController *avc = [[WFCAboutViewController alloc] init];
+            //[self.navigationController pushViewController:avc animated:YES];
+            NSDictionary *dict = [WFCBaseTabBarController getApiClient];
+            NSString *_autor = dict[@"autor"];
+            [self alert:_autor];
         }
     } else if(indexPath.section == 2) {
         if (indexPath.row == 0) {
-            WFCPrivacyViewController * pvc = [[WFCPrivacyViewController alloc] init];
-            pvc.isPrivacy = NO;
-            [self.navigationController pushViewController:pvc animated:YES];
+            //WFCPrivacyViewController * pvc = [[WFCPrivacyViewController alloc] init];
+            //pvc.isPrivacy = NO;
+            //[self.navigationController pushViewController:pvc animated:YES];
+            WFCAboutViewController *avc = [[WFCAboutViewController alloc] init];
+            [self.navigationController pushViewController:avc animated:YES];
         } else if(indexPath.row == 1) {
-            WFCPrivacyViewController * pvc = [[WFCPrivacyViewController alloc] init];
-            pvc.isPrivacy = YES;
-            [self.navigationController pushViewController:pvc animated:YES];
+            //WFCPrivacyViewController * pvc = [[WFCPrivacyViewController alloc] init];
+            //pvc.isPrivacy = YES;
+            //[self.navigationController pushViewController:pvc animated:YES];
+            NSDictionary *dict = [WFCBaseTabBarController getApiClient];
+            NSString *_autor = dict[@"autor"];
+            [self alert:_autor];
         }
     } else if(indexPath.section == 3) {
         __weak typeof(self)ws = self;
@@ -144,15 +158,15 @@
         } if (indexPath.row == 1) {
             cell.textLabel.text = @"帮助与反馈";
         } else if (indexPath.row == 2) {
-            cell.textLabel.text = @"关于野火IM";
+            cell.textLabel.text = @"关于";
         }
     } else if(indexPath.section == 2) {
         if (indexPath.row == 0) {
-            cell.textLabel.text = @"用户协议";
+            cell.textLabel.text = @"管理员";
         } if (indexPath.row == 1) {
-            cell.textLabel.text = @"隐私政策";
+            cell.textLabel.text = @"@关于作者";
         } else if (indexPath.row == 2) {
-            cell.textLabel.text = @"关于野火IM";
+            cell.textLabel.text = @"关于";
         }
     } else if(indexPath.section == 3) {
         if (indexPath.row == 0) {

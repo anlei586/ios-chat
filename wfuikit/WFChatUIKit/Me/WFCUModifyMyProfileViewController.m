@@ -103,7 +103,10 @@
         _textField.borderStyle = UITextBorderStyleRoundedRect;
         _textField.clearButtonMode = UITextFieldViewModeAlways;
         _textField.delegate = self;
-        _textField.inputDelegate = self;
+        if (@available(iOS 13.0, *)) {
+        }else{
+            _textField.inputDelegate = self;
+        }
         [self.view addSubview:_textField];
     }
     return _textField;

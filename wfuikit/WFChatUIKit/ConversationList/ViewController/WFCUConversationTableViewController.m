@@ -52,7 +52,10 @@
     self.searchController.searchResultsUpdater = self;
     self.searchController.delegate = self;
     self.searchController.dimsBackgroundDuringPresentation = NO;
-    [self.searchController.searchBar setValue:@"取消" forKey:@"_cancelButtonText"];
+    //[self.searchController.searchBar setValue:@"取消" forKey:@"_cancelButtonText"];
+    UIButton *cancelButton = [self findViewWithClassName:NSStringFromClass([UIButton class]) inView:self.searchController.searchBar];
+    [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
+    
     
     if (@available(iOS 9.1, *)) {
         self.searchController.obscuresBackgroundDuringPresentation = NO;
@@ -76,6 +79,27 @@
     [self updatePcSession];
 }
 
+- (UIView *)findViewWithClassName:(NSString *)className inView:(UIView *)view{
+    /*
+     UIButton *cancelButton = [self findViewWithClassName:NSStringFromClass([UIButton class]) inView:self.searchController.searchBar];
+     [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
+     */
+    Class specificView = NSClassFromString(className);
+    if ([view isKindOfClass:specificView]) {
+        return view;
+    }
+ 
+    if (view.subviews.count > 0) {
+        for (UIView *subView in view.subviews) {
+            UIView *targetView = [self findViewWithClassName:className inView:subView];
+            if (targetView != nil) {
+                return targetView;
+            }
+        }
+    }
+    
+    return nil;
+}
 - (void)onUserInfoUpdated:(NSNotification *)notification {
     if (self.searchController.active) {
         [self.tableView reloadData];
@@ -246,6 +270,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSendingMessageStatusUpdated:) name:kSendingMessageStatusUpdated object:nil];
     
     self.firstAppear = YES;
+
 }
 
 - (void)updateConnectionStatus:(ConnectionStatus)status {
@@ -341,7 +366,7 @@
             count += info.unreadCount.unread;
         }
     }
-    [self.tabBarController.tabBar showBadgeOnItemIndex:0 badgeValue:count];
+    [self.tabBarController.tabBar showBadgeOnItemIndex:1 badgeValue:count];
 }
 
 - (void)updatePcSession {

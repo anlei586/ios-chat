@@ -17,28 +17,45 @@
 #define kImgKey     @"imageName"
 #define kSelImgKey  @"selectedImageName"
 
+
+static NSDictionary *apiclient;
+
 @interface WFCBaseTabBarController ()
 @property (nonatomic, strong)UINavigationController *firstNav;
 @property (nonatomic, strong)UINavigationController *settingNav;
+
+
 @end
 
 @implementation WFCBaseTabBarController
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    UIViewController *vc = [WFCUConversationTableViewController new];
-    vc.title = @"消息";
+    UIViewController *vc = [DiscoverViewController new];
+    vc.title = @"发现";
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
     UITabBarItem *item = nav.tabBarItem;
-    item.title = @"消息";
-    item.image = [UIImage imageNamed:@"tabbar_chat"];
-    item.selectedImage = [[UIImage imageNamed:@"tabbar_chat_cover"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    item = nav.tabBarItem;
+    item.title = @"发现";
+    item.image = [UIImage imageNamed:@"tabbar_discover"];
+    item.selectedImage = [[UIImage imageNamed:@"tabbar_discover_cover"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     [item setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9]} forState:UIControlStateSelected];
     [self addChildViewController:nav];
     
     self.firstNav = nav;
     
- 
+    WFCUConversationTableViewController *vc1 = [WFCUConversationTableViewController new];
+    vc1.title = @"消息";
+    nav = [[UINavigationController alloc] initWithRootViewController:vc1];
+    item = nav.tabBarItem;
+    item.title = @"消息";
+    item.image = [UIImage imageNamed:@"tabbar_chat"];
+    item.selectedImage = [[UIImage imageNamed:@"tabbar_chat_cover"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    [item setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9]} forState:UIControlStateSelected];
+    [self addChildViewController:nav];
+    //[vc1 viewDidLoad];
+    //[vc1 viewWillAppear:YES];
+    
     vc = [WFCUContactListViewController new];
     vc.title = @"联系人";
     nav = [[UINavigationController alloc] initWithRootViewController:vc];
@@ -46,16 +63,6 @@
     item.title = @"联系人";
     item.image = [UIImage imageNamed:@"tabbar_contacts"];
     item.selectedImage = [[UIImage imageNamed:@"tabbar_contacts_cover"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
-    [item setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9]} forState:UIControlStateSelected];
-    [self addChildViewController:nav];
-    
-    vc = [DiscoverViewController new];
-    vc.title = @"发现";
-    nav = [[UINavigationController alloc] initWithRootViewController:vc];
-    item = nav.tabBarItem;
-    item.title = @"发现";
-    item.image = [UIImage imageNamed:@"tabbar_discover"];
-    item.selectedImage = [[UIImage imageNamed:@"tabbar_discover_cover"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     [item setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9]} forState:UIControlStateSelected];
     [self addChildViewController:nav];
     
@@ -69,6 +76,17 @@
     [item setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9]} forState:UIControlStateSelected];
     [self addChildViewController:nav];
     self.settingNav = nav;
+}
+
++(NSDictionary*) getApiClient{
+    return apiclient;
+}
++(void) setApiClient:(NSDictionary*)dict{
+    apiclient = dict;
+}
+-(void)alert:(NSString*) text{
+    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:text delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+    [alert show];
 }
 
 - (void)setNewUser:(BOOL)newUser {

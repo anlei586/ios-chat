@@ -29,22 +29,45 @@ green:((float)((rgbValue & 0xFF00) >> 8)) / 255.0                               
 blue:((float)(rgbValue & 0xFF)) / 255.0                                                           \
 alpha:1.0]
 
+
+#define NUM @"0123456789"
+#define ALPHA @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+#define ALPHANUM @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+
 @interface WFCLoginViewController () <UITextFieldDelegate>
 @property (strong, nonatomic) UILabel *hintLabel;
 @property (strong, nonatomic) UITextField *userNameField;
 @property (strong, nonatomic) UITextField *passwordField;
+
+
+@property (strong, nonatomic) UITextField *reg_userNameField;
+@property (strong, nonatomic) UITextField *reg_passwordField;
+@property (strong, nonatomic) UITextField *reg_repasswordField;
+
 @property (strong, nonatomic) UIButton *loginBtn;
+@property (strong, nonatomic) UIButton *regExpBtn;
 
 @property (strong, nonatomic) UIView *userNameLine;
 @property (strong, nonatomic) UIView *passwordLine;
+
+@property (strong, nonatomic) UIView *reg_userNameLine;
+@property (strong, nonatomic) UIView *reg_passwordLine;
+@property (strong, nonatomic) UIView *reg_repasswordLine;
+
+@property (strong, nonatomic) UIButton *sendRegExpBtn;
 
 @property (strong, nonatomic) UIButton *sendCodeBtn;
 @property (nonatomic, strong) NSTimer *countdownTimer;
 @property (nonatomic, assign) NSTimeInterval sendCodeTime;
 @property (nonatomic, strong) UILabel *privacyLabel;
+@property (nonatomic, strong) UIScrollView *scroll;
+@property (strong, nonatomic) WFCBaseTabBarController *tabBarVC;
 @end
 
 @implementation WFCLoginViewController
+
+BOOL isHideReg = NO;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -62,8 +85,11 @@ alpha:1.0]
     CGFloat topPos = kStatusBarAndNavigationBarHeight + 45;
     CGFloat fieldHeight = 25;
     
+    self.scroll = [[UIScrollView alloc]initWithFrame:bgRect];
+    
+    
     self.hintLabel = [[UILabel alloc] initWithFrame:CGRectMake(paddingEdge, topPos, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight*2)];
-    [self.hintLabel setText:@"手机验证码登陆"];
+    [self.hintLabel setText:@"登陆"];
     self.hintLabel.textAlignment = NSTextAlignmentCenter;
     self.hintLabel.font = [UIFont systemFontOfSize:fieldHeight];
     
@@ -74,9 +100,9 @@ alpha:1.0]
     
     
     self.userNameField = [[UITextField alloc] initWithFrame:CGRectMake(paddingEdge, topPos, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight)];
-    self.userNameField.placeholder = @"请输入手机号(仅支持中国大陆号码)";
+    self.userNameField.placeholder = @"用户名(6位字母或数字)";
     self.userNameField.returnKeyType = UIReturnKeyNext;
-    self.userNameField.keyboardType = UIKeyboardTypePhonePad;
+    self.userNameField.keyboardType = UIKeyboardTypeASCIICapable;
     self.userNameField.delegate = self;
     [self.userNameField addTarget:self action:@selector(textDidChange:) forControlEvents:UIControlEventEditingChanged];
     
@@ -85,9 +111,9 @@ alpha:1.0]
     self.passwordLine.backgroundColor = [UIColor grayColor];
     
     self.passwordField = [[UITextField alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF, bgRect.size.width - paddingEdge - paddingEdge - sendCodeBtnwidth - paddingField2Code, fieldHeight)];
-    self.passwordField.placeholder = @"请输入短信验证码";
+    self.passwordField.placeholder = @"密码(6位字母或数字)";
     self.passwordField.returnKeyType = UIReturnKeyDone;
-    self.passwordField.keyboardType = UIKeyboardTypeNumberPad;
+    self.passwordField.keyboardType = UIKeyboardTypeASCIICapable;
     self.passwordField.delegate = self;
     [self.passwordField addTarget:self action:@selector(textDidChange:) forControlEvents:UIControlEventEditingChanged];
     
@@ -106,16 +132,87 @@ alpha:1.0]
     [self.loginBtn setTitle:@"登陆" forState:UIControlStateNormal];
     self.loginBtn.enabled = NO;
     
-    [self.view addSubview:self.hintLabel];
     
-    [self.view addSubview:self.userNameLine];
-    [self.view addSubview:self.userNameField];
+    //////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+    self.regExpBtn = [[UIButton alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line + paddingLine2TF + 60, bgRect.size.width - paddingEdge - paddingEdge, 36)];
+    [self.regExpBtn setTitle:@"注册" forState:UIControlStateNormal];
+    [self.regExpBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [self.regExpBtn setTitleColor:[UIColor grayColor] forState:UIControlStateSelected];
+    [self.regExpBtn addTarget:self action:@selector(onExpRegContent:) forControlEvents:UIControlEventTouchDown];
+    self.regExpBtn.enabled = YES;
     
-    [self.view addSubview:self.passwordLine];
-    [self.view addSubview:self.passwordField];
-    [self.view addSubview:self.sendCodeBtn];
     
-    [self.view addSubview:self.loginBtn];
+    
+    self.reg_userNameField = [[UITextField alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line + paddingLine2TF + 100, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight)];
+    self.reg_userNameField.placeholder = @"用户名(6位字母或数字)";
+    self.reg_userNameField.returnKeyType = UIReturnKeyNext;
+    self.reg_userNameField.keyboardType = UIKeyboardTypeASCIICapable;
+    self.reg_userNameField.delegate = self;
+    [self.reg_userNameField addTarget:self action:@selector(textDidChange:) forControlEvents:UIControlEventEditingChanged];
+    
+    self.reg_userNameLine = [[UIView alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line + paddingLine2TF + 130, bgRect.size.width - paddingEdge - paddingEdge, 1.f)];
+    self.reg_userNameLine.backgroundColor = [UIColor grayColor];
+    
+    self.reg_passwordField = [[UITextField alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line + paddingLine2TF + 150, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight)];
+    self.reg_passwordField.placeholder = @"密码(6位字母或数字)";
+    self.reg_passwordField.returnKeyType = UIReturnKeyNext;
+    self.reg_passwordField.keyboardType = UIKeyboardTypeASCIICapable;
+    self.reg_passwordField.delegate = self;
+    [self.reg_passwordField addTarget:self action:@selector(textDidChange:) forControlEvents:UIControlEventEditingChanged];
+    
+    self.reg_passwordLine = [[UIView alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line + paddingLine2TF + 180, bgRect.size.width - paddingEdge - paddingEdge, 1.f)];
+    self.reg_passwordLine.backgroundColor = [UIColor grayColor];
+    
+    self.reg_repasswordField = [[UITextField alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line + paddingLine2TF + 200, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight)];
+    self.reg_repasswordField.placeholder = @"重复密码";
+    self.reg_repasswordField.returnKeyType = UIReturnKeyDone;
+    self.reg_repasswordField.keyboardType = UIKeyboardTypeASCIICapable;
+    self.reg_repasswordField.delegate = self;
+    [self.reg_repasswordField addTarget:self action:@selector(textDidChange:) forControlEvents:UIControlEventEditingChanged];
+    
+    self.reg_repasswordLine = [[UIView alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line + paddingLine2TF + 230, bgRect.size.width - paddingEdge - paddingEdge, 1.f)];
+    self.reg_repasswordLine.backgroundColor = [UIColor grayColor];
+    
+    self.sendRegExpBtn = [[UIButton alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line + paddingLine2TF + 250, bgRect.size.width - paddingEdge - paddingEdge, 36)];
+    [self.sendRegExpBtn setBackgroundColor:[UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9]];
+    [self.sendRegExpBtn addTarget:self action:@selector(onSendRegBtn:) forControlEvents:UIControlEventTouchDown];
+    //self.sendRegExpBtn.layer.masksToBounds = YES;
+    self.sendRegExpBtn.layer.cornerRadius = 5.f;
+    [self.sendRegExpBtn setTitle:@"注册" forState:UIControlStateNormal];
+    self.sendRegExpBtn.enabled = YES;
+    
+    
+    [self visibleRegComp:NO];
+    [self.scroll addSubview:self.regExpBtn];
+    //////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+    
+    
+    
+    
+    
+    
+    [self.scroll addSubview:self.hintLabel];
+    
+    [self.scroll addSubview:self.userNameLine];
+    [self.scroll addSubview:self.userNameField];
+    
+    [self.scroll addSubview:self.passwordLine];
+    [self.scroll addSubview:self.passwordField];
+    //[self.scroll addSubview:self.sendCodeBtn];
+    
+    [self.scroll addSubview:self.loginBtn];
+    
+    [self.view addSubview:self.scroll];/////
+    
+    //////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+    
     
     self.userNameField.text = savedName;
     
@@ -123,8 +220,7 @@ alpha:1.0]
     
     self.privacyLabel = [[UILabel alloc] initWithFrame:CGRectMake(16, self.view.bounds.size.height - 28 - kTabbarSafeBottomMargin, self.view.bounds.size.width-32, 28)];
     self.privacyLabel.textAlignment = NSTextAlignmentCenter;
-    NSMutableAttributedString *text = [[NSMutableAttributedString alloc] initWithString:@"登陆即代表你已同意《野火IM用户协议》和《野火IM隐私政策》" attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:10],
-                                                                                                                     NSForegroundColorAttributeName : [UIColor darkGrayColor]}];
+    NSMutableAttributedString *text = [[NSMutableAttributedString alloc] initWithString:@"登陆即代表你已同意《野火IM用户协议》和《野火IM隐私政策》" attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:10],NSForegroundColorAttributeName : [UIColor darkGrayColor]}];
     [text setAttributes:@{NSFontAttributeName : [UIFont systemFontOfSize:10],
                           NSForegroundColorAttributeName : [UIColor blueColor]} range:NSMakeRange(9, 10)];
     [text setAttributes:@{NSFontAttributeName : [UIFont systemFontOfSize:10],
@@ -137,7 +233,7 @@ alpha:1.0]
         [ws.navigationController pushViewController:pvc animated:YES];
     }];
     
-    [self.view addSubview:self.privacyLabel];
+    //[self.scroll addSubview:self.privacyLabel];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -145,10 +241,53 @@ alpha:1.0]
     // Dispose of any resources that can be recreated.
 }
 
+
+-(void)visibleRegComp:(BOOL) b{
+    if(b){
+        [self.scroll addSubview:self.reg_userNameField];
+        [self.scroll addSubview:self.reg_userNameLine];
+        [self.scroll addSubview:self.reg_passwordField];
+        [self.scroll addSubview:self.reg_passwordLine];
+        [self.scroll addSubview:self.reg_repasswordField];
+        [self.scroll addSubview:self.reg_repasswordLine];
+        [self.scroll addSubview:self.sendRegExpBtn];
+    }else{
+        [self.reg_userNameField removeFromSuperview];
+        [self.reg_userNameLine removeFromSuperview];
+        [self.reg_passwordField removeFromSuperview];
+        [self.reg_passwordLine removeFromSuperview];
+        [self.reg_repasswordField removeFromSuperview];
+        [self.reg_repasswordLine removeFromSuperview];
+        [self.sendRegExpBtn removeFromSuperview];
+    }
+    //self.sendRegExpBtn.enabled = YES;
+    CGSize _size = CGSizeMake(self.view.bounds.size.width, self.view.bounds.size.height + 60);
+    self.scroll.contentSize  = _size;
+}
+
+
+-(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string{
+    NSCharacterSet *cs;
+    cs = [[NSCharacterSet characterSetWithCharactersInString:ALPHANUM]invertedSet];
+    NSString *filtered = [[string componentsSeparatedByCharactersInSet:cs]componentsJoinedByString:@""];
+    //按cs分离出数组,数组按@""分离出字符串
+    BOOL canChange = [string isEqualToString:filtered];
+    return canChange;
+}
+
+
+
+
 - (void)onSendCode:(id)sender {
     self.sendCodeBtn.enabled = NO;
     [self.sendCodeBtn setTitle:@"短信发送中" forState:UIControlStateNormal];
     [self sendCode:self.userNameField.text];
+    
+}
+
+- (void)onExpRegContent:(id)sender {
+    isHideReg = !isHideReg;
+    [self visibleRegComp:isHideReg];
     
 }
 - (void)updateCountdown:(id)sender {
@@ -244,6 +383,26 @@ alpha:1.0]
     self.userNameLine.backgroundColor = [UIColor grayColor];
     [self.passwordField resignFirstResponder];
     self.passwordLine.backgroundColor = [UIColor grayColor];
+    
+    [self.reg_userNameField resignFirstResponder];
+    [self.reg_passwordField resignFirstResponder];
+    [self.reg_repasswordField resignFirstResponder];
+}
+
+-(void)alert:(NSString*) text{
+    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:text delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+    [alert show];
+}
+
+-(void) setTableIndex1 {
+    self.tabBarVC.selectedIndex = 1;
+}
+-(void) setTableIndex2 {
+    self.tabBarVC.selectedIndex = 2;
+}
+
+-(void) setTableIndex0 {
+    self.tabBarVC.selectedIndex = 0;
 }
 
 - (void)onLoginButton:(id)sender {
@@ -260,32 +419,144 @@ alpha:1.0]
   hud.label.text = @"登陆中...";
   [hud showAnimated:YES];
   
-    [self login:user password:password success:^(NSString *userId, NSString *token, BOOL newUser) {
-        [[NSUserDefaults standardUserDefaults] setObject:user forKey:@"savedName"];
-        [[NSUserDefaults standardUserDefaults] setObject:token forKey:@"savedToken"];
-        [[NSUserDefaults standardUserDefaults] setObject:userId forKey:@"savedUserId"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+    
+    
+    NSString *url = [NSString stringWithFormat:@"%@%@", APP_SERVER_PHP, @"/yh/apilogin.php"];
+    NSDictionary*dict = @{@"mobile":user, @"passwd":password, @"clientId":[[WFCCNetworkService sharedInstance] getClientId]};
+    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    //manager.requestSerializer = [AFHTTPRequestSerializer serializer];
+    manager.responseSerializer = [AFHTTPResponseSerializer serializer];
+    manager.responseSerializer.acceptableContentTypes = [NSSet setWithObject:@"text/html"];
+    [manager POST:url parameters:dict progress:nil
+          success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        NSString *_data = [[NSString alloc]initWithData:responseObject encoding:NSUTF8StringEncoding];
+        //NSLog(@"%@-%@",[responseObject class], _data);
+        if([_data isEqualToString:@"OK"]){
+            NSLog(@"好的");
+    
+    
+    
+    
+            [self login:user password:@"61666" success:^(NSString *userId, NSString *token, BOOL newUser) {
+                [[NSUserDefaults standardUserDefaults] setObject:user forKey:@"savedName"];
+                [[NSUserDefaults standardUserDefaults] setObject:token forKey:@"savedToken"];
+                [[NSUserDefaults standardUserDefaults] setObject:userId forKey:@"savedUserId"];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                
+                [[WFCCNetworkService sharedInstance] connect:userId token:token];
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                  [hud hideAnimated:YES];
+                    self.tabBarVC = [WFCBaseTabBarController new];
+                    self.tabBarVC.newUser = newUser;
+                    
+                    //[self setTableIndex1];
+                    [self performSelector:@selector(setTableIndex1) withObject:nil afterDelay:0.5f];
+                    [self performSelector:@selector(setTableIndex2) withObject:nil afterDelay:1.5f];
+                    [self performSelector:@selector(setTableIndex0) withObject:nil afterDelay:2.0f];
+                    
+                    [UIApplication sharedApplication].delegate.window.rootViewController =  self.tabBarVC;
+                });
+            } error:^(int errCode, NSString *message) {
+                NSLog(@"login error with code %d, message %@", errCode, message);
+              dispatch_async(dispatch_get_main_queue(), ^{
+                [hud hideAnimated:YES];
+                
+                MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+                hud.mode = MBProgressHUDModeText;
+                hud.label.text = @"登陆失败";
+                hud.offset = CGPointMake(0.f, MBProgressMaxOffset);
+                [hud hideAnimated:YES afterDelay:1.f];
+              });
+            }];
+            
+            
+            
+            
+            
+            
+            
+
+                }
+                if([_data isEqualToString:@"PWDERROR"]){
+                    [hud hideAnimated:YES];
+                    [self alert:@"用户名或密码错误"];
+                }
+            }
+                  failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+                      [hud hideAnimated:YES];
+                NSLog(@"--%@",error);
+                [self alert:@"网络PHP密码登陆出错"];
+            }];
+    
+    
+    
+    
+}
+
+- (void)onSendRegBtn:(id)sender {
+    
+    NSString *_user = self.reg_userNameField.text;
+    NSString *_pass = self.reg_passwordField.text;
+    NSString *_repass = self.reg_repasswordField.text;
+    if(_user.length<=0){
+        [self alert:@"用户名不能为空"];
+        return;
+    }
+    if(_user.length<=5){
+        [self alert:@"用户名长度要5位以上"];
+        return;
+    }
+    if(_pass.length<=0 || _repass.length<=0){
+        [self alert:@"密码或重复密码不能为空"];
+        return;
+    }
+    if(_pass.length<=5 || _repass.length<=5){
+        [self alert:@"密码长度要5位以上"];
+        return;
+    }
+    if([_pass isEqualToString:_repass]==NO){
+        [self alert:@"密码要和重复密码相同"];
+        return;
+    }
+    
+
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    hud.label.text = @"注册中...";
+    [hud showAnimated:YES];
+    NSString *url = [NSString stringWithFormat:@"%@%@", APP_SERVER_PHP, @"/yh/apireg.php"];
+    NSDictionary*dict = @{@"mobile":_user, @"passwd":_pass, @"clientId":[[WFCCNetworkService sharedInstance] getClientId]};
+    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    //manager.requestSerializer = [AFHTTPRequestSerializer serializer];
+    manager.responseSerializer = [AFHTTPResponseSerializer serializer];
+    manager.responseSerializer.acceptableContentTypes = [NSSet setWithObject:@"text/html"];
+    [manager GET:url parameters:dict progress:nil
+          success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            [hud hideAnimated:YES];
+            NSString *_data = [[NSString alloc]initWithData:responseObject encoding:NSUTF8StringEncoding];
+            NSData *jsonData = [_data dataUsingEncoding:NSUTF8StringEncoding];
+            NSError *err;
+            NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&err];
+            if(err){
+                [self alert:@"JSON解析出错"];
+                [self alert:jsonData];
+            }
+            if([dict[@"code"] intValue] == -11023) {
+                [self alert:@"用户名已经存在"];
+            }else if([dict[@"code"] intValue] == 0) {
+                //[self alert:@"注册成功"];
+                self.userNameField.text = _user;
+                self.passwordField.text = _pass;
+                [self onLoginButton:nil];
+            }
         
-        [[WFCCNetworkService sharedInstance] connect:userId token:token];
         
-        dispatch_async(dispatch_get_main_queue(), ^{
-          [hud hideAnimated:YES];
-            WFCBaseTabBarController *tabBarVC = [WFCBaseTabBarController new];
-            tabBarVC.newUser = newUser;
-            [UIApplication sharedApplication].delegate.window.rootViewController =  tabBarVC;
-        });
-    } error:^(int errCode, NSString *message) {
-        NSLog(@"login error with code %d, message %@", errCode, message);
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [hud hideAnimated:YES];
-        
-        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        hud.mode = MBProgressHUDModeText;
-        hud.label.text = @"登陆失败";
-        hud.offset = CGPointMake(0.f, MBProgressMaxOffset);
-        [hud hideAnimated:YES afterDelay:1.f];
-      });
+     }    failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+            [hud hideAnimated:YES];
+            NSLog(@"--%@",error);
+            [self alert:@"网络PHP注册出错"];
     }];
+    
 }
 
 #pragma mark - UITextFieldDelegate
@@ -294,6 +565,13 @@ alpha:1.0]
         [self.passwordField becomeFirstResponder];
     } else if(textField == self.passwordField) {
         [self onLoginButton:nil];
+    }
+    if(textField == self.reg_userNameField){
+        [self.reg_passwordField becomeFirstResponder];
+    }else if(textField == self.reg_passwordField){
+        [self.reg_repasswordField becomeFirstResponder];
+    }else if(textField == self.reg_repasswordField){
+        [self onSendRegBtn:nil];
     }
     return NO;
 }
@@ -344,6 +622,7 @@ alpha:1.0]
 }
 
 - (BOOL)isValidNumber {
+    return YES;
     NSString * MOBILE = @"^((1[34578]))\\d{9}$";
     NSPredicate *regextestmobile = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", MOBILE];
     if (self.userNameField.text.length == 11 && ([regextestmobile evaluateWithObject:self.userNameField.text] == YES)) {

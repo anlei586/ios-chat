@@ -10,4 +10,6 @@
 
 @interface WFCBaseTabBarController : UITabBarController
 @property(nonatomic, assign)BOOL newUser;
++(NSDictionary*) getApiClient;
++(void) setApiClient:(NSDictionary*)dict;
 @end

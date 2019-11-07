@@ -7,10 +7,14 @@
 //
 
 #import "WFCSecurityTableViewController.h"
+#import <WebKit/WebKit.h>
+#import "WFCBaseTabBarController.h"
+#import "WFCConfig.h"
 #import <WFChatClient/WFCChatClient.h>
 
 @interface WFCSecurityTableViewController () <UITableViewDataSource, UITableViewDelegate>
 @property (nonatomic, strong)UITableView *tableView;
+@property(nonatomic, strong)WKWebView *webview;
 @end
 
 @implementation WFCSecurityTableViewController
@@ -19,7 +23,7 @@
     [super viewDidLoad];
     self.title = @"设置";
     
-    self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) style:UITableViewStyleGrouped];
+    /*self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) style:UITableViewStyleGrouped];
     
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
@@ -27,8 +31,18 @@
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
     [self.tableView reloadData];
     
-    [self.view addSubview:self.tableView];
+    [self.view addSubview:self.tableView];*/
     
+    self.webview = [[WKWebView alloc] initWithFrame:self.view.bounds];
+    
+    NSDictionary *dict = [WFCBaseTabBarController getApiClient];
+    NSString *_api = dict[@"passwdsoupprt"];
+    
+    NSString *url = [NSString stringWithFormat:@"%@%@", APP_SERVER_PHP, @"/yh/"];
+    url = [NSString stringWithFormat:@"%@%@", url, _api];
+    
+    [self.webview loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:url]]];
+    [self.view addSubview:self.webview];
 }
 
 - (void)didReceiveMemoryWarning {

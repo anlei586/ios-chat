@@ -38,7 +38,10 @@
     if (@available(iOS 9.1, *)) {
         self.searchController.obscuresBackgroundDuringPresentation = NO;
     }
-    [self.searchController.searchBar setValue:@"取消" forKey:@"_cancelButtonText"];
+    //[self.searchController.searchBar setValue:@"取消" forKey:@"_cancelButtonText"];
+    UIButton *cancelButton = [self findViewWithClassName:NSStringFromClass([UIButton class]) inView:self.searchController.searchBar];
+    [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
+    
     self.searchController.searchBar.placeholder = @"搜索";
     
     
@@ -59,7 +62,23 @@
     
     self.definesPresentationContext = YES;
 }
-
+- (UIView *)findViewWithClassName:(NSString *)className inView:(UIView *)view{
+    Class specificView = NSClassFromString(className);
+    if ([view isKindOfClass:specificView]) {
+        return view;
+    }
+ 
+    if (view.subviews.count > 0) {
+        for (UIView *subView in view.subviews) {
+            UIView *targetView = [self findViewWithClassName:className inView:subView];
+            if (targetView != nil) {
+                return targetView;
+            }
+        }
+    }
+    
+    return nil;
+}
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.messages = [[NSMutableArray alloc] init];

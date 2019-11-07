@@ -12,8 +12,8 @@
 //然后找到脚本“xcodescript.sh”，删除掉“cp -af WFChatUIKit/AVEngine/*  ${DST_DIR}/”这句话。
 //在删除掉ChatUIKit工程的WebRTC和WFAVEngineKit的依赖。
 //删除掉应用工程中的WebRTC.framework和WFAVEngineKit.framework。
-#define WFCU_SUPPORT_VOIP 1
-//#define WFCU_SUPPORT_VOIP 0
+//define WFCU_SUPPORT_VOIP 1
+#define WFCU_SUPPORT_VOIP 0
 
 #import "AppDelegate.h"
 #import <WFChatClient/WFCChatClient.h>
@@ -32,16 +32,59 @@
 #import "GroupInfoViewController.h"
 #import <Bugly/Bugly.h>
 
+#import "AFNetworking.h"
+#import "MBProgressHUD.h"
+#import "WFCConfig.h"
+
 @interface AppDelegate () <ConnectionStatusDelegate, ReceiveMessageDelegate,
 #if WFCU_SUPPORT_VOIP
     WFAVEngineDelegate,
 #endif
     UNUserNotificationCenterDelegate, QrCodeDelegate>
 @property(nonatomic, strong) AVAudioPlayer *audioPlayer;
+@property (strong, nonatomic) WFCBaseTabBarController *tabBarVC;
 @end
 
 @implementation AppDelegate
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+
+     self.window.backgroundColor = [UIColor whiteColor];
+    //MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    //hud.label.text = @"加载中...";
+    //[hud showAnimated:YES];
+    NSString *url = [NSString stringWithFormat:@"%@%@", APP_SERVER_PHP, @"/yh/apiclient.php"];
+    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    manager.responseSerializer = [AFHTTPResponseSerializer serializer];
+    manager.responseSerializer.acceptableContentTypes = [NSSet setWithObject:@"text/html"];
+    [manager GET:url parameters:nil progress:nil
+          success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            //[hud hideAnimated:YES];
+            NSString *_data = [[NSString alloc]initWithData:responseObject encoding:NSUTF8StringEncoding];
+            NSData *jsonData = [_data dataUsingEncoding:NSUTF8StringEncoding];
+            NSError *err;
+            NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&err];
+            [WFCBaseTabBarController setApiClient:dict];
+            NSDictionary *dc2 = [WFCBaseTabBarController getApiClient];
+            if(err){
+                [self alert:@"JSON解析出错"];
+                [self alert:jsonData];
+            }
+            
+            [self initApp2:application didFinishLaunchingWithOptions:launchOptions];
+        
+
+            
+     }    failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+            //[hud hideAnimated:YES];
+            NSLog(@"--%@",error);
+            [self alert:@"网络PHP注册出错"];
+    }];
+    return YES;
+}
+
+-(BOOL)initApp2:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    
+    
     //替换为您自己的Bugly账户。
     [Bugly startWithAppId:@"b21375e023"];
     
@@ -60,8 +103,15 @@
     NSString *savedToken = [[NSUserDefaults standardUserDefaults] stringForKey:@"savedToken"];
     NSString *savedUserId = [[NSUserDefaults standardUserDefaults] stringForKey:@"savedUserId"];
     
-    self.window.rootViewController = [WFCBaseTabBarController new];
-    self.window.backgroundColor = [UIColor whiteColor];
+
+    self.tabBarVC = [WFCBaseTabBarController new];
+    self.window.rootViewController = self.tabBarVC;
+    
+
+    //[self setTableIndex1];
+    [self performSelector:@selector(setTableIndex1) withObject:nil afterDelay:0.5f];
+    [self performSelector:@selector(setTableIndex2) withObject:nil afterDelay:1.5f];
+    [self performSelector:@selector(setTableIndex0) withObject:nil afterDelay:2.0f];
     
     [self setupNavBar];
     
@@ -90,9 +140,7 @@
         [application registerUserNotificationSettings:settings];
     }
     
-    
-
-    
+        
     if (savedToken.length > 0 && savedUserId.length > 0) {
         [[WFCCNetworkService sharedInstance] connect:savedUserId token:savedToken];
     } else {
@@ -100,10 +148,26 @@
         UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:loginVC];
         self.window.rootViewController = nav;
     }
+        
     
     return YES;
 }
 
+-(void)alert:(NSString*) text{
+    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:text delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+    [alert show];
+}
+
+-(void) setTableIndex1 {
+    self.tabBarVC.selectedIndex = 1;
+}
+-(void) setTableIndex2 {
+    self.tabBarVC.selectedIndex = 2;
+}
+
+-(void) setTableIndex0 {
+    self.tabBarVC.selectedIndex = 0;
+}
 
 - (void)application:(UIApplication *)application didRegisterUserNotificationSettings:
 (UIUserNotificationSettings *)notificationSettings {

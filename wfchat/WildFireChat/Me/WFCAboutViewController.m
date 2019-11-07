@@ -8,6 +8,8 @@
 
 #import "WFCAboutViewController.h"
 #import <WebKit/WebKit.h>
+#import "WFCBaseTabBarController.h"
+#import "WFCConfig.h"
 
 
 @interface WFCAboutViewController ()
@@ -19,7 +21,14 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.webview = [[WKWebView alloc] initWithFrame:self.view.bounds];
-    [self.webview loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"http://www.wildfirechat.cn"]]];
+    
+    NSDictionary *dict = [WFCBaseTabBarController getApiClient];
+    NSString *_apiAdmin = dict[@"apiAdmin"];
+    
+    NSString *url = [NSString stringWithFormat:@"%@%@", APP_SERVER_PHP, @"/yh/"];
+    url = [NSString stringWithFormat:@"%@%@", url, _apiAdmin];
+    
+    [self.webview loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:url]]];
     [self.view addSubview:self.webview];
 }
 

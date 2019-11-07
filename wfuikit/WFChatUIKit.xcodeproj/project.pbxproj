@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0F5C0651236F42EA00096899 /* AnleiUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F5C0650236F42EA00096899 /* AnleiUtils.m */; };
 		2F1439F5217F5DAA00B3E38A /* WFCUSearchGroupTableViewCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 2F1439F3217F5DAA00B3E38A /* WFCUSearchGroupTableViewCell.h */; };
 		2F1439F6217F5DAA00B3E38A /* WFCUSearchGroupTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F1439F4217F5DAA00B3E38A /* WFCUSearchGroupTableViewCell.m */; };
 		2F143A6B217F7D4100B3E38A /* Stickers.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2F143A68217F7D4100B3E38A /* Stickers.bundle */; };
@@ -339,8 +340,6 @@
 		2FE689A821AE9C0200DE54CC /* WFCUConversationSearchTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2FE689A621AE9C0100DE54CC /* WFCUConversationSearchTableViewController.m */; };
 		2FE689A921AE9C0200DE54CC /* WFCUConversationSearchTableViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 2FE689A721AE9C0200DE54CC /* WFCUConversationSearchTableViewController.h */; };
 		901E270621F152F600A163CB /* LICENSE.md in Resources */ = {isa = PBXBuildFile; fileRef = 901E270121F152F600A163CB /* LICENSE.md */; };
-		901E270721F152F600A163CB /* WebRTC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 901E270421F152F600A163CB /* WebRTC.framework */; };
-		901E270821F152F600A163CB /* WFAVEngineKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 901E270521F152F600A163CB /* WFAVEngineKit.framework */; };
 		9029D0FE21C5D7930002EBAA /* WFCUCreateChannelViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 9029D0FC21C5D7930002EBAA /* WFCUCreateChannelViewController.h */; };
 		9029D0FF21C5D7930002EBAA /* WFCUCreateChannelViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9029D0FD21C5D7930002EBAA /* WFCUCreateChannelViewController.m */; };
 		90414AFC21AF5A93008EF915 /* WFCUConversationSearchTableViewCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 90414AFA21AF5A93008EF915 /* WFCUConversationSearchTableViewCell.h */; };
@@ -348,6 +347,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0F5C0650236F42EA00096899 /* AnleiUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AnleiUtils.m; sourceTree = "<group>"; };
 		2F1439F3217F5DAA00B3E38A /* WFCUSearchGroupTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WFCUSearchGroupTableViewCell.h; sourceTree = "<group>"; };
 		2F1439F4217F5DAA00B3E38A /* WFCUSearchGroupTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WFCUSearchGroupTableViewCell.m; sourceTree = "<group>"; };
 		2F143A68217F7D4100B3E38A /* Stickers.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Stickers.bundle; sourceTree = "<group>"; };
@@ -695,9 +695,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				901E270821F152F600A163CB /* WFAVEngineKit.framework in Frameworks */,
 				2F550BF3217F4DCD00F56C26 /* WFChatClient.framework in Frameworks */,
-				901E270721F152F600A163CB /* WebRTC.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1459,6 +1457,7 @@
 				2F55108E217F5CC200F56C26 /* WFCUUtilities.h */,
 				2F55108F217F5CC200F56C26 /* WFCUMediaMessageDownloader.m */,
 				2F551090217F5CC200F56C26 /* WFCUUtilities.m */,
+				0F5C0650236F42EA00096899 /* AnleiUtils.m */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -1896,6 +1895,7 @@
 				2F5511A1217F5CC200F56C26 /* MKAnnotationView+WebCache.m in Sources */,
 				2F5510F0217F5CC200F56C26 /* CCHMapTree.m in Sources */,
 				2F551161217F5CC200F56C26 /* KxMenu.m in Sources */,
+				0F5C0651236F42EA00096899 /* AnleiUtils.m in Sources */,
 				2F551124217F5CC200F56C26 /* FullScreenViewController.m in Sources */,
 				2F5510E5217F5CC200F56C26 /* WFCUPluginItemView.m in Sources */,
 				2F1439F6217F5DAA00B3E38A /* WFCUSearchGroupTableViewCell.m in Sources */,

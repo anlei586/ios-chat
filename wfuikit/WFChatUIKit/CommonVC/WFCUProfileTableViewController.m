@@ -170,7 +170,7 @@
         btn.layer.masksToBounds = YES;
         [self.sendMessageCell addSubview:btn];
 
-#if WFCU_SUPPORT_VOIP
+//#if WFCU_SUPPORT_VOIP
         self.voipCallCell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"cell"];
         for (UIView *subView in self.voipCallCell.subviews) {
             [subView removeFromSuperview];
@@ -181,8 +181,9 @@
         [btn addTarget:self action:@selector(onVoipCallBtn:) forControlEvents:UIControlEventTouchDown];
         btn.layer.cornerRadius = 5.f;
         btn.layer.masksToBounds = YES;
+        btn.hidden = NO;
         [self.voipCallCell addSubview:btn];
-#endif
+//#endif
     } else if([[WFCCNetworkService sharedInstance].userId isEqualToString:self.userId]) {
         
     } else {

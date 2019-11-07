@@ -45,5 +45,5 @@ alpha:1.0]
 
 #define kMessageListChanged  @"kMessageListChanged"
 
-#define WFCU_SUPPORT_VOIP 1
+#define WFCU_SUPPORT_VOIP 0
 #endif /* Predefine_h */

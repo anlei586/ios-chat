@@ -9,4 +9,5 @@
 #import <UIKit/UIKit.h>
 
 @interface WFCLoginViewController : UIViewController
+//@interface WFCLoginViewController : UIScrollView
 @end

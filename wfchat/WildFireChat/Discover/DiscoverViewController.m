@@ -10,9 +10,12 @@
 #import "ChatroomListViewController.h"
 #import <WFChatUIKit/WFChatUIKit.h>
 #import <WFChatClient/WFCCIMService.h>
+#import <WebKit/WebKit.h>
+#import "WFCBaseTabBarController.h"
 
 @interface DiscoverViewController () <UITableViewDataSource, UITableViewDelegate>
 @property (nonatomic, strong)UITableView *tableView;
+@property (nonatomic, strong)WKWebView *webView;
 @end
 
 @implementation DiscoverViewController
@@ -20,7 +23,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.title = @"发现";
-    
+    /*
     self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) style:UITableViewStyleGrouped];
     
     self.tableView.delegate = self;
@@ -30,6 +33,14 @@
     [self.tableView reloadData];
     
     [self.view addSubview:self.tableView];
+    */
+    self.webView = [[WKWebView alloc]initWithFrame:self.view.frame];
+    self.webView.navigationDelegate=self;
+    self.webView.backgroundColor=[UIColor whiteColor];
+    [self.view addSubview:self.webView];
+    NSDictionary *dict = [WFCBaseTabBarController getApiClient];
+    NSString *_url = dict[@"homeUrl"];
+    [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:_url]]];
 }
 
 - (void)didReceiveMemoryWarning {
