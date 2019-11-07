@@ -60,7 +60,7 @@
     _groupSearchInfo = groupSearchInfo;
     WFCCGroupInfo *groupInfo = groupSearchInfo.groupInfo;
     if (groupInfo.name.length == 0) {
-        self.name.text = [NSString stringWithFormat:@"Group<%@>", groupInfo.target];
+        self.name.text = WFCString(@"GroupChat");
     } else {
         self.name.text = [NSString stringWithFormat:@"%@(%d)", groupInfo.name, (int)groupInfo.memberCount];
     }
@@ -76,12 +76,12 @@
             }
         }
         if (string == nil) {
-            string = [[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"用户<%@>", groupSearchInfo.marchedMemberNames[0]]] mutableCopy];
+            string = [[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@<%@>", WFCString(@"User"), groupSearchInfo.marchedMemberNames[0]]] mutableCopy];
         }
-        NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:@"群成员含:"];
+        NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:WFCString(@"GroupMemberNameMatch")];
         [attrStr appendAttributedString:string];
         if (groupSearchInfo.marchedMemberNames.count > 1) {
-            [attrStr appendAttributedString:[[NSAttributedString alloc] initWithString:@"等"]];
+            [attrStr appendAttributedString:[[NSAttributedString alloc] initWithString:WFCString(@"Etc")]];
         }
         self.haveMember.attributedText = attrStr;
     } else {
@@ -89,11 +89,11 @@
         [string addAttribute:NSForegroundColorAttributeName value:[UIColor greenColor] range:NSMakeRange(0, string.length)];
         [string addAttribute:NSUnderlineStyleAttributeName value:@YES range:NSMakeRange(0, string.length)];
         
-        NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:@"群名包含:"];
+        NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:WFCString(@"GroupNameMatch")];
         [attrStr appendAttributedString:string];
         self.haveMember.attributedText = attrStr;
     }
-    [self.portrait sd_setImageWithURL:[NSURL URLWithString:groupInfo.portrait] placeholderImage:[UIImage imageNamed:@"group_default_portrait"]];
+    [self.portrait sd_setImageWithURL:[NSURL URLWithString:[groupInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"group_default_portrait"]];
 }
 
 @end

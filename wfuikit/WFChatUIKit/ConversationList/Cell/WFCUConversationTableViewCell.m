@@ -10,7 +10,7 @@
 #import "WFCUUtilities.h"
 #import <WFChatClient/WFCChatClient.h>
 #import "SDWebImage.h"
-
+#import "WFCUConfigManager.h"
 
 @implementation WFCUConversationTableViewCell
 - (void)awakeFromNib {
@@ -24,7 +24,7 @@
 }
   
 - (void)updateUserInfo:(WFCCUserInfo *)userInfo {
-  [self.potraitView sd_setImageWithURL:[NSURL URLWithString:userInfo.portrait] placeholderImage: [UIImage imageNamed:@"PersonalChat"]];
+  [self.potraitView sd_setImageWithURL:[NSURL URLWithString:[userInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage: [UIImage imageNamed:@"PersonalChat"]];
   
     if (userInfo.friendAlias.length) {
         self.targetView.text = userInfo.friendAlias;
@@ -36,22 +36,22 @@
 }
 
 - (void)updateChannelInfo:(WFCCChannelInfo *)channelInfo {
-    [self.potraitView sd_setImageWithURL:[NSURL URLWithString:channelInfo.portrait] placeholderImage:[UIImage imageNamed:@"channel_default_portrait"]];
+    [self.potraitView sd_setImageWithURL:[NSURL URLWithString:[channelInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"channel_default_portrait"]];
     
     if(channelInfo.name.length > 0) {
         self.targetView.text = channelInfo.name;
     } else {
-        self.targetView.text = [NSString stringWithFormat:@"Channel<%@>", self.info.conversation.target];
+        self.targetView.text = WFCString(@"Channel");
     }
 }
 
 - (void)updateGroupInfo:(WFCCGroupInfo *)groupInfo {
-  [self.potraitView sd_setImageWithURL:[NSURL URLWithString:groupInfo.portrait] placeholderImage:[UIImage imageNamed:@"group_default_portrait"]];
+  [self.potraitView sd_setImageWithURL:[NSURL URLWithString:[groupInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"group_default_portrait"]];
   
   if(groupInfo.name.length > 0) {
     self.targetView.text = groupInfo.name;
   } else {
-    self.targetView.text = [NSString stringWithFormat:@"group<%@>", self.info.conversation.target];
+    self.targetView.text = WFCString(@"GroupChat");
   }
 }
 
@@ -61,7 +61,7 @@
     self.timeView.hidden = YES;
     [self update:searchInfo.conversation];
     if (searchInfo.marchedCount > 1) {
-        self.digestView.text = [NSString stringWithFormat:@"%d条记录", searchInfo.marchedCount];
+        self.digestView.text = [NSString stringWithFormat:WFCString(@"NumberOfRecords"), searchInfo.marchedCount];
     } else {
         NSString *strContent = searchInfo.marchedMessage.digest;
         NSMutableAttributedString *attrStr = [[NSMutableAttributedString alloc] initWithString:strContent];
@@ -95,10 +95,25 @@
     [self update:info.conversation];
     self.timeView.hidden = NO;
     self.timeView.text = [WFCUUtilities formatTimeLabel:info.timestamp];
-    if (info.isTop) {
-        [self.contentView setBackgroundColor:[UIColor colorWithRed:0.9 green:0.9 blue:0.9 alpha:1.f]];
+    
+    BOOL darkMode = NO;
+    if (@available(iOS 13.0, *)) {
+        if(UITraitCollection.currentTraitCollection.userInterfaceStyle == UIUserInterfaceStyleDark) {
+            darkMode = YES;
+        }
+    }
+    if (darkMode) {
+        if (info.isTop) {
+            [self.contentView setBackgroundColor:[UIColor colorWithRed:0.3 green:0.3 blue:0.3 alpha:1.f]];
+        } else {
+            self.contentView.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
+        }
     } else {
-        [self.contentView setBackgroundColor:[UIColor whiteColor]];
+        if (info.isTop) {
+            [self.contentView setBackgroundColor:[UIColor colorWithRed:0.9 green:0.9 blue:0.9 alpha:1.f]];
+        } else {
+            self.contentView.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
+        }
     }
     
     if (info.lastMessage && info.lastMessage.direction == MessageDirection_Send) {
@@ -150,13 +165,13 @@
         }
         [self updateChannelInfo:channelInfo];
     } else {
-        self.targetView.text = [NSString stringWithFormat:@"chatroom<%@>", conversation.target];
+        self.targetView.text = WFCString(@"Chatroom");
     }
     
     self.potraitView.layer.cornerRadius = 4.f;
     
     if (_info.draft.length) {
-        NSMutableAttributedString *attString = [[NSMutableAttributedString alloc] initWithString:@"[草稿]" attributes:@{NSForegroundColorAttributeName : [UIColor redColor]}];
+        NSMutableAttributedString *attString = [[NSMutableAttributedString alloc] initWithString:WFCString(@"[Draft]") attributes:@{NSForegroundColorAttributeName : [UIColor redColor]}];
         
         NSError *__error = nil;
         NSDictionary *dictionary = [NSJSONSerialization JSONObjectWithData:[_info.draft dataUsingEncoding:NSUTF8StringEncoding]
@@ -174,7 +189,12 @@
         if (text != nil) {
             [attString appendAttributedString:[[NSAttributedString alloc] initWithString:text]];
         } else {
-        [attString appendAttributedString:[[NSAttributedString alloc] initWithString:_info.draft]];
+            [attString appendAttributedString:[[NSAttributedString alloc] initWithString:_info.draft]];
+        }
+        if (_info.conversation.type == Group_Type && _info.unreadCount.unreadMentionAll + _info.unreadCount.unreadMention > 0) {
+            NSMutableAttributedString *tmp = [[NSMutableAttributedString alloc] initWithString:WFCString(@"[MentionYou]") attributes:@{NSForegroundColorAttributeName : [UIColor redColor]}];
+            [tmp appendAttributedString:attString];
+            attString = tmp;
         }
         self.digestView.attributedText = attString;
     } else if (_info.lastMessage.direction == MessageDirection_Receive && (_info.conversation.type == Group_Type || _info.conversation.type == Channel_Type)) {
@@ -191,6 +211,12 @@
             self.digestView.text = [NSString stringWithFormat:@"%@:%@", sender.displayName, _info.lastMessage.digest];
         } else {
             self.digestView.text = _info.lastMessage.digest;
+        }
+        
+        if (_info.conversation.type == Group_Type && _info.unreadCount.unreadMentionAll + _info.unreadCount.unreadMention > 0) {
+            NSMutableAttributedString *attString = [[NSMutableAttributedString alloc] initWithString:WFCString(@"[MentionYou]") attributes:@{NSForegroundColorAttributeName : [UIColor redColor]}];
+            [attString appendAttributedString:[[NSAttributedString alloc] initWithString:self.digestView.text]];
+            self.digestView.attributedText = attString;
         }
     } else {
         self.digestView.text = _info.lastMessage.digest;

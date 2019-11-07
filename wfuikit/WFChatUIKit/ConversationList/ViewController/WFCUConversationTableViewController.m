@@ -27,6 +27,7 @@
 
 #import "WFCUContactTableViewCell.h"
 #import "QrCodeHelper.h"
+#import "WFCUConfigManager.h"
 
 @interface WFCUConversationTableViewController () <UISearchControllerDelegate, UISearchResultsUpdating, UITableViewDelegate, UITableViewDataSource>
 @property (nonatomic, strong)NSMutableArray<WFCCConversationInfo *> *conversations;
@@ -52,12 +53,15 @@
     self.searchController.searchResultsUpdater = self;
     self.searchController.delegate = self;
     self.searchController.dimsBackgroundDuringPresentation = NO;
-    [self.searchController.searchBar setValue:@"取消" forKey:@"_cancelButtonText"];
+    if (! @available(iOS 13, *)) {
+        [self.searchController.searchBar setValue:WFCString(@"Cancel") forKey:@"_cancelButtonText"];
+    }
+
     
     if (@available(iOS 9.1, *)) {
         self.searchController.obscuresBackgroundDuringPresentation = NO;
     }
-    self.searchController.searchBar.placeholder = @"搜索";
+    self.searchController.searchBar.placeholder = WFCString(@"Search");
     
     self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
     [self.view addSubview:self.tableView];
@@ -65,6 +69,7 @@
     self.tableView.dataSource = self;
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    self.tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     
     if (@available(iOS 11.0, *)) {
         self.navigationItem.searchController = _searchController;
@@ -157,19 +162,19 @@
     [KxMenu showMenuInView:self.view
                   fromRect:CGRectMake(self.view.bounds.size.width - 56, kStatusBarAndNavigationBarHeight + searchExtra, 48, 5)
                  menuItems:@[
-                             [KxMenuItem menuItem:@"发起群聊"
+                             [KxMenuItem menuItem:WFCString(@"StartChat")
                                             image:[UIImage imageNamed:@"menu_start_chat"]
                                            target:self
                                            action:@selector(startChatAction:)],
-                             [KxMenuItem menuItem:@"添加朋友"
+                             [KxMenuItem menuItem:WFCString(@"AddFriend")
                                             image:[UIImage imageNamed:@"menu_add_friends"]
                                            target:self
                                            action:@selector(addFriendsAction:)],
-                             [KxMenuItem menuItem:@"收听频道"
+                             [KxMenuItem menuItem:WFCString(@"SubscribeChannel")
                                             image:[UIImage imageNamed:@"menu_listen_channel"]
                                            target:self
                                            action:@selector(listenChannelAction:)],
-                             [KxMenuItem menuItem:@"扫二维码"
+                             [KxMenuItem menuItem:WFCString(@"ScanQRCode")
                                             image:[UIImage imageNamed:@"menu_scan_qr"]
                                            target:self
                                            action:@selector(scanQrCodeAction:)]
@@ -255,39 +260,41 @@
       
     switch (status) {
       case kConnectionStatusLogout:
-        navLabel.text = @"未登录";
+        navLabel.text = WFCString(@"NotLogin");
         break;
       case kConnectionStatusUnconnected:
-        navLabel.text = @"未连接";
+        navLabel.text = WFCString(@"NotConnect");
         break;
       case kConnectionStatusConnected:
-        navLabel.text = @"信息";
+        navLabel.text = WFCString(@"Message");
         break;
         
       default:
         break;
     }
     
-    [navLabel setTextColor:[UIColor whiteColor]];
-    navLabel.font = [UIFont systemFontOfSize:18];
+    navLabel.textColor = [WFCUConfigManager globalManager].naviTextColor;
+    navLabel.font = [UIFont fontWithName:@"Arial-BoldMT" size:18];
+      
     navLabel.textAlignment = NSTextAlignmentCenter;
     title = navLabel;
   } else {
       UIView *continer = [[UIView alloc] initWithFrame:CGRectMake([UIScreen mainScreen].bounds.size.width/2 - 60, 0, 120, 44)];
       UILabel *navLabel = [[UILabel alloc] initWithFrame:CGRectMake(40, 2, 80, 40)];
       if (status == kConnectionStatusConnecting) {
-        navLabel.text = @"连接中。。。";
+        navLabel.text = WFCString(@"Connecting");
       } else {
-        navLabel.text = @"接收中。。。";
+        navLabel.text = WFCString(@"Synching");
       }
       
-      [navLabel setTextColor:[UIColor whiteColor]];
-      navLabel.font = [UIFont systemFontOfSize:18];
+      navLabel.textColor = [WFCUConfigManager globalManager].naviTextColor;
+      navLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:18];
       [continer addSubview:navLabel];
       
     UIActivityIndicatorView *indicatorView = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
     indicatorView.center = CGPointMake(20, 21);
     [indicatorView startAnimating];
+      indicatorView.color = [WFCUConfigManager globalManager].naviTextColor;
       [continer addSubview:indicatorView];
     title = continer;
   }
@@ -386,6 +393,15 @@
     [self refreshLeftButton];
 }
 
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
+    [super traitCollectionDidChange:previousTraitCollection];
+    if (@available(iOS 13.0, *)) {
+        if ([self.traitCollection hasDifferentColorAppearanceComparedToTraitCollection:previousTraitCollection]) {
+            [self.tableView reloadData];
+        }
+    }
+}
+
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     if (self.searchController.isActive) {
@@ -399,11 +415,11 @@
         
         NSString *title = nil;
         if (count > 0 && count < 1000) {
-            title = [NSString stringWithFormat:@"返回(%ld)", count];
+            title = [NSString stringWithFormat:WFCString(@"BackNumber"), count];
         } else if (count >= 1000) {
-            title = @"返回(...)";
+            title = WFCString(@"BackMore");
         } else {
-            title = @"返回";
+            title = WFCString(@"Back");
         }
         
         UIBarButtonItem *item = [[UIBarButtonItem alloc] init];
@@ -421,7 +437,7 @@
         iv.image = [UIImage imageNamed:@"pc_session"];
         [_pcSessionView addSubview:iv];
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(68, 10, 100, 20)];
-        label.text = @"PC已登录";
+        label.text = WFCString(@"PCLogined");
         [_pcSessionView addSubview:label];
     }
     return _pcSessionView;
@@ -554,27 +570,27 @@
         label.font = [UIFont systemFontOfSize:13];
         label.textColor = [UIColor grayColor];
         label.textAlignment = NSTextAlignmentLeft;
-        label.backgroundColor = [UIColor colorWithRed:239/255.f green:239/255.f blue:239/255.f alpha:1.0f];
+        label.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
         
         int sec = 0;
         if (self.searchFriendList.count) {
             sec++;
             if (section == sec-1) {
-                label.text = @"联系人";
+                label.text = WFCString(@"Contact");
             }
         }
         
         if (self.searchGroupList.count) {
             sec++;
             if (section == sec-1) {
-                label.text = @"群组";
+                label.text = WFCString(@"Group");
             }
         }
         
         if (self.searchConversationList.count) {
             sec++;
             if (sec-1 == section) {
-                label.text = @"信息";
+                label.text = WFCString(@"Message");
             }
         }
         
@@ -607,7 +623,7 @@
 
 - (NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath {
     __weak typeof(self) ws = self;
-    UITableViewRowAction *delete = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"删除" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+    UITableViewRowAction *delete = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:WFCString(@"Delete") handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
         [[WFCCIMService sharedWFCIMService] clearUnreadStatus:ws.conversations[indexPath.row].conversation];
         [[WFCCIMService sharedWFCIMService] removeConversation:ws.conversations[indexPath.row].conversation clearMessage:YES];
         [ws.conversations removeObjectAtIndex:indexPath.row];
@@ -615,24 +631,24 @@
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
     }];
     
-    UITableViewRowAction *setTop = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"置顶" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+    UITableViewRowAction *setTop = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:WFCString(@"Pinned") handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
         [[WFCCIMService sharedWFCIMService] setConversation:ws.conversations[indexPath.row].conversation top:YES success:^{
             [ws refreshList];
         } error:^(int error_code) {
             MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:ws.view animated:NO];
-            hud.label.text = @"设置失败";
+            hud.label.text = WFCString(@"UpdateFailure");
             hud.mode = MBProgressHUDModeText;
             hud.removeFromSuperViewOnHide = YES;
             [hud hideAnimated:NO afterDelay:1.5];
         }];
     }];
     
-    UITableViewRowAction *setUntop = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"取消置顶" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+    UITableViewRowAction *setUntop = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:WFCString(@"Unpinned") handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
         [[WFCCIMService sharedWFCIMService] setConversation:ws.conversations[indexPath.row].conversation top:NO success:^{
             [ws refreshList];
         } error:^(int error_code) {
             MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:ws.view animated:NO];
-            hud.label.text = @"设置失败";
+            hud.label.text = WFCString(@"UpdateFailure");
             hud.mode = MBProgressHUDModeText;
             hud.removeFromSuperViewOnHide = YES;
             [hud hideAnimated:NO afterDelay:1.5];

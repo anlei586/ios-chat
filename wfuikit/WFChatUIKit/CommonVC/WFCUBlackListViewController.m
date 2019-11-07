@@ -2,8 +2,8 @@
 //  WFCUBlackListViewController.m
 //  WFChatUIKit
 //
-//  Created by Tom Lee on 2019/7/31.
-//  Copyright © 2019 Tom Lee. All rights reserved.
+//  Created by Heavyrain.Lee on 2019/7/31.
+//  Copyright © 2019 Wildfire Chat. All rights reserved.
 //
 
 #import "WFCUBlackListViewController.h"
@@ -19,7 +19,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title = @"黑名单";
+    self.title = WFCString(@"Blacklist");
     self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
@@ -48,7 +48,7 @@
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return @"删除";
+    return WFCString(@"Delete");
 }
 #pragma mark - UITableViewDataSource
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -61,7 +61,7 @@
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"cell"];
     }
-    [cell.imageView sd_setImageWithURL:[NSURL URLWithString:userInfo.portrait] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
+    [cell.imageView sd_setImageWithURL:[NSURL URLWithString:[userInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
     cell.textLabel.text = userInfo.displayName;
     return cell;
 }

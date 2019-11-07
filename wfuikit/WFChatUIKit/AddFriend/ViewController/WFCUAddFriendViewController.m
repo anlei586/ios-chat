@@ -11,7 +11,7 @@
 #import "WFCUProfileTableViewController.h"
 #import "SDWebImage.h"
 #import "MBProgressHUD.h"
-
+#import "WFCUConfigManager.h"
 
 @interface WFCUAddFriendViewController () <UITableViewDataSource, UISearchControllerDelegate, UISearchResultsUpdating, UITableViewDelegate>
 @property (nonatomic, strong)  UITableView              *tableView;
@@ -33,8 +33,8 @@
 }
 
 - (void)initSearchUIAndData {
-    self.view.backgroundColor = [UIColor whiteColor];
-    self.navigationItem.title = @"添加好友";
+    self.view.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
+    self.navigationItem.title = WFCString(@"AddFriend");
 
     _searchList = [NSMutableArray array];
         
@@ -45,8 +45,10 @@
     if (@available(iOS 9.1, *)) {
         self.searchController.obscuresBackgroundDuringPresentation = NO;
     }
-    [self.searchController.searchBar setValue:@"取消" forKey:@"_cancelButtonText"];
-    self.searchController.searchBar.placeholder = @"搜索添加好友";
+    if (! @available(iOS 13, *)) {
+        [self.searchController.searchBar setValue:WFCString(@"Cancel") forKey:@"_cancelButtonText"];
+    }
+    self.searchController.searchBar.placeholder = WFCString(@"SearchUserHint");
     
     self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
     [self.view addSubview:self.tableView];
@@ -102,7 +104,7 @@
         }
         WFCCUserInfo *userInfo = self.searchList[indexPath.row];
         [cell.textLabel setText:userInfo.displayName];
-        [cell.imageView sd_setImageWithURL:[NSURL URLWithString:userInfo.portrait] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
+        [cell.imageView sd_setImageWithURL:[NSURL URLWithString:[userInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
       
       cell.userInteractionEnabled = YES;
       return cell;
@@ -138,6 +140,7 @@
     NSString *searchString = [ws.searchController.searchBar text];
     if (searchString.length) {
         [[WFCCIMService sharedWFCIMService] searchUser:searchString
+                                                 fuzzy:YES
                                                success:^(NSArray<WFCCUserInfo *> *machedUsers) {
                                                    dispatch_async(dispatch_get_main_queue(), ^{
                                                        ws.searchList = machedUsers;

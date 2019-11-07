@@ -21,6 +21,8 @@
 #import "MBProgressHUD.h"
 
 #import "WFCUConversationSearchTableViewCell.h"
+#import "WFCUConfigManager.h"
+
 
 @interface WFCUConversationSearchTableViewController () <UISearchControllerDelegate, UISearchResultsUpdating, UITableViewDelegate, UITableViewDataSource>
 @property (nonatomic, strong)NSMutableArray<WFCCMessage* > *messages;
@@ -38,8 +40,10 @@
     if (@available(iOS 9.1, *)) {
         self.searchController.obscuresBackgroundDuringPresentation = NO;
     }
-    [self.searchController.searchBar setValue:@"取消" forKey:@"_cancelButtonText"];
-    self.searchController.searchBar.placeholder = @"搜索";
+    if (! @available(iOS 13, *)) {
+        [self.searchController.searchBar setValue:WFCString(@"Cancel") forKey:@"_cancelButtonText"];
+    }
+    self.searchController.searchBar.placeholder = WFCString(@"Search");
     
     
     self.tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
@@ -113,18 +117,18 @@
     label.font = [UIFont boldSystemFontOfSize:18];
     label.textColor = [UIColor blackColor];
     label.textAlignment = NSTextAlignmentLeft;
-    header.backgroundColor = [UIColor colorWithRed:239/255.f green:239/255.f blue:239/255.f alpha:1.0f];
+    header.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
     if (self.conversation.type == Single_Type) {
         WFCCUserInfo *userInfo = [[WFCCIMService sharedWFCIMService] getUserInfo:self.conversation.target refresh:NO];
-        [portraitView sd_setImageWithURL:[NSURL URLWithString:userInfo.portrait] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
+        [portraitView sd_setImageWithURL:[NSURL URLWithString:[userInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
         label.text = [NSString stringWithFormat:@"\"%@\"的聊天记录", userInfo.displayName];
     } else if (self.conversation.type == Group_Type) {
         WFCCGroupInfo *groupInfo = [[WFCCIMService sharedWFCIMService] getGroupInfo:self.conversation.target refresh:NO];
-        [portraitView sd_setImageWithURL:[NSURL URLWithString:groupInfo.portrait] placeholderImage:[UIImage imageNamed:@"GroupChatRound"]];
+        [portraitView sd_setImageWithURL:[NSURL URLWithString:[groupInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"GroupChatRound"]];
         label.text = [NSString stringWithFormat:@"\"%@\"的聊天记录", groupInfo.name];
     } else if(self.conversation.type == Channel_Type) {
         WFCCChannelInfo *channelInfo = [[WFCCIMService sharedWFCIMService] getChannelInfo:self.conversation.target refresh:NO];
-        [portraitView sd_setImageWithURL:[NSURL URLWithString:channelInfo.portrait] placeholderImage:[UIImage imageNamed:@"GroupChatRound"]];
+        [portraitView sd_setImageWithURL:[NSURL URLWithString:[channelInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"GroupChatRound"]];
         label.text = [NSString stringWithFormat:@"\"%@\"的聊天记录", channelInfo.name];
     }
     

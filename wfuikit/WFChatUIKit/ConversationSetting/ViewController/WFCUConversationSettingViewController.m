@@ -27,6 +27,10 @@
 #import "WFCUChannelProfileViewController.h"
 #import "QrCodeHelper.h"
 #import "UIView+Toast.h"
+#import "WFCUConfigManager.h"
+#import "WFCUUtilities.h"
+#import "WFCUGroupAnnouncementViewController.h"
+
 
 @interface WFCUConversationSettingViewController () <UITableViewDataSource, UITableViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource>
 @property (nonatomic, strong)UICollectionView *memberCollectionView;
@@ -40,6 +44,12 @@
 @property (nonatomic, strong)UIImageView *channelPortrait;
 @property (nonatomic, strong)UILabel *channelName;
 @property (nonatomic, strong)UILabel *channelDesc;
+
+@property (nonatomic, strong)WFCUGroupAnnouncement *groupAnnouncement;
+
+@property (nonatomic, assign)BOOL showMoreMember;
+@property (nonatomic, assign)int extraBtnNumber;
+@property (nonatomic, assign)int memberCollectionCount;
 @end
 
 
@@ -66,69 +76,41 @@
     
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
+    [self.view addSubview:self.tableView];
     
-    BOOL showMoreMember = NO;
-    if (self.conversation.type == Single_Type || self.conversation.type == Group_Type) {
-        self.memberCollectionViewLayout = [[WFCUConversationSettingMemberCollectionViewLayout alloc] initWithItemMargin:5];
-        int memberCollectionCount = 0;
-        if (self.conversation.type == Single_Type) {
-            memberCollectionCount = 2;
-        } else if(self.conversation.type == Group_Type) {
-            if ([self isGroupManager]) {
-                memberCollectionCount = (int)self.memberList.count + 2;
-            } else if(self.groupInfo.type == GroupType_Restricted) {
-                if (self.groupInfo.joinType == 1 || self.groupInfo.joinType == 0) {
-                    memberCollectionCount = (int)self.memberList.count + 1;
+    if(self.conversation.type == Group_Type) {
+        __weak typeof(self)ws = self;
+        [[NSNotificationCenter defaultCenter] addObserverForName:kGroupMemberUpdated object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
+            if ([ws.conversation.target isEqualToString:note.object]) {
+                ws.groupInfo = [[WFCCIMService sharedWFCIMService] getGroupInfo:ws.conversation.target refresh:NO];
+                ws.memberList = [[WFCCIMService sharedWFCIMService] getGroupMembers:ws.conversation.target forceUpdate:NO];
+                [ws setupMemberCollectionView];
+                [ws.memberCollectionView reloadData];
+            }
+        }];
+        [[WFCUConfigManager globalManager].appServiceProvider getGroupAnnouncement:self.groupInfo.target success:^(WFCUGroupAnnouncement *announcement) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.groupAnnouncement = announcement;
+                if ([self isGroupManager] && self.groupInfo.type == GroupType_Restricted) {
+                    [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:4 inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
                 } else {
-                    memberCollectionCount = (int)self.memberList.count;
+                    [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:3 inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
                 }
-            } else {
-                memberCollectionCount = (int)self.memberList.count + 1;
-            }
-            if (memberCollectionCount > Group_Member_Visible_Lines * 4) {
-                memberCollectionCount = Group_Member_Visible_Lines * 4;
-                showMoreMember = YES;
-            }
-        } else if(self.conversation.type == Channel_Type) {
-            memberCollectionCount = 1;
-        }
-        
-        self.memberCollectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, [self.memberCollectionViewLayout getHeigthOfItemCount:memberCollectionCount]) collectionViewLayout:self.memberCollectionViewLayout];
-        self.memberCollectionView.delegate = self;
-        self.memberCollectionView.dataSource = self;
-        
-        
-        
-        self.memberCollectionView.backgroundColor = [UIColor whiteColor];
-        
-        [self.memberCollectionView registerClass:[WFCUConversationSettingMemberCell class] forCellWithReuseIdentifier:Group_Member_Cell_Reuese_ID];
-        
-        if (showMoreMember) {
-            UIView *head = [[UIView alloc] init];
-            CGRect frame = self.memberCollectionView.frame;
-            frame.size.height += 36;
-            head.frame = frame;
-            [head addSubview:self.memberCollectionView];
+                
+            });
+        } error:^(int error_code) {
             
-            UIButton *moreBtn = [[UIButton alloc] initWithFrame:CGRectMake(0, frame.size.height - 36, frame.size.width, 36)];
-            [moreBtn setTitle:@"查看全部成员" forState:UIControlStateNormal];
-            [moreBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
-            [moreBtn addTarget:self action:@selector(onViewAllMember:) forControlEvents:UIControlEventTouchDown];
-            [head addSubview:moreBtn];
-            
-            [head setBackgroundColor:[UIColor whiteColor]];
-            self.tableView.tableHeaderView = head;
-        } else {
-            self.tableView.tableHeaderView = self.memberCollectionView;
-        }
-    } else if(self.conversation.type == Channel_Type) {
+        }];
+    }
+    
+    if(self.conversation.type == Channel_Type) {
         CGFloat portraitWidth = 80;
         CGFloat top = 40;
         CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
         self.channelInfo = [[WFCCIMService sharedWFCIMService] getChannelInfo:self.conversation.target refresh:YES];
         
         self.channelPortrait = [[UIImageView alloc] initWithFrame:CGRectMake((screenWidth - portraitWidth)/2, top, portraitWidth, portraitWidth)];
-        [self.channelPortrait sd_setImageWithURL:[NSURL URLWithString:self.channelInfo.portrait] placeholderImage:[UIImage imageNamed:@"channel_default_portrait"]];
+        [self.channelPortrait sd_setImageWithURL:[NSURL URLWithString:[self.channelInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"channel_default_portrait"]];
         self.channelPortrait.userInteractionEnabled = YES;
         [self.channelPortrait addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onTapChannelPortrait:)]];
         
@@ -168,19 +150,68 @@
         [container addSubview:self.channelDesc];
         self.tableView.tableHeaderView = container;
     }
-    
-    [self.view addSubview:self.tableView];
-    
-    if(self.conversation.type == Group_Type) {
-        __weak typeof(self)ws = self;
-        [[NSNotificationCenter defaultCenter] addObserverForName:kGroupMemberUpdated object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note) {
-            if ([ws.conversation.target isEqualToString:note.object]) {
-                ws.groupInfo = [[WFCCIMService sharedWFCIMService] getGroupInfo:ws.conversation.target refresh:NO];
-                ws.memberList = [[WFCCIMService sharedWFCIMService] getGroupMembers:ws.conversation.target forceUpdate:NO];
-                [ws.memberCollectionView reloadData];
+}
+
+- (void)setupMemberCollectionView {
+    if (self.conversation.type == Single_Type || self.conversation.type == Group_Type) {
+        self.memberCollectionViewLayout = [[WFCUConversationSettingMemberCollectionViewLayout alloc] initWithItemMargin:5];
+
+        if (self.conversation.type == Single_Type) {
+            self.extraBtnNumber = 1;
+            self.memberCollectionCount = 2;
+        } else if(self.conversation.type == Group_Type) {
+            if ([self isGroupManager]) {
+                self.extraBtnNumber = 2;
+                self.memberCollectionCount = (int)self.memberList.count + self.extraBtnNumber;
+            } else if(self.groupInfo.type == GroupType_Restricted) {
+                if (self.groupInfo.joinType == 1 || self.groupInfo.joinType == 0) {
+                    self.extraBtnNumber = 1;
+                    self.memberCollectionCount = (int)self.memberList.count + self.extraBtnNumber;
+                } else {
+                    self.memberCollectionCount = (int)self.memberList.count;
+                }
+            } else {
+                self.extraBtnNumber = 1;
+                self.memberCollectionCount = (int)self.memberList.count + self.extraBtnNumber;
             }
-        }];
+            if (self.memberCollectionCount > Group_Member_Visible_Lines * 4) {
+                self.memberCollectionCount = Group_Member_Visible_Lines * 4;
+                self.showMoreMember = YES;
+            }
+        } else if(self.conversation.type == Channel_Type) {
+            self.memberCollectionCount = 1;
+        }
+        
+        self.memberCollectionView = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, [self.memberCollectionViewLayout getHeigthOfItemCount:self.memberCollectionCount]) collectionViewLayout:self.memberCollectionViewLayout];
+        self.memberCollectionView.delegate = self;
+        self.memberCollectionView.dataSource = self;
+        
+        self.memberCollectionView.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
+        
+        [self.memberCollectionView registerClass:[WFCUConversationSettingMemberCell class] forCellWithReuseIdentifier:Group_Member_Cell_Reuese_ID];
+        
+        if (self.showMoreMember) {
+            UIView *head = [[UIView alloc] init];
+            CGRect frame = self.memberCollectionView.frame;
+            frame.size.height += 36;
+            head.frame = frame;
+            [head addSubview:self.memberCollectionView];
+            
+            UIButton *moreBtn = [[UIButton alloc] initWithFrame:CGRectMake(0, frame.size.height - 36, frame.size.width, 36)];
+            [moreBtn setTitle:WFCString(@"ShowAllMembers") forState:UIControlStateNormal];
+            
+            [moreBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+            [moreBtn addTarget:self action:@selector(onViewAllMember:) forControlEvents:UIControlEventTouchDown];
+            [head addSubview:moreBtn];
+            
+            head.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
+            
+            self.tableView.tableHeaderView = head;
+        } else {
+            self.tableView.tableHeaderView = self.memberCollectionView;
+        }
     }
+
 }
 
 - (void)onViewAllMember:(id)sender {
@@ -294,6 +325,7 @@
         self.channelInfo = [[WFCCIMService sharedWFCIMService] getChannelInfo:self.conversation.target refresh:NO];
         self.memberList = @[self.conversation.target];
     }
+    [self setupMemberCollectionView];
     
     [self.memberCollectionView reloadData];
     [self.tableView reloadData];
@@ -322,10 +354,30 @@
 
 - (BOOL)isGroupManageCell:(NSIndexPath *)indexPath {
   if(self.conversation.type == Group_Type && indexPath.section == 0 && indexPath.row == 3) {
-    return YES;
+    if ([self isGroupManager] && self.groupInfo.type == GroupType_Restricted) {
+        return YES;
+    } else {
+        return NO;
+    }
   }
   return NO;
 }
+
+- (BOOL)isGroupAnnouncementCell:(NSIndexPath *)indexPath {
+    if(self.conversation.type == Group_Type && indexPath.section == 0) {
+        if ([self isGroupManager] && self.groupInfo.type == GroupType_Restricted) {
+            if (indexPath.row == 4) {
+                return YES;
+            }
+        } else {
+            if (indexPath.row == 3) {
+                return YES;
+            }
+        }
+    }
+    return NO;
+}
+
 
 - (BOOL)isSearchMessageCell:(NSIndexPath *)indexPath {
   if((self.conversation.type == Group_Type && indexPath.section == 1 && indexPath.row == 0)
@@ -402,9 +454,9 @@
     if (self.conversation.type == Group_Type) {
         if (section == 0) {
             if ([self isGroupManager] && self.groupInfo.type == GroupType_Restricted) {
-                return 4; //群名称，群头像，群二维码，群管理，
+                return 5; //群名称，群头像，群二维码，群管理，群公告
             } else {
-                return 3; //群名称，群头像，群二维码
+                return 4; //群名称，群头像，群二维码，群公告
             }
             
         } else if(section == 1) {
@@ -442,6 +494,13 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if ([self isGroupAnnouncementCell:indexPath]) {
+        float height = [WFCUUtilities getTextDrawingSize:self.groupAnnouncement.text font:[UIFont systemFontOfSize:12] constrainedSize:CGSizeMake(self.view.bounds.size.width - 48, 1000)].height;
+        if (height > 136) {
+            height = 136;
+        }
+        return height + 48;
+    }
     return 48;
 }
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
@@ -477,15 +536,15 @@
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath  {
   if ([self isGroupNameCell:indexPath]) {
-    return [self cellOfTable:tableView WithTitle:@"群聊名称" withDetailTitle:self.groupInfo.name withDisclosureIndicator:YES withSwitch:NO withSwitchType:SwitchType_Conversation_None];
+    return [self cellOfTable:tableView WithTitle:WFCString(@"GroupName") withDetailTitle:self.groupInfo.name withDisclosureIndicator:YES withSwitch:NO withSwitchType:SwitchType_Conversation_None];
   } else if ([self isGroupPortraitCell:indexPath]) {
-    UITableViewCell *cell = [self cellOfTable:tableView WithTitle:@"更改头像" withDetailTitle:nil withDisclosureIndicator:NO withSwitch:NO withSwitchType:SwitchType_Conversation_None];
+    UITableViewCell *cell = [self cellOfTable:tableView WithTitle:WFCString(@"ChangePortrait") withDetailTitle:nil withDisclosureIndicator:NO withSwitch:NO withSwitchType:SwitchType_Conversation_None];
     UIImageView *portraitView = [[UIImageView alloc] initWithFrame:CGRectMake(self.view.frame.size.width - 56, 8, 40, 40)];
-    [portraitView sd_setImageWithURL:[NSURL URLWithString:self.groupInfo.portrait] placeholderImage:[UIImage imageNamed:@"group_default_portrait"]];
+    [portraitView sd_setImageWithURL:[NSURL URLWithString:[self.groupInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"group_default_portrait"]];
     cell.accessoryView = portraitView;
     return cell;
   } else if([self isGroupQrCodeCell:indexPath]) {
-    UITableViewCell *cell = [self cellOfTable:tableView WithTitle:@"群二维码" withDetailTitle:nil withDisclosureIndicator:YES withSwitch:NO withSwitchType:SwitchType_Conversation_None];
+    UITableViewCell *cell = [self cellOfTable:tableView WithTitle:WFCString(@"GroupQRCode") withDetailTitle:nil withDisclosureIndicator:YES withSwitch:NO withSwitchType:SwitchType_Conversation_None];
       
       CGFloat width = [UIScreen mainScreen].bounds.size.width;
       UIImage *qrcode = [UIImage imageNamed:@"qrcode"];
@@ -495,27 +554,44 @@
       
       return cell;
   } else if ([self isGroupManageCell:indexPath]) {
-    return [self cellOfTable:tableView WithTitle:@"群管理" withDetailTitle:nil withDisclosureIndicator:YES withSwitch:NO withSwitchType:SwitchType_Conversation_None];
+    return [self cellOfTable:tableView WithTitle:WFCString(@"GroupManage") withDetailTitle:nil withDisclosureIndicator:YES withSwitch:NO withSwitchType:SwitchType_Conversation_None];
+  } else if([self isGroupAnnouncementCell:indexPath]) {
+//    return [self cellOfTable:tableView WithTitle:@"群公告" withDetailTitle:nil withDisclosureIndicator:YES withSwitch:NO withSwitchType:SwitchType_Conversation_None];
+      
+      UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"announcementCell"];
+        if (cell == nil) {
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"announcementCell"];
+        }
+        cell.textLabel.text = @"群公告";
+        cell.detailTextLabel.text = self.groupAnnouncement.text;
+        cell.detailTextLabel.numberOfLines = 10;
+        cell.detailTextLabel.font = [UIFont systemFontOfSize:12];
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        cell.accessoryView = nil;
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+      
+        return cell;
+      
   } else if ([self isSearchMessageCell:indexPath]) {
-    return [self cellOfTable:tableView WithTitle:@"查找聊天内容" withDetailTitle:nil withDisclosureIndicator:NO withSwitch:NO withSwitchType:SwitchType_Conversation_None];
+    return [self cellOfTable:tableView WithTitle:WFCString(@"SearchMessageContent") withDetailTitle:nil withDisclosureIndicator:NO withSwitch:NO withSwitchType:SwitchType_Conversation_None];
   } else if ([self isMessageSilentCell:indexPath]) {
-    return [self cellOfTable:tableView WithTitle:@"消息免打扰" withDetailTitle:nil withDisclosureIndicator:NO withSwitch:YES withSwitchType:SwitchType_Conversation_Silent];
+    return [self cellOfTable:tableView WithTitle:WFCString(@"Silent") withDetailTitle:nil withDisclosureIndicator:NO withSwitch:YES withSwitchType:SwitchType_Conversation_Silent];
   } else if ([self isSetTopCell:indexPath]) {
-    return [self cellOfTable:tableView WithTitle:@"置顶聊天" withDetailTitle:nil withDisclosureIndicator:NO withSwitch:YES withSwitchType:SwitchType_Conversation_Top];
+    return [self cellOfTable:tableView WithTitle:WFCString(@"PinChat") withDetailTitle:nil withDisclosureIndicator:NO withSwitch:YES withSwitchType:SwitchType_Conversation_Top];
   } else if ([self isSaveGroupCell:indexPath]) {
-    return [self cellOfTable:tableView WithTitle:@"保存到通讯录" withDetailTitle:nil withDisclosureIndicator:NO withSwitch:YES withSwitchType:SwitchType_Conversation_Save_To_Contact];
+    return [self cellOfTable:tableView WithTitle:WFCString(@"SaveToContact") withDetailTitle:nil withDisclosureIndicator:NO withSwitch:YES withSwitchType:SwitchType_Conversation_Save_To_Contact];
   } else if ([self isGroupNameCardCell:indexPath]) {
     WFCCGroupMember *groupMember = [[WFCCIMService sharedWFCIMService] getGroupMember:self.conversation.target memberId:[WFCCNetworkService sharedInstance].userId];
       if (groupMember.alias.length) {
-          return [self cellOfTable:tableView WithTitle:@"我在本群的昵称" withDetailTitle:groupMember.alias withDisclosureIndicator:YES withSwitch:NO withSwitchType:SwitchType_Conversation_None];
+          return [self cellOfTable:tableView WithTitle:WFCString(@"NicknameInGroup") withDetailTitle:groupMember.alias withDisclosureIndicator:YES withSwitch:NO withSwitchType:SwitchType_Conversation_None];
       } else {
-          return [self cellOfTable:tableView WithTitle:@"我在本群的昵称" withDetailTitle:@"未设置" withDisclosureIndicator:YES withSwitch:NO withSwitchType:SwitchType_Conversation_None];
+          return [self cellOfTable:tableView WithTitle:WFCString(@"NicknameInGroup") withDetailTitle:WFCString(@"Unset") withDisclosureIndicator:YES withSwitch:NO withSwitchType:SwitchType_Conversation_None];
       }
     
   } else if([self isShowNameCardCell:indexPath]) {
-    return [self cellOfTable:tableView WithTitle:@"显示群成员昵称" withDetailTitle:nil withDisclosureIndicator:NO withSwitch:YES withSwitchType:SwitchType_Conversation_Show_Alias];
+    return [self cellOfTable:tableView WithTitle:WFCString(@"ShowMemberNickname") withDetailTitle:nil withDisclosureIndicator:NO withSwitch:YES withSwitchType:SwitchType_Conversation_Show_Alias];
   } else if ([self isClearMessageCell:indexPath]) {
-    return [self cellOfTable:tableView WithTitle:@"清空聊天记录" withDetailTitle:nil withDisclosureIndicator:NO withSwitch:NO withSwitchType:SwitchType_Conversation_None];
+    return [self cellOfTable:tableView WithTitle:WFCString(@"ClearChatHistory") withDetailTitle:nil withDisclosureIndicator:NO withSwitch:NO withSwitchType:SwitchType_Conversation_None];
   } else if([self isQuitGroup:indexPath]) {
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"buttonCell"];
         if (cell == nil) {
@@ -525,9 +601,9 @@
             }
             UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(20, 4, self.view.frame.size.width - 40, 40)];
             if ([self isGroupOwner]) {
-                [btn setTitle:@"解散群组" forState:UIControlStateNormal];
+                [btn setTitle:WFCString(@"DismissGroup") forState:UIControlStateNormal];
             } else {
-                [btn setTitle:@"退出群组" forState:UIControlStateNormal];
+                [btn setTitle:WFCString(@"QuitGroup") forState:UIControlStateNormal];
             }
             
             btn.layer.cornerRadius = 5.f;
@@ -547,9 +623,9 @@
           }
           UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(20, 4, self.view.frame.size.width - 40, 40)];
           if ([self isChannelOwner]) {
-              [btn setTitle:@"销毁频道" forState:UIControlStateNormal];
+              [btn setTitle:WFCString(@"DestroyChannel") forState:UIControlStateNormal];
           } else {
-              [btn setTitle:@"取消订阅频道" forState:UIControlStateNormal];
+              [btn setTitle:WFCString(@"UnscribeChannel") forState:UIControlStateNormal];
           }
           
           btn.layer.cornerRadius = 5.f;
@@ -580,12 +656,12 @@
     __weak typeof(self)weakSelf = self;
   if ([self isGroupNameCell:indexPath]) {
       if (self.groupInfo.type == GroupType_Restricted && ![self isGroupManager]) {
-          [self.view makeToast:@"只有管理员才可以修改群名称" duration:1 position:CSToastPositionCenter];
+          [self.view makeToast:WFCString(@"OnlyManangerCanChangeGroupNameHint") duration:1 position:CSToastPositionCenter];
           return;
       }
     WFCUGeneralModifyViewController *gmvc = [[WFCUGeneralModifyViewController alloc] init];
     gmvc.defaultValue = self.groupInfo.name;
-    gmvc.titleText = @"修改群名称";
+    gmvc.titleText = WFCString(@"ModifyGroupName");
     gmvc.canEmpty = NO;
     gmvc.tryModify = ^(NSString *newValue, void (^result)(BOOL success)) {
       [[WFCCIMService sharedWFCIMService] modifyGroupInfo:self.groupInfo.target type:Modify_Group_Name newValue:newValue notifyLines:@[@(0)] notifyContent:nil success:^{
@@ -598,7 +674,7 @@
     [self.navigationController presentViewController:nav animated:YES completion:nil];
   } else if ([self isGroupPortraitCell:indexPath]) {
       if (self.groupInfo.type == GroupType_Restricted && ![self isGroupManager]) {
-          [self.view makeToast:@"只有管理员才可以修改群头像" duration:1 position:CSToastPositionCenter];
+          [self.view makeToast:WFCString(@"OnlyManangerCanChangeGroupPortraitHint") duration:1 position:CSToastPositionCenter];
           return;
       }
     WFCUCreateGroupViewController *vc = [[WFCUCreateGroupViewController alloc] init];
@@ -629,7 +705,7 @@
     WFCUGeneralModifyViewController *gmvc = [[WFCUGeneralModifyViewController alloc] init];
     WFCCGroupMember *groupMember = [[WFCCIMService sharedWFCIMService] getGroupMember:self.conversation.target memberId:[WFCCNetworkService sharedInstance].userId];
     gmvc.defaultValue = groupMember.alias;
-    gmvc.titleText = @"修改我在群中的名片";
+    gmvc.titleText = WFCString(@"ModifyMyGroupNameCard");
     gmvc.canEmpty = NO;
     gmvc.tryModify = ^(NSString *newValue, void (^result)(BOOL success)) {
       [[WFCCIMService sharedWFCIMService] modifyGroupAlias:self.conversation.target alias:newValue notifyLines:@[@(0)] notifyContent:nil success:^{
@@ -643,15 +719,15 @@
   } else if([self isShowNameCardCell:indexPath]) {
     
   } else if ([self isClearMessageCell:indexPath]) {
-      UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:@"确认删除" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+      UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:WFCString(@"ConfirmDelete") message:nil preferredStyle:UIAlertControllerStyleActionSheet];
 
-      UIAlertAction *actionCancel = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+      UIAlertAction *actionCancel = [UIAlertAction actionWithTitle:WFCString(@"Cancel") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
 
       }];
-      UIAlertAction *actionDelete = [UIAlertAction actionWithTitle:@"删除" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+      UIAlertAction *actionDelete = [UIAlertAction actionWithTitle:WFCString(@"Delete") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
           [[WFCCIMService sharedWFCIMService] clearMessages:self.conversation];
               MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:weakSelf.view animated:NO];
-              hud.label.text = @"删除成功";
+              hud.label.text = WFCString(@"Deleted");
               hud.mode = MBProgressHUDModeText;
               hud.removeFromSuperViewOnHide = YES;
               [hud hideAnimated:NO afterDelay:1.5];
@@ -671,32 +747,19 @@
       if (gQrCodeDelegate) {
           [gQrCodeDelegate showQrCodeViewController:self.navigationController type:QRType_Group target:self.groupInfo.target];
       }
+  } else if([self isGroupAnnouncementCell:indexPath]) {
+      WFCUGroupAnnouncementViewController *vc = [[WFCUGroupAnnouncementViewController alloc] init];
+      vc.announcement = self.groupAnnouncement;
+      vc.isManager = [self isGroupManager];
+      [self.navigationController pushViewController:vc animated:YES];
   }
 }
 
 
 #pragma mark - UICollectionViewDataSource
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    if (self.conversation.type == Group_Type) {
-        if([self isGroupManager]) {
-            if (self.memberList.count + 2 > Group_Member_Visible_Lines * 4) {
-                self.memberList = [self.memberList subarrayWithRange:NSMakeRange(0, Group_Member_Visible_Lines * 4 - 2)];
-            }
-            return self.memberList.count + 2;
-        } else {
-            if (self.groupInfo.type == GroupType_Restricted && self.groupInfo.joinType != 1 && self.groupInfo.joinType != 0) {
-                if (self.memberList.count > Group_Member_Visible_Lines * 4) {
-                    self.memberList = [self.memberList subarrayWithRange:NSMakeRange(0, Group_Member_Visible_Lines * 4)];
-                }
-                return self.memberList.count;
-            }
-            if (self.memberList.count + 1 > Group_Member_Visible_Lines * 4) {
-                self.memberList = [self.memberList subarrayWithRange:NSMakeRange(0, Group_Member_Visible_Lines * 4 - 1)];
-            }
-            return self.memberList.count + 1;
-        }
-    } else if(self.conversation.type == Single_Type) {
-        return self.memberList.count + 1;
+    if (self.conversation.type == Group_Type || self.conversation.type == Single_Type) {
+        return self.memberCollectionCount;
     } else if(self.conversation.type == Channel_Type) {
         return self.memberList.count;
     }
@@ -706,11 +769,11 @@
 // The cell that is returned must be retrieved from a call to -dequeueReusableCellWithReuseIdentifier:forIndexPath:
 - (__kindof UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     WFCUConversationSettingMemberCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:Group_Member_Cell_Reuese_ID forIndexPath:indexPath];
-    if (indexPath.row < self.memberList.count) {
+    if (indexPath.row < self.memberCollectionCount-self.extraBtnNumber) {
         WFCCGroupMember *member = self.memberList[indexPath.row];
         [cell setModel:member withType:self.conversation.type];
     } else {
-        if (indexPath.row == self.memberList.count) {
+        if (indexPath.row == self.memberCollectionCount-self.extraBtnNumber) {
             [cell.headerImageView setImage:[UIImage imageNamed:@"addmember"]];
             cell.nameLabel.text = nil;
             cell.nameLabel.hidden = YES;
@@ -726,13 +789,14 @@
 #pragma mark - UICollectionViewDelegate
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
     __weak typeof(self)ws = self;
-    if (indexPath.row == self.memberList.count) {
+    if (indexPath.row == self.memberCollectionCount-self.extraBtnNumber) {
         WFCUContactListViewController *pvc = [[WFCUContactListViewController alloc] init];
         pvc.selectContact = YES;
         pvc.multiSelect = YES;
         NSMutableArray *disabledUser = [[NSMutableArray alloc] init];
       if(self.conversation.type == Group_Type) {
-        for (WFCCGroupMember *member in self.memberList) {
+          
+        for (WFCCGroupMember *member in [[WFCCIMService sharedWFCIMService] getGroupMembers:self.groupInfo.target forceUpdate:NO]) {
             [disabledUser addObject:member.memberId];
         }
         pvc.selectResult = ^(NSArray<NSString *> *contacts) {
@@ -779,15 +843,16 @@
         pvc.disableUsers = disabledUser;
         UINavigationController *navi = [[UINavigationController alloc] initWithRootViewController:pvc];
         [self.navigationController presentViewController:navi animated:YES completion:nil];
-    } else if(indexPath.row == self.memberList.count + 1) {
+    } else if(indexPath.row == self.memberCollectionCount-self.extraBtnNumber + 1) {
         WFCUContactListViewController *pvc = [[WFCUContactListViewController alloc] init];
         pvc.selectContact = YES;
         pvc.multiSelect = YES;
-      pvc.selectResult = ^(NSArray<NSString *> *contacts) {
+        __weak typeof(self)ws = self;
+        pvc.selectResult = ^(NSArray<NSString *> *contacts) {
           [[WFCCIMService sharedWFCIMService] kickoffMembers:contacts fromGroup:self.conversation.target notifyLines:@[@(0)] notifyContent:nil success:^{
             [[WFCCIMService sharedWFCIMService] getGroupMembers:ws.conversation.target forceUpdate:YES];
             dispatch_async(dispatch_get_main_queue(), ^{
-              NSMutableArray *tmpArray = [self.memberList mutableCopy];
+              NSMutableArray *tmpArray = [ws.memberList mutableCopy];
               NSMutableArray *removeArray = [[NSMutableArray alloc] init];
               [tmpArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 WFCCGroupMember *member = obj;
@@ -796,8 +861,9 @@
                 }
               }];
               [tmpArray removeObjectsInArray:removeArray];
-              self.memberList = [tmpArray mutableCopy];
-              [self.memberCollectionView reloadData];
+              ws.memberList = [tmpArray mutableCopy];
+              [ws setupMemberCollectionView];
+              [ws.memberCollectionView reloadData];
             });
           } error:^(int error_code) {
             
@@ -807,7 +873,7 @@
         NSMutableArray *disableUsers = [[NSMutableArray alloc] init];
         BOOL isOwner = [self isGroupOwner];
         
-        for (WFCCGroupMember *member in self.memberList) {
+        for (WFCCGroupMember *member in [[WFCCIMService sharedWFCIMService] getGroupMembers:self.groupInfo.target forceUpdate:NO]) {
             [candidateUsers addObject:member.memberId];
             if (!isOwner && (member.type == Member_Type_Manager || [self.groupInfo.owner isEqualToString:member.memberId])) {
                 [disableUsers addObject:member.memberId];

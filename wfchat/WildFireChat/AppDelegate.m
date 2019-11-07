@@ -18,7 +18,7 @@
 #import "AppDelegate.h"
 #import <WFChatClient/WFCChatClient.h>
 #if WFCU_SUPPORT_VOIP
-#import <WFAVengineKit/WFAVengineKit.h>
+#import <WFAVEngineKit/WFAVEngineKit.h>
 #endif
 #import "WFCLoginViewController.h"
 #import "WFCConfig.h"
@@ -31,6 +31,8 @@
 #import "StyleDIY.h"
 #import "GroupInfoViewController.h"
 #import <Bugly/Bugly.h>
+#import "AppService.h"
+
 
 @interface AppDelegate () <ConnectionStatusDelegate, ReceiveMessageDelegate,
 #if WFCU_SUPPORT_VOIP
@@ -55,6 +57,8 @@
     [[WFAVEngineKit sharedEngineKit] setVideoProfile:kWFAVVideoProfile360P swapWidthHeight:YES];
     [WFAVEngineKit sharedEngineKit].delegate = self;
 #endif
+    
+    [WFCUConfigManager globalManager].appServiceProvider = [AppService sharedAppService];
     
 
     NSString *savedToken = [[NSUserDefaults standardUserDefaults] stringForKey:@"savedToken"];
@@ -112,14 +116,23 @@
 }
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-    NSString *token = [[[[deviceToken description] stringByReplacingOccurrencesOfString:@"<"
-                                                                             withString:@""]
-                        stringByReplacingOccurrencesOfString:@">"
-                        withString:@""]
-                       stringByReplacingOccurrencesOfString:@" "
-                       withString:@""];
-    
-    [[WFCCNetworkService sharedInstance] setDeviceToken:token];
+    if ([deviceToken isKindOfClass:[NSData class]]) {
+        const unsigned *tokenBytes = [deviceToken bytes];
+        NSString *hexToken = [NSString stringWithFormat:@"%08x%08x%08x%08x%08x%08x%08x%08x",
+                              ntohl(tokenBytes[0]), ntohl(tokenBytes[1]), ntohl(tokenBytes[2]),
+                              ntohl(tokenBytes[3]), ntohl(tokenBytes[4]), ntohl(tokenBytes[5]),
+                              ntohl(tokenBytes[6]), ntohl(tokenBytes[7])];
+        [[WFCCNetworkService sharedInstance] setDeviceToken:hexToken];
+    } else {
+        NSString *token = [[[[deviceToken description] stringByReplacingOccurrencesOfString:@"<"
+                                                                                 withString:@""]
+                            stringByReplacingOccurrencesOfString:@">"
+                            withString:@""]
+                           stringByReplacingOccurrencesOfString:@" "
+                           withString:@""];
+        
+        [[WFCCNetworkService sharedInstance] setDeviceToken:token];
+    }
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
@@ -163,6 +176,10 @@
                 continue;
             }
             
+            if (msg.direction == MessageDirection_Send) {
+                continue;
+            }
+            
             int flag = (int)[msg.content.class performSelector:@selector(getContentFlags)];
             WFCCConversationInfo *info = [[WFCCIMService sharedWFCIMService] getConversationInfo:msg.conversation];
             if((flag & 0x03) && !info.isSilent && ![msg.content isKindOfClass:[WFCCCallStartMessageContent class]]) {
@@ -194,6 +211,14 @@
                           // Fallback on earlier versions
                       }
                   }
+                  if (msg.status == Message_Status_Mentioned || msg.status == Message_Status_AllMentioned) {
+                      if (sender.displayName) {
+                          localNote.alertBody = [NSString stringWithFormat:@"%@在群里@了你", sender.displayName];
+                      } else {
+                          localNote.alertBody = @"有人在群里@了你";
+                      }
+                          
+                  }
               }
               
               localNote.applicationIconBadgeNumber = count;
@@ -220,13 +245,19 @@
 }
 
 - (void)setupNavBar {
+    [WFCUConfigManager globalManager].naviBackgroudColor = [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9];
+    [WFCUConfigManager globalManager].naviTextColor = [UIColor whiteColor];
+    
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
     
     UINavigationBar *bar = [UINavigationBar appearance];
-    bar.barTintColor = [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9];
-    bar.tintColor = [UIColor whiteColor];
-    bar.titleTextAttributes = @{NSForegroundColorAttributeName : [UIColor whiteColor]};
-    bar.barStyle = UIBarStyleBlack;
+    bar.barTintColor = [WFCUConfigManager globalManager].naviBackgroudColor;
+    bar.tintColor = [WFCUConfigManager globalManager].naviTextColor;
+    bar.titleTextAttributes = @{NSForegroundColorAttributeName : [WFCUConfigManager globalManager].naviTextColor};
+    bar.barStyle = UIBarStyleDefault;
+    
+    [[UITabBar appearance] setBarTintColor:[WFCUConfigManager globalManager].frameBackgroudColor];
+    [UITabBar appearance].translucent = NO;
 }
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
     return [self handleUrl:[url absoluteString] withNav:application.delegate.window.rootViewController.navigationController];

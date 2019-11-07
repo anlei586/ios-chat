@@ -13,7 +13,7 @@
 #import "WFCUUtilities.h"
 #import "SDPhotoBrowser.h"
 
-@interface WFCUMyPortraitViewController () <UIActionSheetDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, SDPhotoBrowserDelegate>
+@interface WFCUMyPortraitViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate, SDPhotoBrowserDelegate>
   @property (strong, nonatomic)UIImageView *portraitView;
 @property (nonatomic, strong)UIImage *image;
 @property (nonatomic, strong)WFCCUserInfo *userInfo;
@@ -30,12 +30,12 @@
     [self.view addSubview:self.portraitView];
     
     if ([[WFCCNetworkService sharedInstance].userId isEqualToString:self.userId]) {
-        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"修改" style:UIBarButtonItemStyleDone target:self action:@selector(onModify:)];
+        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:WFCString(@"Modify") style:UIBarButtonItemStyleDone target:self action:@selector(onModify:)];
     }
     
   self.userInfo = [[WFCCIMService sharedWFCIMService] getUserInfo:self.userId refresh:NO];
     __weak typeof(self)ws = self;
-    [self.portraitView sd_setImageWithURL:[NSURL URLWithString:self.userInfo.portrait] placeholderImage:[UIImage imageNamed:@"PersonalChat"] completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
+    [self.portraitView sd_setImageWithURL:[NSURL URLWithString:[self.userInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"PersonalChat"] completed:^(UIImage * _Nullable image, NSError * _Nullable error, SDImageCacheType cacheType, NSURL * _Nullable imageURL) {
         dispatch_async(dispatch_get_main_queue(), ^{
             ws.image = image;
         });
@@ -68,14 +68,44 @@
         
     }
 }
+
 - (void)onModify:(id)sender {
-  UIActionSheet *actionSheet =
-  [[UIActionSheet alloc] initWithTitle:@"修改头像"
-                              delegate:self
-                     cancelButtonTitle:@"取消"
-                destructiveButtonTitle:@"拍照"
-                     otherButtonTitles:@"相册", nil];
-  [actionSheet showInView:self.view];
+    __weak typeof(self)ws = self;
+    UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:WFCString(@"ChangePortrait") message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    UIAlertAction *actionCancel = [UIAlertAction actionWithTitle:WFCString(@"Cancel") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        
+    }];
+    UIAlertAction *actionCamera = [UIAlertAction actionWithTitle:WFCString(@"TakePhotos") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIImagePickerController *picker = [[UIImagePickerController alloc] init];
+        picker.allowsEditing = YES;
+        picker.delegate = ws;
+        if ([UIImagePickerController
+             isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+            picker.sourceType = UIImagePickerControllerSourceTypeCamera;
+        } else {
+            NSLog(@"无法连接相机");
+            picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        }
+        [ws presentViewController:picker animated:YES completion:nil];
+    }];
+    
+    UIAlertAction *actionAlubum = [UIAlertAction actionWithTitle:WFCString(@"Album") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIImagePickerController *picker = [[UIImagePickerController alloc] init];
+        picker.allowsEditing = YES;
+        picker.delegate = ws;
+        picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        [ws presentViewController:picker animated:YES completion:nil];
+    }];
+    
+    //把action添加到actionSheet里
+    [actionSheet addAction:actionCamera];
+    [actionSheet addAction:actionAlubum];
+    [actionSheet addAction:actionCancel];
+    
+    
+    //相当于之前的[actionSheet show];
+    [self presentViewController:actionSheet animated:YES completion:nil];
 }
   
 - (void)didReceiveMemoryWarning {
@@ -93,30 +123,6 @@
 }
 */
 
-#pragma mark -  UIActionSheetDelegate <NSObject>
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-  if(buttonIndex == 0) {
-    UIImagePickerController *picker = [[UIImagePickerController alloc] init];
-    picker.allowsEditing = YES;
-    picker.delegate = self;
-    if ([UIImagePickerController
-         isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
-      picker.sourceType = UIImagePickerControllerSourceTypeCamera;
-    } else {
-      NSLog(@"无法连接相机");
-      picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-    }
-    [self presentViewController:picker animated:YES completion:nil];
-
-  } else if (buttonIndex == 1) {
-    UIImagePickerController *picker = [[UIImagePickerController alloc] init];
-    picker.allowsEditing = YES;
-    picker.delegate = self;
-    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-    [self presentViewController:picker animated:YES completion:nil];
-  }
-}
-  
 #pragma mark - UIImagePickerControllerDelegate
 - (void)imagePickerController:(UIImagePickerController *)picker
 didFinishPickingMediaWithInfo:(NSDictionary *)info {
@@ -135,19 +141,19 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info {
   UIImage *previousImage = self.portraitView.image;
   __weak typeof(self) ws = self;
   __block MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-  hud.label.text = @"更新中...";
+  hud.label.text = WFCString(@"Updating");
   [hud showAnimated:YES];
   
-  [[WFCCIMService sharedWFCIMService] uploadMedia:data mediaType:Media_Type_PORTRAIT
+    [[WFCCIMService sharedWFCIMService] uploadMedia:nil mediaData:data mediaType:Media_Type_PORTRAIT
                                           success:^(NSString *remoteUrl) {
     [[WFCCIMService sharedWFCIMService] modifyMyInfo:@{@(Modify_Portrait):remoteUrl} success:^{
       dispatch_async(dispatch_get_main_queue(), ^{
-        [ws.portraitView sd_setImageWithURL:[NSURL URLWithString:remoteUrl] placeholderImage:previousImage];
+        [ws.portraitView sd_setImageWithURL:[NSURL URLWithString:[remoteUrl stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:previousImage];
 
           [hud hideAnimated:YES];
           MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
           hud.mode = MBProgressHUDModeText;
-          hud.label.text = @"更新成功";
+          hud.label.text = WFCString(@"UpdateDone");
           hud.offset = CGPointMake(0.f, MBProgressMaxOffset);
           [hud hideAnimated:YES afterDelay:1.f];
           
@@ -157,7 +163,7 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info {
           [hud hideAnimated:YES];
           MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
           hud.mode = MBProgressHUDModeText;
-          hud.label.text = @"更新失败";
+          hud.label.text = WFCString(@"UpdateFailure");
           hud.offset = CGPointMake(0.f, MBProgressMaxOffset);
           [hud hideAnimated:YES afterDelay:1.f];
       });
@@ -169,7 +175,7 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info {
                                             error:^(int error_code) {
     dispatch_async(dispatch_get_main_queue(), ^{
       [hud hideAnimated:NO];
-      [ws showHud:@"更新失败"];
+      [ws showHud:WFCString(@"UpdateFailure")];
     });
   }];
     
@@ -193,7 +199,7 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info {
 }
 
 - (NSURL *)photoBrowser:(SDPhotoBrowser *)browser highQualityImageURLForIndex:(NSInteger)index {
-    return [NSURL URLWithString:self.userInfo.portrait];
+    return [NSURL URLWithString:[self.userInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
 }
 
 - (void)photoBrowserDidDismiss:(SDPhotoBrowser *)browser {

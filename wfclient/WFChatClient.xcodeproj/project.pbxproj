@@ -6,20 +6,6 @@
 	objectVersion = 48;
 	objects = {
 
-/* Begin PBXAggregateTarget section */
-		2E66FBCD1FAFE9220025B5A9 /* Release */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = 2E66FBCE1FAFE9220025B5A9 /* Build configuration list for PBXAggregateTarget "Release" */;
-			buildPhases = (
-				2E66FBD11FAFE92B0025B5A9 /* ShellScript */,
-			);
-			dependencies = (
-			);
-			name = Release;
-			productName = Release;
-		};
-/* End PBXAggregateTarget section */
-
 /* Begin PBXBuildFile section */
 		2E6B50A01FAE98E6006B6E31 /* WFCChatClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 2E6B509E1FAE98E6006B6E31 /* WFCChatClient.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2E6B50B01FAE990D006B6E31 /* interf_dec.h in Headers */ = {isa = PBXBuildFile; fileRef = 2E6B50A71FAE990D006B6E31 /* interf_dec.h */; };
@@ -226,7 +212,6 @@
 		901E270F21F1545000A163CB /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
 		901E271121F1545900A163CB /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
 		901E271321F1546100A163CB /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
-		9036FE9222ED852D00FD45E3 /* libmars-open-iphone.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libmars-open-iphone.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		903EBB8921357DDF00312C16 /* WFCCStickerMessageContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WFCCStickerMessageContent.m; sourceTree = "<group>"; };
 		903EBB8A21357DDF00312C16 /* WFCCStickerMessageContent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WFCCStickerMessageContent.h; sourceTree = "<group>"; };
 		90B044441FEFD6BA00AFE79B /* WFCCUnknownMessageContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WFCCUnknownMessageContent.m; sourceTree = "<group>"; };
@@ -442,7 +427,6 @@
 		901E270C21F1543C00A163CB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				9036FE9222ED852D00FD45E3 /* libmars-open-iphone.a */,
 				901E271321F1546100A163CB /* libz.tbd */,
 				901E271121F1545900A163CB /* libc++.tbd */,
 				901E270F21F1545000A163CB /* libresolv.tbd */,
@@ -545,10 +529,6 @@
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = WildFireChat;
 				TargetAttributes = {
-					2E66FBCD1FAFE9220025B5A9 = {
-						CreatedOnToolsVersion = 9.1;
-						ProvisioningStyle = Automatic;
-					};
 					2E6B509A1FAE98E6006B6E31 = {
 						CreatedOnToolsVersion = 9.1;
 						ProvisioningStyle = Automatic;
@@ -568,7 +548,6 @@
 			projectRoot = "";
 			targets = (
 				2E6B509A1FAE98E6006B6E31 /* WFChatClient */,
-				2E66FBCD1FAFE9220025B5A9 /* Release */,
 			);
 		};
 /* End PBXProject section */
@@ -584,19 +563,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		2E66FBD11FAFE92B0025B5A9 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "sh build.sh WFChatClient\n";
-		};
 		F89D8F2820538E36005A6CD1 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
@@ -672,24 +638,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		2E66FBCF1FAFE9220025B5A9 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				VALID_ARCHS = "arm64 armv7 x86_64";
-			};
-			name = Debug;
-		};
-		2E66FBD01FAFE9220025B5A9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				VALID_ARCHS = "arm64 armv7 x86_64";
-			};
-			name = Release;
-		};
 		2E6B50A11FAE98E6006B6E31 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -835,7 +783,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "arm64 arm64e armv7 armv7s";
+				VALID_ARCHS = "arm64 arm64e";
 				WARNING_CFLAGS = "";
 			};
 			name = Debug;
@@ -871,7 +819,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "arm64 arm64e armv7 armv7s";
+				VALID_ARCHS = "arm64 arm64e";
 				WARNING_CFLAGS = "";
 			};
 			name = Release;
@@ -879,15 +827,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2E66FBCE1FAFE9220025B5A9 /* Build configuration list for PBXAggregateTarget "Release" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				2E66FBCF1FAFE9220025B5A9 /* Debug */,
-				2E66FBD01FAFE9220025B5A9 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		2E6B50951FAE98E5006B6E31 /* Build configuration list for PBXProject "WFChatClient" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

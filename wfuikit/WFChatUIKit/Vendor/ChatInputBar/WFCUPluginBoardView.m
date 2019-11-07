@@ -8,6 +8,7 @@
 
 #import "WFCUPluginBoardView.h"
 #import "WFCUPluginItemView.h"
+#import "WFCUConfigManager.h"
 
 #define PLUGIN_AREA_HEIGHT 211
 
@@ -51,7 +52,7 @@
     if (self) {
         self.delegate = delegate;
         self.hasVoip = withWoip;
-        self.backgroundColor = [UIColor colorWithRed:236.0/255.0 green:236.0/255.0 blue:236.0/255.0 alpha:1];
+        self.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
         
         int FACE_COUNT_ALL = (int)self.pluginItems.count;
         
@@ -86,7 +87,7 @@
     if (!_pluginItems) {
         if (self.hasVoip) {
             _pluginItems = [@[
-                              [[PluginItem alloc] initWithTitle:@"相册" image:[UIImage imageNamed:@"chat_input_plugin_album"] tag:1],
+                              [[PluginItem alloc] initWithTitle:WFCString(@"Album") image:[UIImage imageNamed:@"chat_input_plugin_album"] tag:1],
                               [[PluginItem alloc] initWithTitle:@"拍摄" image:[UIImage imageNamed:@"chat_input_plugin_camera"] tag:2],
                               [[PluginItem alloc] initWithTitle:@"位置" image:[UIImage imageNamed:@"chat_input_plugin_location"] tag:3],
 #if WFCU_SUPPORT_VOIP
@@ -96,7 +97,7 @@
                               ] mutableCopy];
         } else {
             _pluginItems = [@[
-                              [[PluginItem alloc] initWithTitle:@"相册" image:[UIImage imageNamed:@"chat_input_plugin_album"] tag:1],
+                              [[PluginItem alloc] initWithTitle:WFCString(@"Album") image:[UIImage imageNamed:@"chat_input_plugin_album"] tag:1],
                               [[PluginItem alloc] initWithTitle:@"拍摄" image:[UIImage imageNamed:@"chat_input_plugin_camera"] tag:2],
                               [[PluginItem alloc] initWithTitle:@"位置" image:[UIImage imageNamed:@"chat_input_plugin_location"] tag:3],
                               [[PluginItem alloc] initWithTitle:@"文件" image:[UIImage imageNamed:@"chat_input_plugin_file"] tag:5]

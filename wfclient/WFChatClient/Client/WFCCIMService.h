@@ -118,6 +118,7 @@ typedef NS_ENUM(NSInteger, UserSettingScope) {
                       refresh:(BOOL)refresh;
 
 - (void)searchUser:(NSString *)keyword
+             fuzzy:(BOOL)fuzzy
            success:(void(^)(NSArray<WFCCUserInfo *> *machedUsers))successBlock
              error:(void(^)(int errorCode))errorBlock;
 
@@ -461,13 +462,15 @@ typedef NS_ENUM(NSInteger, UserSettingScope) {
 /**
  上传媒体(图片、语音、文件等)
  
+ @param fileName 文件名，可为空
  @param mediaData 媒体信息
  @param mediaType 媒体类型
  @param successBlock 成功的回调
  @param progressBlock 上传进度的回调，注意仅当媒体内容大于300K才会有回调
  @param errorBlock 失败的回调
  */
-- (void)uploadMedia:(NSData *)mediaData
+- (void)uploadMedia:(NSString *)fileName
+          mediaData:(NSData *)mediaData
           mediaType:(WFCCMediaType)mediaType
             success:(void(^)(NSString *remoteUrl))successBlock
            progress:(void(^)(long uploaded, long total))progressBlock
@@ -564,10 +567,12 @@ typedef NS_ENUM(NSInteger, UserSettingScope) {
  搜索用户
  
  @param keyword 关键词
+ @param fuzzy 是否模糊匹配
  @param successBlock 成功的回调
  @param errorBlock 失败的回调
  */
 - (void)searchUser:(NSString *)keyword
+             fuzzy:(BOOL)fuzzy
            success:(void(^)(NSArray<WFCCUserInfo *> *machedUsers))successBlock
              error:(void(^)(int errorCode))errorBlock;
 
@@ -1089,7 +1094,36 @@ typedef NS_ENUM(NSInteger, UserSettingScope) {
 /**
  获取图片缩略图参数
  
- @retur 图片缩略图参数
+ @return 图片缩略图参数
  */
 - (NSString *)imageThumbPara;
+
+/**
+ 插入消息
+ 
+ @param message 待插入的消息
+ @return 插入消息的id
+ */
+- (long)insertMessage:(WFCCMessage *)message;
+
+/**
+ 获取会话的消息数
+ 
+ @param conversation 会话。
+ @return 会话的消息数。
+ */
+- (int)getMessageCount:(WFCCConversation *)conversation;
+
+/**
+ 开启数据库事务。注意：该方法仅仅在做数据迁移时使用，其它情况不要使用；另外开启成功后一定要注意commit，需要配对使用.
+ 
+ @return 是否开启成功。
+ */
+- (BOOL)beginTransaction;
+
+/**
+提交数据库事务。注意：该方法仅仅在做数据迁移时使用，其它情况不要使用；需要跟beginTransaction配对使用
+ 
+*/
+- (void)commitTransaction;
 @end

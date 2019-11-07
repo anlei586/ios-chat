@@ -12,6 +12,8 @@
 #import "MBProgressHUD.h"
 #import "SDWebImage.h"
 #import "UIView+Toast.h"
+#import "WFCUConfigManager.h"
+
 
 @interface WFCUCreateGroupViewController () <UIImagePickerControllerDelegate, UIActionSheetDelegate, UINavigationControllerDelegate>
 @property(nonatomic, strong)UIImageView *portraitView;
@@ -28,7 +30,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self.view setBackgroundColor:[UIColor whiteColor]];
+    self.view.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
     
     CGRect bound = self.view.bounds;
     CGFloat portraitWidth = PortraitWidth;
@@ -62,7 +64,7 @@
   } else {
     CGFloat namePadding = 60;
     self.nameField = [[UITextField alloc] initWithFrame:CGRectMake(namePadding, 80 + portraitWidth + 60, bound.size.width - namePadding - namePadding, 24)];
-    [self.nameField setPlaceholder:@"请输入群名称(可选)"];
+    [self.nameField setPlaceholder:WFCString(@"InputGropNameHint")];
     [self.nameField setFont:[UIFont systemFontOfSize:21]];
     self.nameField.textAlignment = NSTextAlignmentCenter;
     [self.view addSubview:self.nameField];
@@ -70,17 +72,9 @@
     UIView *line = [[UIView alloc] initWithFrame:CGRectMake(namePadding, 80 + portraitWidth + 60 + 24, bound.size.width - namePadding - namePadding, 2)];
     [line setBackgroundColor:[UIColor grayColor]];
     [self.view addSubview:line];
-      
-      UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(namePadding, 80 + portraitWidth + 60 + 24 + 40, 80, 24)];
-      label.text = @"群管理功能";
-      [self.view addSubview:label];
-      
-//      self.qqSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(namePadding + 84, 80 + portraitWidth + 60 + 24 + 40, 60, 24)];
-//      self.qqSwitch.on = NO;
-//      [self.view addSubview:self.qqSwitch];
   }
     
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"完成" style:UIBarButtonItemStyleDone target:self action:@selector(onDone:)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:WFCString(@"Done") style:UIBarButtonItemStyleDone target:self action:@selector(onDone:)];
     
     [self.view addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onResetKeyBoard:)]];
   
@@ -89,7 +83,7 @@
   } else {
     UIImageView *portraitView = [[UIImageView alloc] initWithFrame:self.combineHeadView.bounds];
     WFCCGroupInfo *groupInfo = [[WFCCIMService sharedWFCIMService] getGroupInfo:self.groupId refresh:NO];
-    [portraitView sd_setImageWithURL:[NSURL URLWithString:groupInfo.portrait] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
+    [portraitView sd_setImageWithURL:[NSURL URLWithString:[groupInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
     [self.combineHeadView addSubview:portraitView];
   }
 }
@@ -144,7 +138,7 @@
                     index = j + (i-1)*column + firstCol;
                 }
                 WFCCUserInfo *user = [users objectAtIndex:index];
-                [imageView sd_setImageWithURL:[NSURL URLWithString:user.portrait] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
+                [imageView sd_setImageWithURL:[NSURL URLWithString:[user.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
                 [self.combineHeadView addSubview:imageView];
             }
         }
@@ -157,11 +151,11 @@
 
 - (void)onSelectPortrait:(id)sender {
     UIActionSheet *actionSheet =
-    [[UIActionSheet alloc] initWithTitle:@"修改头像"
+    [[UIActionSheet alloc] initWithTitle:WFCString(@"ChangePortrait")
                                 delegate:self
-                       cancelButtonTitle:@"取消"
-                  destructiveButtonTitle:@"拍照"
-                       otherButtonTitles:@"相册", nil];
+                       cancelButtonTitle:WFCString(@"Cancel")
+                  destructiveButtonTitle:WFCString(@"TakePhotos")
+                       otherButtonTitles:WFCString(@"Album"), nil];
     [actionSheet showInView:self.view];
 }
 
@@ -212,10 +206,10 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info {
     NSData *portraitData = UIImageJPEGRepresentation(portraitImage, 0.70);
     __weak typeof(self) ws = self;
     __block MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    hud.label.text = @"图片上传中...";
+    hud.label.text = WFCString(@"PhotoUploading");
     [hud showAnimated:YES];
     
-    [[WFCCIMService sharedWFCIMService] uploadMedia:portraitData mediaType:Media_Type_PORTRAIT success:^(NSString *remoteUrl) {
+    [[WFCCIMService sharedWFCIMService] uploadMedia:nil mediaData:portraitData mediaType:Media_Type_PORTRAIT success:^(NSString *remoteUrl) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [hud hideAnimated:NO];
           if (createGroup) {
@@ -230,14 +224,14 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info {
                       userInfo = [[WFCCIMService sharedWFCIMService] getUserInfo:[self.memberIds objectAtIndex:i]  refresh:NO];
                       if (userInfo.displayName.length > 0) {
                           if (name.length + userInfo.displayName.length + 1 > 16) {
-                              name = [name stringByAppendingString:@"等"];
+                              name = [name stringByAppendingString:WFCString(@"Etc")];
                               break;
                           }
                           name = [name stringByAppendingFormat:@",%@", userInfo.displayName];
                       }
                   }
                   if (name.length == 0) {
-                      name = @"群聊";
+                      name = WFCString(@"GroupChat");
                   }
               }
             [ws createGroup:name portrait:ws.portraitUrl members:ws.memberIds];
@@ -254,7 +248,7 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info {
             [hud hideAnimated:NO];
             hud = [MBProgressHUD showHUDAddedTo:ws.view animated:YES];
             hud.mode = MBProgressHUDModeText;
-            hud.label.text = @"上传失败";
+            hud.label.text = WFCString(@"UploadFailure");
             hud.offset = CGPointMake(0.f, MBProgressMaxOffset);
             [hud hideAnimated:YES afterDelay:1.f];
         });
@@ -301,7 +295,7 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info {
         }
     } error:^(int error_code) {
         NSLog(@"create group failure");
-        [ws.view makeToast:@"创建群组失败"
+        [ws.view makeToast:WFCString(@"CreateGroupFailure")
                     duration:2
                     position:CSToastPositionCenter];
 
