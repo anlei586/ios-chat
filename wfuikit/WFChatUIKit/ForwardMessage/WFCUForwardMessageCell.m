@@ -39,27 +39,27 @@
             name = userInfo.displayName;
             portrait = userInfo.portrait;
         } else {
-            name = [NSString stringWithFormat:@"用户<%@>", conversation.target];
+            name = [NSString stringWithFormat:@"%@<%@>", WFCString(@"User"), conversation.target];
         }
-        [self.portrait sd_setImageWithURL:[NSURL URLWithString:portrait] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
+        [self.portrait sd_setImageWithURL:[NSURL URLWithString:[portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
     } else if (conversation.type == Group_Type) {
         WFCCGroupInfo *groupInfo = [[WFCCIMService sharedWFCIMService] getGroupInfo:conversation.target refresh:NO];
         if (groupInfo) {
             name = groupInfo.name;
             portrait = groupInfo.portrait;
         } else {
-            name = [NSString stringWithFormat:@"群组<%@>", conversation.target];
+            name = WFCString(@"GroupChat");
         }
-        [self.portrait sd_setImageWithURL:[NSURL URLWithString:portrait] placeholderImage:[UIImage imageNamed:@"group_default_portrait"]];
+        [self.portrait sd_setImageWithURL:[NSURL URLWithString:[portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"group_default_portrait"]];
     } else if (conversation.type == Channel_Type) {
         WFCCChannelInfo *channelInfo = [[WFCCIMService sharedWFCIMService] getChannelInfo:conversation.target refresh:NO];
         if (channelInfo) {
             name = channelInfo.name;
             portrait = channelInfo.portrait;
         } else {
-            name = [NSString stringWithFormat:@"频道<%@>", conversation.target];
+            name = WFCString(@"Channel");
         }
-        [self.portrait sd_setImageWithURL:[NSURL URLWithString:portrait] placeholderImage:[UIImage imageNamed:@"channel_default_portrait"]];
+        [self.portrait sd_setImageWithURL:[NSURL URLWithString:[portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"channel_default_portrait"]];
     }
     
     

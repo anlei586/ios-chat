@@ -17,7 +17,7 @@
 #import "UIView+TYAlertView.h"
 #import "UIView+Toast.h"
 #import "WFCUContactListViewController.h"
-
+#import "WFCUConfigManager.h"
 
 @interface WFCUForwardViewController () <UITableViewDataSource, UISearchControllerDelegate, UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating>
 @property (nonatomic, strong)UITableView *tableView;
@@ -40,7 +40,7 @@
     
     self.tableView.tableHeaderView = nil;
 
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStyleDone target:self action:@selector(onLeftBarBtn:)];
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:WFCString(@"Cancel") style:UIBarButtonItemStyleDone target:self action:@selector(onLeftBarBtn:)];
 
     self.conversations = [[[WFCCIMService sharedWFCIMService] getConversationInfos:@[@(Single_Type), @(Group_Type)] lines:@[@(0)]] mutableCopy];
 
@@ -50,16 +50,16 @@
     self.searchController.searchResultsUpdater = self;
     self.searchController.delegate = self;
     self.searchController.dimsBackgroundDuringPresentation = NO;
-    //[self.searchController.searchBar setValue:@"取消" forKey:@"_cancelButtonText"];
-    UIButton *cancelButton = [self findViewWithClassName:NSStringFromClass([UIButton class]) inView:self.searchController.searchBar];
-    [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
-    
-    
+
+    if (! @available(iOS 13, *)) {
+        [self.searchController.searchBar setValue:WFCString(@"Cancel") forKey:@"_cancelButtonText"];
+    }
+
     if (@available(iOS 9.1, *)) {
         self.searchController.obscuresBackgroundDuringPresentation = NO;
     }
     
-    [self.searchController.searchBar setPlaceholder:@"搜索聊天"];
+    [self.searchController.searchBar setPlaceholder:WFCString(@"Search")];
     
     if (@available(iOS 11.0, *)) {
         self.navigationItem.searchController = _searchController;
@@ -107,10 +107,10 @@
     __weak typeof(self)ws = self;
     shareView.forwardDone = ^(BOOL success) {
         if (success) {
-            [ws.view makeToast:@"转发成功" duration:1 position:CSToastPositionCenter];
+            [ws.view makeToast:WFCString(@"ForwardSuccess") duration:1 position:CSToastPositionCenter];
             [ws.navigationController dismissViewControllerAnimated:YES completion:nil];
         } else {
-            [ws.view makeToast:@"转发失败" duration:1 position:CSToastPositionCenter];
+            [ws.view makeToast:WFCString(@"ForwardFailure") duration:1 position:CSToastPositionCenter];
         }
     };
     TYAlertController *alertController = [TYAlertController alertControllerWithAlertView:shareView preferredStyle:TYAlertControllerStyleAlert];
@@ -187,7 +187,7 @@
                 cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:REUSENEWCONVIDENTIFY];
                 cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
             }
-            cell.textLabel.text = @"创建新聊天";
+            cell.textLabel.text = WFCString(@"CreateNewChat");
             return cell;
         } else {
             WFCUForwardMessageCell *cell = [tableView dequeueReusableCellWithIdentifier:REUSECONVIDENTIFY];
@@ -243,20 +243,20 @@
             label.font = [UIFont systemFontOfSize:13];
             label.textColor = [UIColor grayColor];
             label.textAlignment = NSTextAlignmentLeft;
-            label.backgroundColor = [UIColor colorWithRed:239/255.f green:239/255.f blue:239/255.f alpha:1.0f];
+            label.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
             
             int sec = 0;
             if (self.searchFriendList.count) {
                 sec++;
                 if (section == sec-1) {
-                    label.text = @"联系人";
+                    label.text = WFCString(@"Contact");
                 }
             }
             
             if (self.searchGroupList.count) {
                 sec++;
                 if (section == sec-1) {
-                    label.text = @"群组";
+                    label.text = WFCString(@"Group");
                 }
             }
 
@@ -267,13 +267,13 @@
             return header;
         }
     } else {
-        NSString *title = @"最近聊天";
+        NSString *title = WFCString(@"RecentChat");
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 21)];
         label.font = [UIFont systemFontOfSize:13];
         label.textColor = [UIColor grayColor];
         label.textAlignment = NSTextAlignmentLeft;
         label.text = [NSString stringWithFormat:@"  %@", title];
-        label.backgroundColor = [UIColor colorWithRed:239/255.f green:239/255.f blue:239/255.f alpha:1.0f];
+        label.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
         return label;
     }
 }

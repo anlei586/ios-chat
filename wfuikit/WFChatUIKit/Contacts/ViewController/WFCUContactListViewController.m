@@ -20,7 +20,7 @@
 #import "WFCUAddFriendViewController.h"
 #import "MBProgressHUD.h"
 #import "WFCUFavChannelTableViewController.h"
-
+#import "WFCUConfigManager.h"
 
 @interface WFCUContactListViewController () <UITableViewDataSource, UISearchControllerDelegate, UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating>
 @property (nonatomic, strong)UITableView *tableView;
@@ -37,7 +37,10 @@
 
 @property(nonatomic, assign)BOOL sorting;
 @property(nonatomic, assign)BOOL needSort;
+@property(nonatomic, strong)UIActivityIndicatorView *activityIndicator;
 @end
+
+static NSMutableDictionary *hanziStringDict = nil;
 
 @implementation WFCUContactListViewController
 
@@ -77,10 +80,10 @@
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
-
+    self.tableView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
     self.tableView.tableHeaderView = nil;
     if (self.selectContact) {
-        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStyleDone target:self action:@selector(onLeftBarBtn:)];
+        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:WFCString(@"Cancel") style:UIBarButtonItemStyleDone target:self action:@selector(onLeftBarBtn:)];
         
         if(self.multiSelect) {
             self.selectedContacts = [[NSMutableArray alloc] init];
@@ -102,15 +105,16 @@
     self.searchController.searchResultsUpdater = self;
     self.searchController.delegate = self;
     self.searchController.dimsBackgroundDuringPresentation = NO;
-    //[self.searchController.searchBar setValue:@"取消" forKey:@"_cancelButtonText"];
-    UIButton *cancelButton = [self findViewWithClassName:NSStringFromClass([UIButton class]) inView:self.searchController.searchBar];
-    [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
-    
+
+    if (! @available(iOS 13, *)) {
+        [self.searchController.searchBar setValue:WFCString(@"Cancel") forKey:@"_cancelButtonText"];
+    }
+
     if (@available(iOS 9.1, *)) {
         self.searchController.obscuresBackgroundDuringPresentation = NO;
     }
     
-    [self.searchController.searchBar setPlaceholder:@"搜索联系人"];
+    [self.searchController.searchBar setPlaceholder:WFCString(@"SearchContact")];
 
     if (@available(iOS 11.0, *)) {
         self.navigationItem.searchController = _searchController;
@@ -122,47 +126,37 @@
     
     self.tableView.sectionIndexColor = [UIColor grayColor];
     [self.view addSubview:self.tableView];
+    
+    [self.view bringSubviewToFront:self.activityIndicator];
+    
     [self.tableView reloadData];
 }
 
-- (UIView *)findViewWithClassName:(NSString *)className inView:(UIView *)view{
-    /*
-     UIButton *cancelButton = [self findViewWithClassName:NSStringFromClass([UIButton class]) inView:self.searchController.searchBar];
-     [cancelButton setTitle:@"取消" forState:UIControlStateNormal];
-     */
-    Class specificView = NSClassFromString(className);
-    if ([view isKindOfClass:specificView]) {
-        return view;
-    }
- 
-    if (view.subviews.count > 0) {
-        for (UIView *subView in view.subviews) {
-            UIView *targetView = [self findViewWithClassName:className inView:subView];
-            if (targetView != nil) {
-                return targetView;
-            }
+- (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
+    [super traitCollectionDidChange:previousTraitCollection];
+    if (@available(iOS 13.0, *)) {
+        if ([self.traitCollection hasDifferentColorAppearanceComparedToTraitCollection:previousTraitCollection]) {
+            [self.tableView reloadData];
         }
     }
-    
-    return nil;
 }
+    
 - (void)updateRightBarBtn {
     if(self.selectedContacts.count == 0) {
-        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"确定" style:UIBarButtonItemStyleDone target:self action:@selector(onRightBarBtn:)];
+        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:WFCString(@"Ok") style:UIBarButtonItemStyleDone target:self action:@selector(onRightBarBtn:)];
         self.navigationItem.rightBarButtonItem.enabled = NO;
     } else {
-        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:[NSString stringWithFormat:@"确定(%d)", (int)self.selectedContacts.count] style:UIBarButtonItemStyleDone target:self action:@selector(onRightBarBtn:)];
+        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:[NSString stringWithFormat:@"%@(%d)", WFCString(@"Ok"),  (int)self.selectedContacts.count] style:UIBarButtonItemStyleDone target:self action:@selector(onRightBarBtn:)];
     }
 }
 
 - (void)onRightBarBtn:(UIBarButtonItem *)sender {
   if (self.selectContact) {
     if (self.selectedContacts) {
-      dispatch_async(dispatch_get_main_queue(), ^{
-        self.selectResult(self.selectedContacts);
-      });
+        [self left:^{
+            self.selectResult(self.selectedContacts);
+        }];
     }
-      [self left:nil];
   } else {
     UIViewController *addFriendVC = [[WFCUAddFriendViewController alloc] init];
     addFriendVC.hidesBottomBarWhenPushed = YES;
@@ -171,6 +165,9 @@
 }
 
 - (void)onLeftBarBtn:(UIBarButtonItem *)sender {
+    if (self.cancelSelect) {
+        self.cancelSelect();
+    }
     [self left:nil];
 }
 
@@ -186,8 +183,12 @@
     [super viewWillAppear:animated];
     
     self.dataArray = [[NSMutableArray alloc] init];
-    [self loadContact:YES];
-    [self updateBadgeNumber];
+    if (self.selectContact) {
+        [self loadContact:NO];
+    } else {
+        [self loadContact:YES];
+        [self updateBadgeNumber];
+    }
 }
 
 - (void)loadContact:(BOOL)forceLoadFromRemote {
@@ -247,7 +248,7 @@
             line.backgroundColor = [UIColor colorWithRed:0.7 green:0.7 blue:0.7 alpha:0.8];
             [countLabel addSubview:line];
             
-            [countLabel setText:[NSString stringWithFormat:@"%d位联系人", (int)self.dataArray.count]];
+            [countLabel setText:[NSString stringWithFormat:WFCString(@"NumberOfContacts"), (int)self.dataArray.count]];
             countLabel.font = [UIFont systemFontOfSize:14];
             countLabel.textColor = [UIColor grayColor];
             
@@ -261,6 +262,8 @@
             if (self.needSort) {
                 self.needSort = self.needSort;
             }
+            [self.activityIndicator stopAnimating];
+            self.activityIndicator.hidden = YES;
         });
     });
 }
@@ -292,7 +295,7 @@
     NSArray *dataSource;
 
     if (self.searchController.active || self.selectContact) {
-        if (self.showCreateChannel && !self.searchController.active) {
+        if ((self.showCreateChannel || self.showMentionAll) && !self.searchController.active) {
             if (section == 0) {
                 return 1;
             }
@@ -320,10 +323,15 @@
 #define REUSEIDENTIFY @"resueCell"
     NSArray *dataSource;
     if (self.searchController.active || self.selectContact) {
-        if (self.showCreateChannel && !self.searchController.active) {
+        if ((self.showCreateChannel || self.showMentionAll) && !self.searchController.active) {
             if (indexPath.section == 0) {
                 cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"new_channel"];
-                cell.textLabel.text = @"新建频道";
+                if (self.showCreateChannel) {
+                    cell.textLabel.text = WFCString(@"CreateChannel");
+                } else {
+                    cell.textLabel.text = WFCString(@"MentionAll");
+                }
+                
                 return cell;
             }
             dataSource = self.allFriendSectionDic[self.allKeys[indexPath.section-1]];
@@ -338,7 +346,7 @@
                 if (contactCell == nil) {
                     contactCell = [[WFCUNewFriendTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"newFriendCell"];
                 }
-                contactCell.nameLabel.text = @"新朋友";
+                contactCell.nameLabel.text = WFCString(@"NewFriend");
                 contactCell.portraitView.image = [UIImage imageNamed:@"friend_request_icon"];
                 [contactCell refresh];
                 return contactCell;
@@ -348,7 +356,7 @@
                     contactCell = [[WFCUContactTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:REUSEIDENTIFY];
                 }
                 
-                contactCell.nameLabel.text = @"群组";
+                contactCell.nameLabel.text = WFCString(@"Group");
                 contactCell.portraitView.image = [UIImage imageNamed:@"contact_group_icon"];
                 
                 return contactCell;
@@ -358,7 +366,7 @@
                     contactCell = [[WFCUContactTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:REUSEIDENTIFY];
                 }
                 
-                contactCell.nameLabel.text = @"频道";
+                contactCell.nameLabel.text = WFCString(@"Channel");
                 contactCell.portraitView.image = [UIImage imageNamed:@"contact_channel_icon"];
                 
                 return contactCell;
@@ -417,7 +425,7 @@
                     contactCell = [[WFCUNewFriendTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"newFriendCell"];
                 }
                 [contactCell refresh];
-              contactCell.nameLabel.text = @"新朋友";
+              contactCell.nameLabel.text = WFCString(@"NewFriend");
               contactCell.portraitView.image = [UIImage imageNamed:@"friend_request_icon"];
                 cell = contactCell;
             } else {
@@ -425,7 +433,7 @@
                 if (contactCell == nil) {
                     contactCell = [[WFCUContactTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:REUSEIDENTIFY];
                 }
-              contactCell.nameLabel.text = @"群组";
+              contactCell.nameLabel.text = WFCString(@"Group");
               contactCell.portraitView.image = [UIImage imageNamed:@"contact_group_icon"];
                 cell = contactCell;
             }
@@ -449,7 +457,7 @@
 -(NSArray<NSString *> *)sectionIndexTitlesForTableView:(UITableView *)tableView {
     if (@available(iOS 11.0, *)) {
         if (self.selectContact) {
-            if (self.showCreateChannel && !self.searchController.active) {
+            if ((self.showCreateChannel || self.showMentionAll) && !self.searchController.active) {
                 NSMutableArray *indexs = [self.allKeys mutableCopy];
                 [indexs insertObject:@"" atIndex:0];
                 return indexs;
@@ -469,7 +477,7 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     if (self.selectContact) {
-        if (self.showCreateChannel && !self.searchController.active) {
+        if ((self.showCreateChannel || self.showMentionAll) && !self.searchController.active) {
             return self.allKeys.count + 1;
         }
         return self.allKeys.count;
@@ -490,7 +498,7 @@
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
     NSString *title;
     if (self.selectContact || self.searchController.active) {
-        if (self.showCreateChannel && !self.searchController.active) {
+        if ((self.showCreateChannel || self.showMentionAll) && !self.searchController.active) {
             if (section == 0) {
                 return nil;
             }
@@ -513,12 +521,25 @@
     label.textColor = [UIColor grayColor];
     label.textAlignment = NSTextAlignmentLeft;
     label.text = [NSString stringWithFormat:@"  %@", title];
-    label.backgroundColor = [UIColor colorWithRed:239/255.f green:239/255.f blue:239/255.f alpha:1.0f];
+    
+    
+    label.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
     return label;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     return 56;
+}
+
+- (UIActivityIndicatorView *)activityIndicator {
+    if (!_activityIndicator) {
+        _activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+        _activityIndicator.center = CGPointMake(self.view.bounds.size.width/2, self.view.bounds.size.height/2);
+        [self.view addSubview:_activityIndicator];
+        [_activityIndicator startAnimating];
+        [self.view bringSubviewToFront:_activityIndicator];
+    }
+    return _activityIndicator;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView sectionForSectionIndexTitle:(NSString *)title atIndex:(NSInteger)index {
@@ -535,13 +556,22 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSArray *dataSource;
     if (self.searchController.active || self.selectContact) {
-        if (self.showCreateChannel && !self.searchController.active) {
+        if ((self.showCreateChannel || self.showMentionAll) && !self.searchController.active) {
             if (indexPath.section == 0) {
-                [self left:^{
-                    if (self.createChannel) {
-                        self.createChannel();
-                    }
-                }];
+                if (self.showCreateChannel) {
+                    [self left:^{
+                        if (self.createChannel) {
+                            self.createChannel();
+                        }
+                    }];
+                } else {
+                    [self left:^{
+                        if (self.mentionAll) {
+                            self.mentionAll();
+                        }
+                    }];
+                }
+                
                 return;
             }
             dataSource = self.allFriendSectionDic[self.allKeys[indexPath.section-1]];
@@ -624,7 +654,7 @@
         if (self.searchList!= nil) {
             [self.searchList removeAllObjects];
             for (WFCCUserInfo *friend in self.dataArray) {
-                if ([friend.displayName containsString:searchString]) {
+                if ([friend.displayName.lowercaseString containsString:searchString.lowercaseString] || [friend.friendAlias.lowercaseString containsString:searchString.lowercaseString]) {
                     [self.searchList addObject:friend];
                 }
             }
@@ -669,9 +699,8 @@
     NSMutableDictionary *infoDic = [NSMutableDictionary new];
     NSMutableArray *_tempOtherArr = [NSMutableArray new];
     BOOL isReturn = NO;
-    
+    NSMutableDictionary *firstLetterDict = [[NSMutableDictionary alloc] init];
     for (NSString *key in _keys) {
-        
         if ([_tempOtherArr count]) {
             isReturn = YES;
         }
@@ -689,7 +718,12 @@
                 userName = userInfo.displayName;
             }
             
-            firstLetter = [self getFirstUpperLetter:userName];
+            firstLetter = [firstLetterDict objectForKey:userName];
+            if (!firstLetter) {
+                firstLetter = [self getFirstUpperLetter:userName];
+                [firstLetterDict setObject:firstLetter forKey:userName];
+            }
+            
             
         
             if ([firstLetter isEqualToString:key]) {
@@ -751,7 +785,15 @@
     if (!hanZi) {
         return nil;
     }
-    NSString *pinYinResult = [NSString string];
+    if (!hanziStringDict) {
+        hanziStringDict = [[NSMutableDictionary alloc] init];
+    }
+    
+    NSString *pinYinResult = [hanziStringDict objectForKey:hanZi];
+    if (pinYinResult) {
+        return pinYinResult;
+    }
+    pinYinResult = [NSString string];
     for (int j = 0; j < hanZi.length; j++) {
         NSString *singlePinyinLetter = nil;
         if ([self isChinese:[hanZi substringWithRange:NSMakeRange(j, 1)]]) {
@@ -764,6 +806,7 @@
         
         pinYinResult = [pinYinResult stringByAppendingString:singlePinyinLetter];
     }
+    [hanziStringDict setObject:pinYinResult forKey:hanZi];
     return pinYinResult;
 }
 

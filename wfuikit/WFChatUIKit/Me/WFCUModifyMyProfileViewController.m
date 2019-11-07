@@ -9,7 +9,7 @@
 #import "WFCUModifyMyProfileViewController.h"
 #import "MBProgressHUD.h"
 #import <WFChatClient/WFCChatClient.h>
-
+#import "WFCUConfigManager.h"
 
 @interface WFCUModifyMyProfileViewController () <UITextFieldDelegate, UITextInputDelegate>
 @property(nonatomic, strong)UITextField *textField;
@@ -25,34 +25,34 @@
     NSString *defaultValue = nil;
     switch (self.modifyType) {
         case Modify_Email:
-            title = @"修改邮箱";
+            title = WFCString(@"ModifyEmail");
             defaultValue = userInfo.email;
             self.textField.keyboardType = UIKeyboardTypeEmailAddress;
             break;
         
         case Modify_Mobile:
-            title = @"修改电话";
+            title = WFCString(@"ModifyMobile");
             defaultValue = userInfo.mobile;
             self.textField.keyboardType = UIKeyboardTypePhonePad;
             break;
         
         case Modify_Social:
-            title = @"修改社交账号";
+            title = WFCString(@"ModifySocialAccount");
             defaultValue = userInfo.social;
             break;
             
         case Modify_Address:
-            title = @"修改地址";
+            title = WFCString(@"ModifyAddress");
             defaultValue = userInfo.address;
             break;
             
         case Modify_Company:
-            title = @"修改公司信息";
+            title = WFCString(@"ModifyCompanyInfo");
             defaultValue = userInfo.company;
             break;
             
         case Modify_DisplayName:
-            title = @"修改昵称";
+            title = WFCString(@"ModifyNickname");
             defaultValue = userInfo.displayName;
             break;
         default:
@@ -62,9 +62,9 @@
     self.textField.text = defaultValue;
     [self setTitle:title];
     
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"确定" style:UIBarButtonItemStyleDone target:self action:@selector(onDone:)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:WFCString(@"Ok") style:UIBarButtonItemStyleDone target:self action:@selector(onDone:)];
     
-    [self.view setBackgroundColor:[UIColor colorWithRed:232/255.f green:232/255.f blue:232/255.f alpha:1.f]];
+    self.view.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
     
     [self.textField becomeFirstResponder];
 }
@@ -74,7 +74,7 @@
     __weak typeof(self) ws = self;
     
     __block MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    hud.label.text = @"修改中...";
+    hud.label.text = WFCString(@"Updating");
     [hud showAnimated:YES];
     
     [[WFCCIMService sharedWFCIMService] modifyMyInfo:@{@(self.modifyType):self.textField.text} success:^{
@@ -86,7 +86,7 @@
         
         hud = [MBProgressHUD showHUDAddedTo:ws.view animated:YES];
         hud.mode = MBProgressHUDModeText;
-        hud.label.text = @"修改失败";
+        hud.label.text = WFCString(@"UpdateFailure");
         hud.offset = CGPointMake(0.f, MBProgressMaxOffset);
         [hud hideAnimated:YES afterDelay:1.f];
     }];
@@ -126,5 +126,20 @@
         self.navigationItem.rightBarButtonItem.enabled = NO;
     }
 }
+
+- (void)selectionDidChange:(nullable id<UITextInput>)textInput {
+    
+}
+
+
+- (void)selectionWillChange:(nullable id<UITextInput>)textInput {
+    
+}
+
+
+- (void)textWillChange:(nullable id<UITextInput>)textInput {
+
+}
+
 
 @end

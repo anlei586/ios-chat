@@ -12,8 +12,10 @@
 #import "MBProgressHUD.h"
 #import "SDWebImage.h"
 #import "UIView+Toast.h"
+#import "WFCUConfigManager.h"
 
-@interface WFCUCreateChannelViewController () <UIImagePickerControllerDelegate, UIActionSheetDelegate, UINavigationControllerDelegate>
+
+@interface WFCUCreateChannelViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 @property(nonatomic, strong)UIImageView *portraitView;
 @property(nonatomic, strong)UILabel *nameLabel;
 @property(nonatomic, strong)UITextField *nameField;
@@ -33,7 +35,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self.view setBackgroundColor:[UIColor whiteColor]];
+    self.view.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
     
     CGRect bound = self.view.bounds;
     CGFloat portraitWidth = PortraitWidth;
@@ -60,13 +62,13 @@
     top += 40;
     
     self.nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(namePadding, top, labelWidth, 25)];
-    self.nameLabel.text = @"频道名称:";
+    self.nameLabel.text = WFCString(@"ChannelName");
     self.nameLabel.font = [UIFont systemFontOfSize:14];
     [self.view addSubview:self.nameLabel];
     
     
     self.nameField = [[UITextField alloc] initWithFrame:CGRectMake(namePadding + labelWidth + labelFeildPadding, top, bound.size.width - namePadding - labelWidth - labelFeildPadding - namePadding, 24)];
-    [self.nameField setPlaceholder:@"请输入频道名称"];
+    [self.nameField setPlaceholder:WFCString(@"InputChannelNameHint")];
     [self.nameField setFont:[UIFont systemFontOfSize:14]];
     self.nameField.textAlignment = NSTextAlignmentLeft;
     [self.view addSubview:self.nameField];
@@ -78,13 +80,13 @@
     top += 25;
     top += 16;
     self.descLabel = [[UILabel alloc] initWithFrame:CGRectMake(namePadding, top, labelWidth, 25)];
-    self.descLabel.text = @"频道说明:";
+    self.descLabel.text = WFCString(@"ChannelDescription");
     self.descLabel.font = [UIFont systemFontOfSize:14];
     [self.view addSubview:self.descLabel];
     
     
     self.descField = [[UITextField alloc] initWithFrame:CGRectMake(namePadding + labelWidth + labelFeildPadding, top, bound.size.width - namePadding - labelWidth - labelFeildPadding - namePadding, 24)];
-    [self.descField setPlaceholder:@"请输入频道描述"];
+    [self.descField setPlaceholder:WFCString(@"InputChannelDescHint")];
     [self.descField setFont:[UIFont systemFontOfSize:14]];
     self.descField.textAlignment = NSTextAlignmentLeft;
     [self.view addSubview:self.descField];
@@ -98,7 +100,7 @@
     top += 25;
     top += 16;
     self.openLabel = [[UILabel alloc] initWithFrame:CGRectMake(namePadding, top, labelWidth, 25)];
-    self.openLabel.text = @"是否公开:";
+    self.openLabel.text = WFCString(@"Public");
     self.openLabel.font = [UIFont systemFontOfSize:14];
     [self.view addSubview:self.openLabel];
     
@@ -107,7 +109,7 @@
     self.openSwitch.on = YES;
     [self.view addSubview:self.openSwitch];
     
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"创建" style:UIBarButtonItemStyleDone target:self action:@selector(onDone:)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:WFCString(@"Create") style:UIBarButtonItemStyleDone target:self action:@selector(onDone:)];
     
     [self.view addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(onResetKeyBoard:)]];
 }
@@ -118,21 +120,16 @@
 }
 
 - (void)onSelectPortrait:(id)sender {
-    UIActionSheet *actionSheet =
-    [[UIActionSheet alloc] initWithTitle:@"修改头像"
-                                delegate:self
-                       cancelButtonTitle:@"取消"
-                  destructiveButtonTitle:@"拍照"
-                       otherButtonTitles:@"相册", nil];
-    [actionSheet showInView:self.view];
-}
-
-#pragma mark -  UIActionSheetDelegate <NSObject>
-- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-    if(buttonIndex == 0) {
+    __weak typeof(self)ws = self;
+    UIAlertController *actionSheet = [UIAlertController alertControllerWithTitle:WFCString(@"ChangePortrait") message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    UIAlertAction *actionCancel = [UIAlertAction actionWithTitle:WFCString(@"Cancel") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        
+    }];
+    UIAlertAction *actionCamera = [UIAlertAction actionWithTitle:WFCString(@"TakePhotos") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         UIImagePickerController *picker = [[UIImagePickerController alloc] init];
         picker.allowsEditing = YES;
-        picker.delegate = self;
+        picker.delegate = ws;
         if ([UIImagePickerController
              isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
             picker.sourceType = UIImagePickerControllerSourceTypeCamera;
@@ -140,16 +137,26 @@
             NSLog(@"无法连接相机");
             picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
         }
-        [self presentViewController:picker animated:YES completion:nil];
-        
-    } else if (buttonIndex == 1) {
+        [ws presentViewController:picker animated:YES completion:nil];
+    }];
+    
+    UIAlertAction *actionAlubum = [UIAlertAction actionWithTitle:WFCString(@"Album") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         UIImagePickerController *picker = [[UIImagePickerController alloc] init];
         picker.allowsEditing = YES;
-        picker.delegate = self;
+        picker.delegate = ws;
         picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-        [self presentViewController:picker animated:YES completion:nil];
-    }
+        [ws presentViewController:picker animated:YES completion:nil];
+    }];
+    
+    //把action添加到actionSheet里
+    [actionSheet addAction:actionCamera];
+    [actionSheet addAction:actionAlubum];
+    [actionSheet addAction:actionCancel];
+    
+    //相当于之前的[actionSheet show];
+    [self presentViewController:actionSheet animated:YES completion:nil];
 }
+
 
 #pragma mark - UIImagePickerControllerDelegate
 - (void)imagePickerController:(UIImagePickerController *)picker
@@ -173,10 +180,10 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info {
     NSData *portraitData = UIImageJPEGRepresentation(portraitImage, 0.70);
     __weak typeof(self) ws = self;
     __block MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    hud.label.text = @"图片上传中...";
+    hud.label.text = WFCString(@"PhotoUploading");
     [hud showAnimated:YES];
     
-    [[WFCCIMService sharedWFCIMService] uploadMedia:portraitData mediaType:Media_Type_PORTRAIT success:^(NSString *remoteUrl) {
+    [[WFCCIMService sharedWFCIMService] uploadMedia:nil mediaData:portraitData mediaType:Media_Type_PORTRAIT success:^(NSString *remoteUrl) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [hud hideAnimated:NO];
             ws.portraitUrl = remoteUrl;
@@ -192,7 +199,7 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info {
             [hud hideAnimated:NO];
             hud = [MBProgressHUD showHUDAddedTo:ws.view animated:YES];
             hud.mode = MBProgressHUDModeText;
-            hud.label.text = @"上传失败";
+            hud.label.text = WFCString(@"UploadFailure");
             hud.offset = CGPointMake(0.f, MBProgressMaxOffset);
             [hud hideAnimated:YES afterDelay:1.f];
         });
@@ -218,13 +225,13 @@ didFinishPickingMediaWithInfo:(NSDictionary *)info {
     [[WFCCIMService sharedWFCIMService] createChannel:self.nameField.text portrait:portraitUrl status:self.openSwitch.on ? 0 : 1 desc:self.descField.text extra:nil success:^(WFCCChannelInfo *channelInfo) {
         NSLog(@"create channel done");
         WFCCTipNotificationContent *tip = [[WFCCTipNotificationContent alloc] init];
-        tip.tip = @"频道创建成功";
+        tip.tip = WFCString(@"ChannelCreated");
         [[WFCCIMService sharedWFCIMService] send:[WFCCConversation conversationWithType:Channel_Type target:channelInfo.channelId line:0] content:tip success:^(long long messageUid, long long timestamp) {
             NSLog(@"send channel msg done");
         } error:^(int error_code) {
             NSLog(@"send channel msg failure");
         }];
-        [ws.view makeToast:@"创建频道失败"
+        [ws.view makeToast:WFCString(@"ChannelCreateFailure")
                   duration:2
                   position:CSToastPositionCenter];
         [ws.navigationController popViewControllerAnimated:YES];

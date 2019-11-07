@@ -10,7 +10,7 @@
 #import "WFCUUtilities.h"
 #import <WFChatClient/WFCChatClient.h>
 #import "SDWebImage.h"
-
+#import "WFCUConfigManager.h"
 
 @implementation WFCUConversationSearchTableViewCell
 - (void)awakeFromNib {
@@ -26,7 +26,7 @@
 
   
 - (void)updateUserInfo:(WFCCUserInfo *)userInfo {
-  [self.potraitView sd_setImageWithURL:[NSURL URLWithString:userInfo.portrait] placeholderImage: [UIImage imageNamed:@"PersonalChat"]];
+  [self.potraitView sd_setImageWithURL:[NSURL URLWithString:[userInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage: [UIImage imageNamed:@"PersonalChat"]];
   
     if (userInfo.friendAlias.length) {
         self.targetView.text = userInfo.friendAlias;
@@ -58,7 +58,7 @@
     
     self.timeView.hidden = NO;
     self.timeView.text = [WFCUUtilities formatTimeLabel:message.serverTime];
-    [self.contentView setBackgroundColor:[UIColor whiteColor]];
+    self.contentView.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
 }
 
 - (UIImageView *)potraitView {

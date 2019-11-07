@@ -118,7 +118,7 @@
   
 - (void)updateUserInfo:(WFCCUserInfo *)userInfo {
   if([userInfo.userId isEqualToString:self.model.message.fromUser]) {
-    [self.portraitView sd_setImageWithURL:[NSURL URLWithString:userInfo.portrait] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
+    [self.portraitView sd_setImageWithURL:[NSURL URLWithString:[userInfo.portrait stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] placeholderImage:[UIImage imageNamed:@"PersonalChat"]];
       if(self.model.showNameLabel) {
           NSString *nameStr = nil;
           if (userInfo.friendAlias.length) {
@@ -132,7 +132,7 @@
           } else if(userInfo.displayName.length > 0) {
               nameStr = userInfo.displayName;
           } else {
-              nameStr = [NSString stringWithFormat:@"User<%@>", self.model.message.fromUser];
+              nameStr = [NSString stringWithFormat:@"%@<%@>", WFCString(@"User"), self.model.message.fromUser];
           }
           self.nameLabel.text = nameStr;
       }
@@ -160,6 +160,7 @@
     } else {
       self.nameLabel.hidden = YES;
     }
+
       
     CGSize size = [self.class sizeForClientArea:model withViewWidth:[WFCUMessageCell clientAreaWidth]];
       self.bubbleView.image = [UIImage imageNamed:@"sent_msg_background"];
@@ -181,8 +182,17 @@
       self.nameLabel.hidden = YES;
     }
       
+      
+      
+      NSString *bubbleImageName = @"received_msg_background";
+      if (@available(iOS 13.0, *)) {
+          if(UITraitCollection.currentTraitCollection.userInterfaceStyle == UIUserInterfaceStyleDark) {
+              bubbleImageName = @"chat_from_bg_normal_dark";
+          }
+      }
+      
     CGSize size = [self.class sizeForClientArea:model withViewWidth:[WFCUMessageCell clientAreaWidth]];
-      self.bubbleView.image = [UIImage imageNamed:@"received_msg_background"];
+      self.bubbleView.image = [UIImage imageNamed:bubbleImageName];
       self.bubbleView.frame = CGRectMake(Portrait_Padding_Left + Portrait_Size + Portrait_Padding_Right, top, size.width + Bubble_Padding_Arraw + Bubble_Padding_Another_Side, size.height + Client_Bubble_Top_Padding + Client_Bubble_Bottom_Padding);
     self.contentArea.frame = CGRectMake(Bubble_Padding_Arraw, Client_Bubble_Top_Padding, size.width, size.height);
       

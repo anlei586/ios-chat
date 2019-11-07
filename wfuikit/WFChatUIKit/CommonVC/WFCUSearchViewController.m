@@ -7,6 +7,8 @@
 //
 
 #import "WFCUSearchViewController.h"
+#import <WFChatUIKit/WFChatUIKit.h>
+
 
 @interface WFCUSearchViewController () <UITableViewDataSource, UISearchControllerDelegate, UISearchResultsUpdating, UITableViewDelegate>
 @property (nonatomic, strong)  UITableView              *tableView;
@@ -26,8 +28,8 @@
 
 
 - (void)initSearchUIAndData {
-    self.view.backgroundColor = [UIColor whiteColor];
-    self.navigationItem.title = @"添加好友";
+    self.view.backgroundColor = [WFCUConfigManager globalManager].backgroudColor;
+    self.navigationItem.title = WFCString(@"AddFriend");
     
     //初始化数据源
     _dataList   = [NSMutableArray array];
