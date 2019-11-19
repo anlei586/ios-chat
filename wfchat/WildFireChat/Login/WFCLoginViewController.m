@@ -15,6 +15,10 @@
 #import "UILabel+YBAttributeTextTapAction.h"
 #import "WFCPrivacyViewController.h"
 #import "AppService.h"
+#import "AFHTTPSessionManager.h"
+#import "WFCConfig.h"
+
+
 
 //是否iPhoneX YES:iPhoneX屏幕 NO:传统屏幕
 #define kIs_iPhoneX ([UIScreen mainScreen].bounds.size.height == 812.0f ||[UIScreen mainScreen].bounds.size.height == 896.0f )
@@ -396,7 +400,7 @@ BOOL isHideReg = NO;
     
     
     
-            [self login:user password:@"61666" success:^(NSString *userId, NSString *token, BOOL newUser) {
+            [[AppService sharedAppService] login:user password:password success:^(NSString *userId, NSString *token, BOOL newUser) {
                 [[NSUserDefaults standardUserDefaults] setObject:user forKey:@"savedName"];
                 [[NSUserDefaults standardUserDefaults] setObject:token forKey:@"savedToken"];
                 [[NSUserDefaults standardUserDefaults] setObject:userId forKey:@"savedUserId"];
@@ -406,15 +410,9 @@ BOOL isHideReg = NO;
                 
                 dispatch_async(dispatch_get_main_queue(), ^{
                   [hud hideAnimated:YES];
-                    self.tabBarVC = [WFCBaseTabBarController new];
-                    self.tabBarVC.newUser = newUser;
-                    
-                    //[self setTableIndex1];
-                    [self performSelector:@selector(setTableIndex1) withObject:nil afterDelay:0.5f];
-                    [self performSelector:@selector(setTableIndex2) withObject:nil afterDelay:1.5f];
-                    [self performSelector:@selector(setTableIndex0) withObject:nil afterDelay:2.0f];
-                    
-                    [UIApplication sharedApplication].delegate.window.rootViewController =  self.tabBarVC;
+                    WFCBaseTabBarController *tabBarVC = [WFCBaseTabBarController new];
+                    tabBarVC.newUser = newUser;
+                    [UIApplication sharedApplication].delegate.window.rootViewController =  tabBarVC;
                 });
             } error:^(int errCode, NSString *message) {
                 NSLog(@"login error with code %d, message %@", errCode, message);
@@ -507,18 +505,8 @@ BOOL isHideReg = NO;
                 self.userNameField.text = _user;
                 self.passwordField.text = _pass;
                 [self onLoginButton:nil];
+           
             }
-
-    [[AppService sharedAppService] login:user password:password success:^(NSString *userId, NSString *token, BOOL newUser) {
-        [[NSUserDefaults standardUserDefaults] setObject:user forKey:@"savedName"];
-        [[NSUserDefaults standardUserDefaults] setObject:token forKey:@"savedToken"];
-        [[NSUserDefaults standardUserDefaults] setObject:userId forKey:@"savedUserId"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-        
-        [[WFCCNetworkService sharedInstance] connect:userId token:token];
-
-        
-        
      }    failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
             [hud hideAnimated:YES];
             NSLog(@"--%@",error);

@@ -26,12 +26,12 @@
 #import <WFChatUIKit/WFChatUIKit.h>
 #import <UserNotifications/UserNotifications.h>
 #import "CreateBarCodeViewController.h"
-#import "PCLoginConfirmViewController.h"
 #import "QQLBXScanViewController.h"
 #import "StyleDIY.h"
-#import "GroupInfoViewController.h"
 #import <Bugly/Bugly.h>
 #import "AppService.h"
+#import "GroupInfoViewController.h"
+#import "PCLoginConfirmViewController.h"
 
 
 #import "AFNetworking.h"
