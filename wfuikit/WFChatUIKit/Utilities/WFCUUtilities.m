@@ -35,6 +35,7 @@
                 lineBreakMode:NSLineBreakByTruncatingTail];
   }
 }
+
 + (NSString *)formatTimeLabel:(int64_t)timestamp {
     if (timestamp == 0) {
         return nil;

@@ -26,10 +26,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, strong)UIColor *naviTextColor;
 
 @property(nonatomic, weak)id<WFCUAppServiceProvider> appServiceProvider;
-
-
-+(NSDictionary*) getApiClient;
-+(void) setApiClient:(NSDictionary*)dict;
 @end
 
 NS_ASSUME_NONNULL_END

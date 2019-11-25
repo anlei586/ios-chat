@@ -11,7 +11,3 @@
 
 
 #endif /* AnleiUtils_h */
-@interface AnleiUtils
-+(NSDictionary*) getApiClient;
-+(void) setApiClient:(NSDictionary*)dict;
-@end

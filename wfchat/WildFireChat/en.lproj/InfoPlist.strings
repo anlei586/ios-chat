@@ -5,8 +5,8 @@
   Created by Heavyrain.lee on 2019/9/16.
   Copyright © 2019 WildFireChat. All rights reserved.
 */
-CFBundleName="YeYa IM";
-CFBundleDisplayName="YeYa IM";
+CFBundleName="Wildfire IM";
+CFBundleDisplayName="Wildfire IM";
 Message="Message";
 Contact="Contact";
 Discover="Disconver";
@@ -19,7 +19,7 @@ ChangePassword="Change password";
 PrivacySettings="Privacy settings";
 CurrentVersion="Current version";
 HelpFeedback="Help feedback";
-AboutWFChat="About YeYa IM";
+AboutWFChat="About WildFire IM";
 UserAgreement="User agreement";
 PrivacyPolicy="Privacy policy";
 Complain="Complain";

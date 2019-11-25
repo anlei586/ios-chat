@@ -8,17 +8,8 @@
 
 #import "WFCUConfigManager.h"
 
-static NSDictionary *apiclient;
-
 static WFCUConfigManager *sharedSingleton = nil;
 @implementation WFCUConfigManager
-
-+(NSDictionary*) getApiClient{
-    return apiclient;
-}
-+(void) setApiClient:(NSDictionary*)dict{
-    apiclient = dict;
-}
 
 + (WFCUConfigManager *)globalManager {
     if (sharedSingleton == nil) {

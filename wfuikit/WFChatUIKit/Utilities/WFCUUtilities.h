@@ -15,5 +15,4 @@
 + (NSString *)formatTimeLabel:(int64_t)timestamp;
 + (NSString *)formatTimeDetailLabel:(int64_t)timestamp;
 + (UIImage *)thumbnailWithImage:(UIImage *)originalImage maxSize:(CGSize)size;
-
 @end

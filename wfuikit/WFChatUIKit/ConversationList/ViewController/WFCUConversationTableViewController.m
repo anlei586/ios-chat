@@ -103,12 +103,6 @@
     
     return nil;
 }
-
--(void)alert:(NSString*) text{
-    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:text delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
-    [alert show];
-}
-
 - (void)onUserInfoUpdated:(NSNotification *)notification {
     if (self.searchController.active) {
         [self.tableView reloadData];
@@ -210,41 +204,35 @@
 }
 
 - (void)startChatAction:(id)sender {
-    NSDictionary *dc2 = [WFCUConfigManager getApiClient];
-    NSString *str = @"1";
-    if ([dc2[@"onfgroupchat"] isEqualToString:str]) {
-        WFCUContactListViewController *pvc = [[WFCUContactListViewController alloc] init];
-        pvc.selectContact = YES;
-        pvc.multiSelect = YES;
-        pvc.showCreateChannel = YES;
-      __weak typeof(self)ws = self;
-        pvc.createChannel = ^(void) {
-            WFCUCreateChannelViewController *vc = [[WFCUCreateChannelViewController alloc] init];
-            vc.hidesBottomBarWhenPushed = YES;
-            [self.navigationController pushViewController:vc animated:YES];
-        };
-        
-        pvc.selectResult = ^(NSArray<NSString *> *contacts) {
-          if (contacts.count == 1) {
-            WFCUMessageListViewController *mvc = [[WFCUMessageListViewController alloc] init];
-            mvc.conversation = [WFCCConversation conversationWithType:Single_Type target:contacts[0] line:0];
-            mvc.hidesBottomBarWhenPushed = YES;
-            [ws.navigationController pushViewController:mvc animated:YES];
-          } else {
-            WFCUCreateGroupViewController *vc = [[WFCUCreateGroupViewController alloc] init];
-            vc.memberIds = [contacts mutableCopy];
-            if (![vc.memberIds containsObject:[WFCCNetworkService sharedInstance].userId]) {
-              [vc.memberIds insertObject:[WFCCNetworkService sharedInstance].userId atIndex:0];
-            }
-            vc.hidesBottomBarWhenPushed = YES;
-            [ws.navigationController pushViewController:vc animated:YES];
-          }
-        };
-        UINavigationController *navi = [[UINavigationController alloc] initWithRootViewController:pvc];
-        [self.navigationController presentViewController:navi animated:YES completion:nil];
-    }else{
-        [self alert:@"管理员禁止该功能！"];
-    }
+    WFCUContactListViewController *pvc = [[WFCUContactListViewController alloc] init];
+    pvc.selectContact = YES;
+    pvc.multiSelect = YES;
+    pvc.showCreateChannel = YES;
+  __weak typeof(self)ws = self;
+    pvc.createChannel = ^(void) {
+        WFCUCreateChannelViewController *vc = [[WFCUCreateChannelViewController alloc] init];
+        vc.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:vc animated:YES];
+    };
+    
+    pvc.selectResult = ^(NSArray<NSString *> *contacts) {
+      if (contacts.count == 1) {
+        WFCUMessageListViewController *mvc = [[WFCUMessageListViewController alloc] init];
+        mvc.conversation = [WFCCConversation conversationWithType:Single_Type target:contacts[0] line:0];
+        mvc.hidesBottomBarWhenPushed = YES;
+        [ws.navigationController pushViewController:mvc animated:YES];
+      } else {
+        WFCUCreateGroupViewController *vc = [[WFCUCreateGroupViewController alloc] init];
+        vc.memberIds = [contacts mutableCopy];
+        if (![vc.memberIds containsObject:[WFCCNetworkService sharedInstance].userId]) {
+          [vc.memberIds insertObject:[WFCCNetworkService sharedInstance].userId atIndex:0];
+        }
+        vc.hidesBottomBarWhenPushed = YES;
+        [ws.navigationController pushViewController:vc animated:YES];
+      }
+    };
+    UINavigationController *navi = [[UINavigationController alloc] initWithRootViewController:pvc];
+    [self.navigationController presentViewController:navi animated:YES completion:nil];
 }
 
 - (void)addFriendsAction:(id)sender {
@@ -254,10 +242,9 @@
 }
 
 - (void)listenChannelAction:(id)sender {
-    [self alert:@"管理员禁止该功能！"];
-    //UIViewController *searchChannelVC = [[WFCUSearchChannelViewController alloc] init];
-    //searchChannelVC.hidesBottomBarWhenPushed = YES;
-    //[self.navigationController pushViewController:searchChannelVC animated:YES];
+    UIViewController *searchChannelVC = [[WFCUSearchChannelViewController alloc] init];
+    searchChannelVC.hidesBottomBarWhenPushed = YES;
+    [self.navigationController pushViewController:searchChannelVC animated:YES];
 }
 
 - (void)scanQrCodeAction:(id)sender {
