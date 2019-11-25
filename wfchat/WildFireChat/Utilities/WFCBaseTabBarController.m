@@ -11,6 +11,7 @@
 #import <WFChatUIKit/WFChatUIKit.h>
 #import "DiscoverViewController.h"
 #import "WFCMeTableViewController.h"
+#import <WFChatUIKit/WFCUConfigManager.h>
 
 #define kClassKey   @"rootVCClassString"
 #define kTitleKey   @"title"
@@ -85,6 +86,7 @@ static NSDictionary *apiclient;
 }
 +(void) setApiClient:(NSDictionary*)dict{
     apiclient = dict;
+    [WFCUConfigManager setApiClient:dict];
 }
 -(void)alert:(NSString*) text{
     UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:text delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];

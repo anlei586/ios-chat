@@ -12,6 +12,10 @@
 
 @property (strong, nonatomic) UIWindow *window;
 
++(NSString*)getMFS_hu;
++(NSString*)getMFS_http;
++(NSString*)getMFS_url;
+
 
 @end
 

@@ -54,6 +54,11 @@
     //MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     //hud.label.text = @"加载中...";
     //[hud showAnimated:YES];
+    
+    IM_SERVER_HOST = [AppDelegate getMFS_url];
+    APP_SERVER_ADDRESS = [[AppDelegate getMFS_hu] stringByAppendingString:@":8888"];
+    APP_SERVER_PHP = [[AppDelegate getMFS_hu] stringByAppendingString:@":81"];
+
     NSString *url = [NSString stringWithFormat:@"%@%@", APP_SERVER_PHP, @"/yh/apiclient.php"];
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.responseSerializer = [AFHTTPResponseSerializer serializer];
@@ -79,7 +84,8 @@
      }    failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
             //[hud hideAnimated:YES];
             NSLog(@"--%@",error);
-            [self alert:@"网络PHP注册出错"];
+            [self alert:@"加载配置出错"];
+            [self application:application didFinishLaunchingWithOptions:launchOptions];
     }];
     return YES;
 }
@@ -156,6 +162,28 @@
         
     
     return YES;
+}
+//return http://xxxx
++(NSString*)getMFS_hu{
+    NSString *h = [self getMFS_http];
+    NSString *u = [self getMFS_url];
+    NSString *_str = [h stringByAppendingString:@"://"];
+    _str = [_str stringByAppendingString:u];
+    return _str;
+}
+
+//return http or https
++(NSString*)getMFS_http{
+    NSString *file = [[NSBundle mainBundle] pathForResource:@"Info" ofType:@"plist"];
+    NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithContentsOfFile:file];
+    return [dict objectForKey:@"serverhttp"];
+}
+
+//return domain or ip
++(NSString*)getMFS_url{
+    NSString *file = [[NSBundle mainBundle] pathForResource:@"Info" ofType:@"plist"];
+    NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithContentsOfFile:file];
+    return [dict objectForKey:@"serverurl"];
 }
 
 -(void)alert:(NSString*) text{
