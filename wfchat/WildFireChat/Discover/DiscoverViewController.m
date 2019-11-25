@@ -13,10 +13,13 @@
 #import <WebKit/WebKit.h>
 #import "WFCBaseTabBarController.h"
 
+#define HexColor(s) [UIColor colorWithRed:(((s & 0xFF0000) >> 16))/255.0 green:(((s &0xFF00) >>8))/255.0 blue:((s &0xFF))/255.0 alpha:1.0]
+
 @interface DiscoverViewController () <UITableViewDataSource, UITableViewDelegate>
 @property (nonatomic, strong)UITableView *tableView;
 
-@property (nonatomic, strong)WKWebView *webView;
+@property (nonatomic, strong)WKWebView *wkWebView;
+@property (nonatomic, strong)UIProgressView *proBar;
 
 @property (nonatomic, assign)BOOL hasMoments;
 
@@ -28,37 +31,80 @@
     [super viewDidLoad];
 
     self.title = @"发现";
-    /*
-
     
-    if(NSClassFromString(@"SDTimeLineTableViewController")) {
-        self.hasMoments = YES;
-    } else {
-        self.hasMoments = NO;
-    }
+    self.proBar = [[UIProgressView alloc] initWithFrame:CGRectMake(0, 64, self.view.bounds.size.width, 0)];
+    self.proBar.tintColor = HexColor(0x45c01a);
+    self.proBar.trackTintColor = HexColor(0x1e88e5);
     
-    self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) style:UITableViewStyleGrouped];
+    CGRect appf = [[UIScreen mainScreen]applicationFrame];
     
-    self.tableView.delegate = self;
-    self.tableView.dataSource = self;
+    self.wkWebView = [[WKWebView alloc]initWithFrame:CGRectMake(appf.origin.x,appf.origin.y,appf.size.width,appf.size.height-50)];
+    self.wkWebView.navigationDelegate=self;
+    self.wkWebView.opaque = NO;
+    self.wkWebView.multipleTouchEnabled= YES;
+    self.wkWebView.backgroundColor=[UIColor whiteColor];
+    [self.wkWebView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionNew context:nil];
+    [self.view addSubview:self.wkWebView];
+    [self.view addSubview:self.proBar];
+    [self webSendRequest];
     
-    self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
-    [self.tableView reloadData];
+    UIBarButtonItem *backItemBtn = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"ic_back"] style:UIBarButtonItemStyleDone target:self action:@selector(onWebBack:)];
     
-    [self.view addSubview:self.tableView];
-    */
-    self.webView = [[WKWebView alloc]initWithFrame:self.view.frame];
-    self.webView.navigationDelegate=self;
-    self.webView.backgroundColor=[UIColor whiteColor];
-    [self.view addSubview:self.webView];
-    NSDictionary *dict = [WFCBaseTabBarController getApiClient];
-    NSString *_url = dict[@"homeUrl"];
-    [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:_url]]];
+    UIBarButtonItem *reloadItemBtn = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"reload"] style:UIBarButtonItemStyleDone target:self action:@selector(onWebReload:)];
+    
+    
+    self.navigationItem.leftBarButtonItem = backItemBtn;
+    self.navigationItem.rightBarButtonItem = reloadItemBtn;
 }
+
+-(void)dealloc{
+    [self.wkWebView removeObserver:self forKeyPath:@"estimatedProgress"];
+}
+#pragma mark - WKNavingationDelegae mehod
+-(void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(nonnull WKNavigationAction *)navigationAction decisionHandler:(nonnull void (^)(WKNavigationActionPolicy))decisionHandler {
+    if([webView.URL.absoluteString hasPrefix:@"https://itunes.apple.com"]) {
+        [[UIApplication sharedApplication] openURL:navigationAction.request.URL];
+        decisionHandler(WKNavigationActionPolicyCancel);
+    }else{
+        decisionHandler(WKNavigationActionPolicyAllow);
+    }
+}
+
+#pragma mark - event response
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
+    if(object == self.wkWebView && [keyPath isEqualToString:@"estimatedProgress"]) {
+        CGFloat newprogress = [[change objectForKey:NSKeyValueChangeNewKey] doubleValue];
+        self.proBar.alpha = 1.0f;
+        [self.proBar setProgress:newprogress animated:YES];
+        if(newprogress >= 1.0f){
+            
+            [UIView animateWithDuration:0.3f delay:0.3f options:UIViewAnimationOptionCurveEaseOut animations:^{
+                [self.proBar setProgress:0 animated:NO];
+            } completion:^(BOOL finished){
+                [self.proBar setProgress:0 animated:NO];
+            }];
+        }
+    }else{
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+-(void)webSendRequest{
+    NSDictionary *dict = [WFCBaseTabBarController getApiClient];
+    NSString *_url = dict[@"homeUrl"];
+    [self.wkWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:_url]]];
+}
+
+-(void)onWebBack:(UIBarButtonItem *)sender {
+    [self.wkWebView goBack];
+}
+-(void)onWebReload:(UIBarButtonItem *)sender {
+    [self.wkWebView reload];
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {

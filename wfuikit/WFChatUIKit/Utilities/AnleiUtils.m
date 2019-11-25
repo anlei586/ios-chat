@@ -6,4 +6,18 @@
 //  Copyright © 2019 Tom Lee. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import <WFChatUIKit/WFChatUIKit.h>
+#import "AnleiUtils.h"
+
+@implementation AnleiUtils
+
+static NSDictionary *apiclient;
+
++(NSDictionary*) getApiClient{
+    return apiclient;
+}
++(void) setApiClient:(NSDictionary*)dict{
+    apiclient = dict;
+}
+
+@end

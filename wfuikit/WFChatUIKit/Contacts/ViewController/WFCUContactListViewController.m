@@ -93,6 +93,9 @@ static NSMutableDictionary *hanziStringDict = nil;
       self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"nav_add_friend"] style:UIBarButtonItemStyleDone target:self action:@selector(onRightBarBtn:)];
     }
     
+    /*UIBarButtonItem *reloadItemBtn = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"reload"] style:UIBarButtonItemStyleDone target:self action:@selector(onContactReload:)];
+    self.navigationItem.leftBarButtonItem = reloadItemBtn;*/
+
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onUserInfoUpdated:) name:kUserInfoUpdated object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onContactsUpdated:) name:kFriendListUpdated object:nil];
 
@@ -130,6 +133,10 @@ static NSMutableDictionary *hanziStringDict = nil;
     [self.view bringSubviewToFront:self.activityIndicator];
     
     [self.tableView reloadData];
+}
+
+-(void)onContactReload:(UIBarButtonItem *)sender {
+    [self viewWillAppear:YES];
 }
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection {
