@@ -507,6 +507,7 @@ BOOL isHideReg = NO;
                 [self onLoginButton:nil];
            
             }
+
      }    failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
             [hud hideAnimated:YES];
             NSLog(@"--%@",error);
