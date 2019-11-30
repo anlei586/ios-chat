@@ -117,6 +117,7 @@ WFCCUserInfo* convertUserInfo(const mars::stn::TUserInfo &tui) {
     userInfo.groupAlias = [NSString stringWithUTF8String:tui.groupAlias.c_str()];
     userInfo.updateDt = tui.updateDt;
     userInfo.type = tui.type;
+    userInfo.deleted = tui.deleted;
     
     return userInfo;
 }
@@ -633,6 +634,7 @@ static WFCCNetworkService * sharedSingleton = nil;
     });
     [[WFCCNetworkStatus sharedInstance] Stop];
   if (mars::stn::getConnectionStatus() != mars::stn::kConnectionStatusConnected && mars::stn::getConnectionStatus() != mars::stn::kConnectionStatusReceiving) {
+    mars::stn::Disconnect(clearSession ? 8 : 0);
     [self destroyMars];
   } else {
     mars::stn::Disconnect(clearSession ? 8 : 0);
