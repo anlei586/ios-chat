@@ -104,6 +104,28 @@
     [self.wkWebView goBack];
 }
 -(void)onWebReload:(UIBarButtonItem *)sender {
+    //clear cache
+    NSArray *types = @[WKWebsiteDataTypeMemoryCache, WKWebsiteDataTypeDiskCache];
+    NSSet *websiteDataTypes = [NSSet setWithArray:types];
+    NSDate * dateFrom = [NSDate dateWithTimeIntervalSince1970:0];
+    [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:websiteDataTypes modifiedSince:dateFrom completionHandler:^{
+        
+    }];
+    
+    //look content
+    NSString *jsTxt = @"document.body.innerText";
+    [self.wkWebView evaluateJavaScript:jsTxt completionHandler:^(id val, NSError *error) {
+        if(val==nil || val==NULL){
+            [self webSendRequest];
+            return;
+        }else{
+            NSUInteger len = [val length];
+            if(len<=0){
+                [self webSendRequest];
+                return;
+            }
+        }
+    }];
     [self.wkWebView reload];
 }
 

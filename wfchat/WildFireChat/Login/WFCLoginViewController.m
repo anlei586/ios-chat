@@ -61,7 +61,7 @@ alpha:1.0]
 
 @property (strong, nonatomic) UIButton *sendRegExpBtn;
 
-@property (strong, nonatomic) UIButton *sendCodeBtn;
+//@property (strong, nonatomic) UIButton *sendCodeBtn;
 @property (nonatomic, strong) NSTimer *countdownTimer;
 @property (nonatomic, assign) NSTimeInterval sendCodeTime;
 @property (nonatomic, strong) UILabel *privacyLabel;
@@ -86,7 +86,7 @@ BOOL isHideReg = NO;
     CGFloat sendCodeBtnwidth = 120;
     CGFloat paddingField2Code = 8;
     
-    CGFloat topPos = kStatusBarAndNavigationBarHeight + 45;
+    CGFloat topPos = kStatusBarAndNavigationBarHeight + 5;
     CGFloat fieldHeight = 25;
     
     self.scroll = [[UIScrollView alloc]initWithFrame:bgRect];
@@ -115,21 +115,21 @@ BOOL isHideReg = NO;
     self.passwordLine = [[UIView alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line, bgRect.size.width - paddingEdge - paddingEdge, 1.f)];
     self.passwordLine.backgroundColor = [UIColor grayColor];
     
-    self.passwordField = [[UITextField alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF, bgRect.size.width - paddingEdge - paddingEdge - sendCodeBtnwidth - paddingField2Code, fieldHeight)];
+    self.passwordField = [[UITextField alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight)];
     self.passwordField.placeholder = @"密码(6位字母或数字)";
     self.passwordField.returnKeyType = UIReturnKeyDone;
     self.passwordField.keyboardType = UIKeyboardTypeASCIICapable;
     self.passwordField.delegate = self;
     self.passwordField.clearButtonMode = UITextFieldViewModeWhileEditing;
     [self.passwordField addTarget:self action:@selector(textDidChange:) forControlEvents:UIControlEventEditingChanged];
-    
+    /*
     self.sendCodeBtn = [[UIButton alloc] initWithFrame:CGRectMake(bgRect.size.width - paddingEdge - sendCodeBtnwidth, topPos + paddingTF2Line + fieldHeight + paddingLine2TF, sendCodeBtnwidth, fieldHeight)];
     [self.sendCodeBtn setTitle:@"发送验证码" forState:UIControlStateNormal];
     [self.sendCodeBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
     [self.sendCodeBtn setTitleColor:[UIColor grayColor] forState:UIControlStateSelected];
     [self.sendCodeBtn addTarget:self action:@selector(onSendCode:) forControlEvents:UIControlEventTouchDown];
     self.sendCodeBtn.enabled = NO;
-    
+    */
     self.loginBtn = [[UIButton alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line + paddingLine2TF + 20, bgRect.size.width - paddingEdge - paddingEdge, 36)];
     [self.loginBtn setBackgroundColor:[UIColor grayColor]];
     [self.loginBtn addTarget:self action:@selector(onLoginButton:) forControlEvents:UIControlEventTouchDown];
@@ -267,7 +267,7 @@ BOOL isHideReg = NO;
         [self.sendRegExpBtn removeFromSuperview];
     }
     //self.sendRegExpBtn.enabled = YES;
-    CGSize _size = CGSizeMake(self.view.bounds.size.width, self.view.bounds.size.height + 60);
+    CGSize _size = CGSizeMake(self.view.bounds.size.width, self.view.bounds.size.height + 160);
     self.scroll.contentSize  = _size;
 }
 
@@ -283,7 +283,7 @@ BOOL isHideReg = NO;
 
 
 
-
+/*
 - (void)onSendCode:(id)sender {
     self.sendCodeBtn.enabled = NO;
     [self.sendCodeBtn setTitle:@"短信发送中" forState:UIControlStateNormal];
@@ -294,13 +294,13 @@ BOOL isHideReg = NO;
         [ws sendCodeDone:NO];
     }];
 }
-
+*/
 - (void)onExpRegContent:(id)sender {
     isHideReg = !isHideReg;
     [self visibleRegComp:isHideReg];
     
 }
-
+/*
 - (void)updateCountdown:(id)sender {
     int second = (int)([NSDate date].timeIntervalSince1970 - self.sendCodeTime);
     [self.sendCodeBtn setTitle:[NSString stringWithFormat:@"%ds", 60-second] forState:UIControlStateNormal];
@@ -311,6 +311,7 @@ BOOL isHideReg = NO;
         self.sendCodeBtn.enabled = YES;
     }
 }
+
 - (void)sendCodeDone:(BOOL)success {
     dispatch_async(dispatch_get_main_queue(), ^{
         if (success) {
@@ -341,7 +342,7 @@ BOOL isHideReg = NO;
         }
     });
 }
-
+*/
 - (void)resetKeyboard:(id)sender {
     [self.userNameField resignFirstResponder];
     self.userNameLine.backgroundColor = [UIColor grayColor];
@@ -555,11 +556,11 @@ BOOL isHideReg = NO;
 - (void)updateBtn {
     if ([self isValidNumber]) {
         if (!self.countdownTimer) {
-            self.sendCodeBtn.enabled = YES;
-            [self.sendCodeBtn setTitleColor:[UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9] forState:UIControlStateNormal];
+            //self.sendCodeBtn.enabled = YES;
+            //[self.sendCodeBtn setTitleColor:[UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9] forState:UIControlStateNormal];
         } else {
-            self.sendCodeBtn.enabled = NO;
-            [self.sendCodeBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+            //self.sendCodeBtn.enabled = NO;
+            //[self.sendCodeBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
         }
         
         if ([self isValidCode]) {
@@ -570,8 +571,8 @@ BOOL isHideReg = NO;
             self.loginBtn.enabled = NO;
         }
     } else {
-        self.sendCodeBtn.enabled = NO;
-        [self.sendCodeBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+        //self.sendCodeBtn.enabled = NO;
+        //[self.sendCodeBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
         
         [self.loginBtn setBackgroundColor:[UIColor grayColor]];
         self.loginBtn.enabled = NO;

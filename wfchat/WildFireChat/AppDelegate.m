@@ -20,9 +20,8 @@
 #if WFCU_SUPPORT_VOIP
 #import <WFAVEngineKit/WFAVEngineKit.h>
 #endif
-#import "WFCLoginViewController.h"
 #import "WFCConfig.h"
-#import "WFCBaseTabBarController.h"
+
 #import <WFChatUIKit/WFChatUIKit.h>
 #import <UserNotifications/UserNotifications.h>
 #import "CreateBarCodeViewController.h"
@@ -33,10 +32,14 @@
 #import "GroupInfoViewController.h"
 #import "PCLoginConfirmViewController.h"
 
+#import "WFCLoginViewController.h"
+#import "WFCBaseTabBarController.h"
 
 #import "AFNetworking.h"
 #import "MBProgressHUD.h"
 #import "WFCConfig.h"
+
+#import "UITextViewWorkaround.h"
 
 @interface AppDelegate () <ConnectionStatusDelegate, ReceiveMessageDelegate,
 #if WFCU_SUPPORT_VOIP
@@ -44,7 +47,7 @@
 #endif
     UNUserNotificationCenterDelegate, QrCodeDelegate>
 @property(nonatomic, strong) AVAudioPlayer *audioPlayer;
-@property (strong, nonatomic) WFCBaseTabBarController *tabBarVC;
+@property(nonatomic, strong) WFCBaseTabBarController *tabBarVC;
 @end
 
 @implementation AppDelegate
@@ -56,9 +59,15 @@
     //[hud showAnimated:YES];
     
     IM_SERVER_HOST = [AppDelegate getMFS_url];
-    APP_SERVER_ADDRESS = [[AppDelegate getMFS_hu] stringByAppendingString:@":8888"];
-    APP_SERVER_PHP = [[AppDelegate getMFS_hu] stringByAppendingString:@":81"];
-
+    APP_SERVER_ADDRESS = [[AppDelegate getMFS_url] stringByAppendingString:@":8888"];
+    APP_SERVER_ADDRESS = [@"http://" stringByAppendingString:APP_SERVER_ADDRESS];
+    if([AppDelegate getMFS_port].length<=0){
+        APP_SERVER_PHP = [AppDelegate getMFS_hu];
+    }else{
+        APP_SERVER_PHP = [[AppDelegate getMFS_hu] stringByAppendingString: @":"];
+        APP_SERVER_PHP = [APP_SERVER_PHP stringByAppendingString: [AppDelegate getMFS_port]];
+    }
+    
     NSString *url = [NSString stringWithFormat:@"%@%@", APP_SERVER_PHP, @"/yh/apiclient.php"];
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     manager.responseSerializer = [AFHTTPResponseSerializer serializer];
@@ -100,6 +109,8 @@
     [WFCCNetworkService sharedInstance].connectionStatusDelegate = self;
     [WFCCNetworkService sharedInstance].receiveMessageDelegate = self;
     [[WFCCNetworkService sharedInstance] setServerAddress:IM_SERVER_HOST port:IM_SERVER_PORT];
+    
+    [UITextViewWorkaround executeWorkaround];
     
 #if WFCU_SUPPORT_VOIP
     [[WFAVEngineKit sharedEngineKit] addIceServer:ICE_ADDRESS userName:ICE_USERNAME password:ICE_PASSWORD];
@@ -184,6 +195,13 @@
     NSString *file = [[NSBundle mainBundle] pathForResource:@"Info" ofType:@"plist"];
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithContentsOfFile:file];
     return [dict objectForKey:@"serverurl"];
+}
+
+//return domain or port
++(NSString*)getMFS_port{
+    NSString *file = [[NSBundle mainBundle] pathForResource:@"Info" ofType:@"plist"];
+    NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithContentsOfFile:file];
+    return [dict objectForKey:@"serverport"];
 }
 
 -(void)alert:(NSString*) text{

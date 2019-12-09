@@ -43,7 +43,20 @@
 }
 
 
+-(void)alert:(NSString*) text{
+    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:text delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+    [alert show];
+}
+
 - (void)onSend:(id)sender {
+    NSDictionary *dict = [WFCUConfigManager getApiClient];
+    NSString *_onfadduser = dict[@"onfadduser"];
+    int _onf = [_onfadduser intValue];
+    if(_onf!=1){
+        [self alert:@"管理员已禁止加好友"];
+        return;
+    }
+    
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     hud.label.text = WFCString(@"Sending");
     [hud showAnimated:YES];

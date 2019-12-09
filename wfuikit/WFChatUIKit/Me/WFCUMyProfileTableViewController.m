@@ -106,9 +106,11 @@
 //    cell = [self getAttrCell:@"账号" rightText:self.userInfo.name mutable:NO];
 //    [self.cells1 addObject:cell];
 
+    /*
     cell = [self getAttrCell:WFCString(@"Mobile") rightText:self.userInfo.mobile mutable:YES];
     cell.tag = Modify_Mobile;
     [self.cells2 addObject:cell];
+    */
 
     cell = [self getAttrCell:WFCString(@"Gender") rightText: [self getGenderString:self.userInfo.gender] mutable:YES];
     cell.tag = Modify_Gender;
