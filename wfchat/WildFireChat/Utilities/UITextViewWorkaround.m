@@ -7,10 +7,10 @@
 @implementation UITextViewWorkaround
  
 + (void)executeWorkaround {
-    if (@available(iOS 13.2, *)) {
+    /*if (@available(iOS 13.2, *)) {
  
     }
-    else {
+    else {*/
         const char *className = "_UITextLayoutView";
         Class cls = objc_getClass(className);
         if (cls == nil) {
@@ -20,7 +20,7 @@
             printf("added %s dynamically\n", className);
 #endif
         }
-    }
+    //}
 }
  
 @end

@@ -12,6 +12,7 @@
 		0F5C0653236FD29500096899 /* CallKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F5C0652236FD29500096899 /* CallKit.framework */; };
 		0F5C0656237051D000096899 /* AUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F5C0655237051D000096899 /* AUtils.m */; };
 		0F900E54239C0E7400EBF963 /* UITextViewWorkaround.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F900E53239C0E7400EBF963 /* UITextViewWorkaround.m */; };
+		0F900E5A23A3DEBD00EBF963 /* WXUncaughtExceptionHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F900E5923A3DEBD00EBF963 /* WXUncaughtExceptionHandler.m */; };
 		0FB4BCB7239C072F00459E2B /* WFCUShareMessageView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0FB4BCB6239C072F00459E2B /* WFCUShareMessageView.xib */; };
 		2BCEC536232E238E00D55E0D /* wfc.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2BCEC531232E238E00D55E0D /* wfc.strings */; };
 		2BCEC537232E238E00D55E0D /* wfc.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2BCEC534232E238E00D55E0D /* wfc.strings */; };
@@ -111,6 +112,8 @@
 		0F5C06572371D87400096899 /* AUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AUtils.h; sourceTree = "<group>"; };
 		0F900E52239C0E4300EBF963 /* UITextViewWorkaround.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UITextViewWorkaround.h; sourceTree = "<group>"; };
 		0F900E53239C0E7400EBF963 /* UITextViewWorkaround.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UITextViewWorkaround.m; sourceTree = "<group>"; };
+		0F900E5823A3DE9300EBF963 /* WXUncaughtExceptionHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WXUncaughtExceptionHandler.h; sourceTree = "<group>"; };
+		0F900E5923A3DEBD00EBF963 /* WXUncaughtExceptionHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WXUncaughtExceptionHandler.m; sourceTree = "<group>"; };
 		0FB4BCB6239C072F00459E2B /* WFCUShareMessageView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = WFCUShareMessageView.xib; sourceTree = "<group>"; };
 		2BCEC532232E238E00D55E0D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = wfc.strings; sourceTree = "<group>"; };
 		2BCEC535232E238E00D55E0D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = wfc.strings; sourceTree = "<group>"; };
@@ -314,6 +317,8 @@
 				2E1D20AF1FAF125D00F4405D /* WFCBaseTabBarController.m */,
 				0F900E52239C0E4300EBF963 /* UITextViewWorkaround.h */,
 				0F900E53239C0E7400EBF963 /* UITextViewWorkaround.m */,
+				0F900E5823A3DE9300EBF963 /* WXUncaughtExceptionHandler.h */,
+				0F900E5923A3DEBD00EBF963 /* WXUncaughtExceptionHandler.m */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -814,6 +819,7 @@
 				909ACDAF2130473100A64FE7 /* ChatroomListViewController.m in Sources */,
 				2F7268F921F7136600E05F9C /* WFCPrivacyViewController.m in Sources */,
 				0F900E54239C0E7400EBF963 /* UITextViewWorkaround.m in Sources */,
+				0F900E5A23A3DEBD00EBF963 /* WXUncaughtExceptionHandler.m in Sources */,
 				2F94FB8C22291577005BD461 /* LBXScanViewController.m in Sources */,
 				2F94FB8F22291577005BD461 /* LBXScanLineAnimation.m in Sources */,
 				2F94FCA322291813005BD461 /* LBXPermissionSetting.m in Sources */,

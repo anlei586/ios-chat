@@ -146,7 +146,7 @@
 "Removed"="已移除";
 "OperationFailure"="操作失败";
 "NewMessageNotification"="新消息通知";
-"ReceiveNewMessageNotification"="接收新消息通知";
+"ReceiveNewMessageNotification"="接收新消息通知声音";
 "NotificationShowMessageDetail"="通知显示消息详情";
 "ModifyEmail"="修改邮箱";
 "ModifyMobile"="修改电话";

@@ -79,7 +79,7 @@
             
             MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
             hud.mode = MBProgressHUDModeText;
-            hud.label.text = WFCString(@"SendFailure");
+            hud.label.text = @"发送失败！或已经添加过";///WFCString(@"SendFailure");
             hud.offset = CGPointMake(0.f, MBProgressMaxOffset);
             [hud hideAnimated:YES afterDelay:1.f];
         });

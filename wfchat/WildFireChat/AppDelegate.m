@@ -27,7 +27,7 @@
 #import "CreateBarCodeViewController.h"
 #import "QQLBXScanViewController.h"
 #import "StyleDIY.h"
-#import <Bugly/Bugly.h>
+//#import <Bugly/Bugly.h>
 #import "AppService.h"
 #import "GroupInfoViewController.h"
 #import "PCLoginConfirmViewController.h"
@@ -40,6 +40,7 @@
 #import "WFCConfig.h"
 
 #import "UITextViewWorkaround.h"
+#import "WXUncaughtExceptionHandler.h"
 
 @interface AppDelegate () <ConnectionStatusDelegate, ReceiveMessageDelegate,
 #if WFCU_SUPPORT_VOIP
@@ -48,15 +49,35 @@
     UNUserNotificationCenterDelegate, QrCodeDelegate>
 @property(nonatomic, strong) AVAudioPlayer *audioPlayer;
 @property(nonatomic, strong) WFCBaseTabBarController *tabBarVC;
+@property(strong, nonatomic) UIAlertAction *_okAction;
+@property(strong, nonatomic) UIAlertAction *_cancelAction;
+@property(strong, nonatomic) AVAudioPlayer *musicPlayer;
+
+
 @end
 
 @implementation AppDelegate
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
-     self.window.backgroundColor = [UIColor whiteColor];
-    //MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    //hud.label.text = @"加载中...";
-    //[hud showAnimated:YES];
+    
+    
+    //简单调用
+    //InstanceWXUncaughtExceptionHandler();
+    
+    //链式调用 是否显示警告框 是否显示错误信息 是否回调日志地址
+    InstanceWXUncaughtExceptionHandler().showAlert(YES).showErrorInfor(YES).getlogPathBlock(^(NSString *logPathStr){
+        NSLog(@"程序异常日志地址 == %@",logPathStr);
+    });
+    
+    
+    
+    
+    
+    
+    self.window.backgroundColor = [UIColor whiteColor];
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.window animated:YES];
+    hud.label.text = @"加载配置中...";
+    [hud showAnimated:YES];
     
     IM_SERVER_HOST = [AppDelegate getMFS_url];
     APP_SERVER_ADDRESS = [[AppDelegate getMFS_url] stringByAppendingString:@":8888"];
@@ -74,7 +95,7 @@
     manager.responseSerializer.acceptableContentTypes = [NSSet setWithObject:@"text/html"];
     [manager GET:url parameters:nil progress:nil
           success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-            //[hud hideAnimated:YES];
+            [hud hideAnimated:YES];
             NSString *_data = [[NSString alloc]initWithData:responseObject encoding:NSUTF8StringEncoding];
             NSData *jsonData = [_data dataUsingEncoding:NSUTF8StringEncoding];
             NSError *err;
@@ -91,10 +112,26 @@
 
             
      }    failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-            //[hud hideAnimated:YES];
+            [hud hideAnimated:YES];
             NSLog(@"--%@",error);
-            [self alert:@"加载配置出错"];
-            [self application:application didFinishLaunchingWithOptions:launchOptions];
+            //[self alert:@"加载配置出错"];
+            // 初始化对话框
+            UIAlertController *_alert = [UIAlertController alertControllerWithTitle:@"提示" message:@"也许您的网络遇到了问题，请尝试切换4G或WIFI" preferredStyle:UIAlertControllerStyleAlert];
+            // 确定注销
+            self._okAction = [UIAlertAction actionWithTitle:@"再试一次" style:UIAlertActionStyleDefault handler:^(UIAlertAction *_Nonnull action) {
+                    [self application:application didFinishLaunchingWithOptions:launchOptions];
+            }];
+             self._cancelAction =[UIAlertAction actionWithTitle:@"退出" style:UIAlertActionStyleCancel handler:^(UIAlertAction *_Nonnull action) {
+                 exit(0);
+             }];
+
+            [_alert addAction:self._okAction];
+            [_alert addAction:self._cancelAction];
+
+                // 弹出对话框
+            [self.window.rootViewController presentViewController:_alert animated:true completion:nil];
+            
+            //[self application:application didFinishLaunchingWithOptions:launchOptions];
     }];
     return YES;
 }
@@ -103,7 +140,7 @@
     
     
     //替换为您自己的Bugly账户。
-    [Bugly startWithAppId:@"b21375e023"];
+    //[Bugly startWithAppId:@"b21375e023"];
     
     [WFCCNetworkService startLog];
     [WFCCNetworkService sharedInstance].connectionStatusDelegate = self;
@@ -205,8 +242,8 @@
 }
 
 -(void)alert:(NSString*) text{
-    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:text delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
-    [alert show];
+    UIAlertView *_alert = [[UIAlertView alloc]initWithTitle:@"提示" message:text delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+    [_alert show];
 }
 
 -(void) setTableIndex1 {
@@ -275,7 +312,36 @@
     [WFCCNetworkService startLog];
 }
 
+
+-(void)playding{
+    if (!self.musicPlayer) {
+            NSString *filePath = [[NSBundle mainBundle] pathForResource:@"definite" ofType:@"mp3"];
+            NSURL *fileUrl = [NSURL URLWithString:filePath];
+            self.musicPlayer = [[AVAudioPlayer alloc]initWithContentsOfURL:fileUrl error:nil];
+            self.musicPlayer.delegate = self;
+        }
+
+    if (![self.musicPlayer isPlaying]){
+        [self.musicPlayer setVolume:0.6];
+        [self.musicPlayer prepareToPlay];
+        [self.musicPlayer play];
+        NSLog(@"play mp3");
+    }
+}
+
+
 - (void)onReceiveMessage:(NSArray<WFCCMessage *> *)messages hasMore:(BOOL)hasMore {
+    if(messages!=nil && messages!=NULL && messages.count>0){
+        WFCCMessage *_msg = messages[0];
+        if(_msg!=nil && _msg!=NULL && _msg.content.extra!=nil && _msg.content.extra!=NULL && _msg.messageId>0){
+            WFCCConversationInfo *_info = [[WFCCIMService sharedWFCIMService] getConversationInfo:_msg.conversation];
+            BOOL *_value = [[WFCCIMService sharedWFCIMService] isGlobalSlient];
+            if(!_value && !_info.isSilent){
+                [self playding];
+            }
+        }
+    }
+    
     if ([UIApplication sharedApplication].applicationState == UIApplicationStateBackground) {
         WFCCUnreadCount *unreadCount = [[WFCCIMService sharedWFCIMService] getUnreadCount:@[@(Single_Type), @(Group_Type), @(Channel_Type)] lines:@[@(0)]];
         int count = unreadCount.unread;

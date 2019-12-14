@@ -142,8 +142,16 @@
     __weak typeof(self) ws = self;
     NSString *searchString = [ws.searchController.searchBar text];
     if (searchString.length) {
+        NSDictionary *dict = [WFCUConfigManager getApiClient];
+        NSString *_onfadduser = dict[@"searchfriendfuzzy"];
+        int _onf = [_onfadduser intValue];
+        BOOL fuzzy = NO;
+        if(_onf!=1){
+            fuzzy = YES;
+        }
+        
         [[WFCCIMService sharedWFCIMService] searchUser:searchString
-                                                 fuzzy:YES
+                                                 fuzzy:fuzzy
                                                success:^(NSArray<WFCCUserInfo *> *machedUsers) {
                                                    dispatch_async(dispatch_get_main_queue(), ^{
                                                        ws.searchList = machedUsers;

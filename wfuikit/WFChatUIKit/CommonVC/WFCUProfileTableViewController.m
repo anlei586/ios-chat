@@ -92,12 +92,14 @@
         blacklistTitle = WFCString(@"Add2Blacklist");
     }
     
+    actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:WFCString(@"Cancel") destructiveButtonTitle:friendTitle otherButtonTitles:blacklistTitle, WFCString(@"SetAlias"), nil];
+    /*
     if ([[WFCCIMService sharedWFCIMService] isMyFriend:self.userId]) {
         actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:WFCString(@"Cancel") destructiveButtonTitle:friendTitle otherButtonTitles:blacklistTitle, WFCString(@"SetAlias"), nil];
     } else {
         actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:WFCString(@"Cancel") destructiveButtonTitle:friendTitle otherButtonTitles:blacklistTitle, nil];
     }
-    
+    */
     [actionSheet showInView:self.view];
 }
 - (void)loadData {
@@ -205,7 +207,7 @@
         btn.layer.cornerRadius = 5.f;
         btn.layer.masksToBounds = YES;
         btn.hidden = NO;
-        [self.voipCallCell addSubview:btn];
+        //[self.voipCallCell addSubview:btn];
 //#endif
     } else if([[WFCCNetworkService sharedInstance].userId isEqualToString:self.userId]) {
         
@@ -432,6 +434,10 @@
             }];
         }
     } else if(buttonIndex == 2) {// alias
+        if (![[WFCCIMService sharedWFCIMService] isMyFriend:self.userId]) {
+            [self alert:@"你们还不是好友!"];
+            return;
+        }
         WFCUGeneralModifyViewController *gmvc = [[WFCUGeneralModifyViewController alloc] init];
         NSString *previousAlias = [[WFCCIMService sharedWFCIMService] getFriendAlias:self.userId];
         gmvc.defaultValue = previousAlias;
@@ -453,6 +459,11 @@
         UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:gmvc];
         [self.navigationController presentViewController:nav animated:YES completion:nil];
     }
+}
+
+-(void)alert:(NSString*) text{
+    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:text delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+    [alert show];
 }
 
 - (void)dealloc {
