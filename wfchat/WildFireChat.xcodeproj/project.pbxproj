@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0F25BCC62374620C007F70F1 /* PCLoginConfirmViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F25BCC22374620C007F70F1 /* PCLoginConfirmViewController.m */; };
 		0F25BCC72374620C007F70F1 /* GroupInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F25BCC42374620C007F70F1 /* GroupInfoViewController.m */; };
+		0F57D90723A4DCE300D6041D /* definite.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 0F57D90623A4DCE300D6041D /* definite.mp3 */; };
 		0F5C0653236FD29500096899 /* CallKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F5C0652236FD29500096899 /* CallKit.framework */; };
 		0F5C0656237051D000096899 /* AUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F5C0655237051D000096899 /* AUtils.m */; };
 		0F900E54239C0E7400EBF963 /* UITextViewWorkaround.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F900E53239C0E7400EBF963 /* UITextViewWorkaround.m */; };
@@ -107,6 +108,7 @@
 		0F25BCC32374620C007F70F1 /* GroupInfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GroupInfoViewController.h; sourceTree = "<group>"; };
 		0F25BCC42374620C007F70F1 /* GroupInfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GroupInfoViewController.m; sourceTree = "<group>"; };
 		0F25BCC52374620C007F70F1 /* PCLoginConfirmViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PCLoginConfirmViewController.h; sourceTree = "<group>"; };
+		0F57D90623A4DCE300D6041D /* definite.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = definite.mp3; sourceTree = "<group>"; };
 		0F5C0652236FD29500096899 /* CallKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CallKit.framework; path = System/Library/Frameworks/CallKit.framework; sourceTree = SDKROOT; };
 		0F5C0655237051D000096899 /* AUtils.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AUtils.m; sourceTree = "<group>"; };
 		0F5C06572371D87400096899 /* AUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AUtils.h; sourceTree = "<group>"; };
@@ -654,6 +656,7 @@
 		903EBC942136313B00312C16 /* SupportFiles */ = {
 			isa = PBXGroup;
 			children = (
+				0F57D90623A4DCE300D6041D /* definite.mp3 */,
 				2E1D20001FAF0AE600F4405D /* Main.storyboard */,
 				2E1D20031FAF0AE600F4405D /* Assets.xcassets */,
 				2E1D20051FAF0AE600F4405D /* LaunchScreen.storyboard */,
@@ -773,6 +776,7 @@
 				2E1D20021FAF0AE600F4405D /* Main.storyboard in Resources */,
 				2F94FB8B22291577005BD461 /* CodeScan.bundle in Resources */,
 				2F623A5022DCBD3E00CB3C65 /* Album.xcassets in Resources */,
+				0F57D90723A4DCE300D6041D /* definite.mp3 in Resources */,
 				2BCEC536232E238E00D55E0D /* wfc.strings in Resources */,
 				90C1D911208C12A900E923F4 /* foreman.mp4 in Resources */,
 				2F143A81217F86BA00B3E38A /* WFChatUIKit.xcassets in Resources */,
@@ -1016,7 +1020,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1.0.16;
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yeyachat.messanger;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yeyachat.utkfht;
 				PRODUCT_NAME = Yeya;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1051,7 +1055,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MARKETING_VERSION = 1.0.16;
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yeyachat.messanger;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yeyachat.utkfht;
 				PRODUCT_NAME = Yeya;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";

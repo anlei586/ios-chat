@@ -62,12 +62,10 @@
 }
 #pragma mark - WKNavingationDelegae mehod
 -(void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(nonnull WKNavigationAction *)navigationAction decisionHandler:(nonnull void (^)(WKNavigationActionPolicy))decisionHandler {
-    if([webView.URL.absoluteString hasPrefix:@"https://itunes.apple.com"]) {
-        [[UIApplication sharedApplication] openURL:navigationAction.request.URL];
-        decisionHandler(WKNavigationActionPolicyCancel);
-    }else{
-        decisionHandler(WKNavigationActionPolicyAllow);
+    if(navigationAction.targetFrame == nil){
+        [self.wkWebView loadRequest:navigationAction.request];
     }
+    decisionHandler(WKNavigationActionPolicyAllow);
 }
 
 #pragma mark - event response

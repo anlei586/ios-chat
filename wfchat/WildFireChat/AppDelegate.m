@@ -314,11 +314,27 @@
 
 
 -(void)playding{
+    /*
+    if (!self.musicPlayer) {
+        NSURL *url = [[NSBundle mainBundle] URLForResource:@"definite" withExtension:@"mp3"];
+        NSError *error = nil;
+        self.musicPlayer = [[AVAudioPlayer alloc] initWithContentsOfURL:url error:&error];
+    }
+    //if (![self.musicPlayer isPlaying]){
+        self.musicPlayer.numberOfLoops = -1;
+        self.musicPlayer.volume = 1.0;
+        [self.musicPlayer prepareToPlay];
+        [self.musicPlayer play];
+        NSLog(@"play mp3");
+    //}*/
+    
+    
+    
     if (!self.musicPlayer) {
             NSString *filePath = [[NSBundle mainBundle] pathForResource:@"definite" ofType:@"mp3"];
             NSURL *fileUrl = [NSURL URLWithString:filePath];
             self.musicPlayer = [[AVAudioPlayer alloc]initWithContentsOfURL:fileUrl error:nil];
-            self.musicPlayer.delegate = self;
+            //self.musicPlayer.delegate = self;
         }
 
     if (![self.musicPlayer isPlaying]){
