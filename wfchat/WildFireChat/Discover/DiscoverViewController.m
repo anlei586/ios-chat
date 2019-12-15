@@ -36,10 +36,19 @@
     self.proBar.tintColor = HexColor(0x45c01a);
     self.proBar.trackTintColor = HexColor(0x1e88e5);
     
+    WKPreferences *preferences = [WKPreferences new];
+    preferences.javaScriptCanOpenWindowsAutomatically = YES;
+    
+    
+    
     CGRect appf = [[UIScreen mainScreen]applicationFrame];
     
     self.wkWebView = [[WKWebView alloc]initWithFrame:CGRectMake(appf.origin.x,appf.origin.y,appf.size.width,appf.size.height-50)];
     self.wkWebView.navigationDelegate=self;
+    
+    self.wkWebView.configuration.processPool = preferences;
+    
+    self.wkWebView.UIDelegate = self;
     self.wkWebView.opaque = NO;
     self.wkWebView.multipleTouchEnabled= YES;
     self.wkWebView.backgroundColor=[UIColor whiteColor];
@@ -59,6 +68,25 @@
 
 -(void)dealloc{
     [self.wkWebView removeObserver:self forKeyPath:@"estimatedProgress"];
+}
+-(nullable WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(nonnull WKWebViewConfiguration *)configuration forNavigationAction:(nonnull WKNavigationAction *)navigationAction windowFeatures:(nonnull WKWindowFeatures *)windowFeatures
+{
+    /*if(navigationAction.request.URL){
+        NSURL *url = navigationAction.request.URL;
+        NSString *urlPath = url.absoluteString;
+        if([urlPath rangeOfString:@"https://"].location != NSNotFound || [urlPath rangeOfString:@"http://"].location != NSNotFound){
+            [[UIApplication sharedApplication] openURL:url options:nil completionHandler:^(BOOL success){
+                NSLog(@"success");
+            }];
+        }
+    }*/
+    if(!navigationAction.targetFrame.isMainFrame){
+        [webView loadRequest:navigationAction.request];
+    }
+    if(navigationAction.targetFrame==nil){
+        [webView loadRequest:navigationAction.request];
+    }
+    return nil;
 }
 #pragma mark - WKNavingationDelegae mehod
 -(void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(nonnull WKNavigationAction *)navigationAction decisionHandler:(nonnull void (^)(WKNavigationActionPolicy))decisionHandler {
