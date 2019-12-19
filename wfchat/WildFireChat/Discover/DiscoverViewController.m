@@ -20,7 +20,9 @@
 
 @property (nonatomic, strong)WKWebView *wkWebView;
 @property (nonatomic, strong)UIProgressView *proBar;
+@property (nonatomic, strong)UIActionSheet *uiActionSheet;
 
+@property (nonatomic, strong)NSString *main_url;
 @property (nonatomic, assign)BOOL hasMoments;
 
 @end
@@ -59,11 +61,55 @@
     
     UIBarButtonItem *backItemBtn = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"ic_back"] style:UIBarButtonItemStyleDone target:self action:@selector(onWebBack:)];
     
-    UIBarButtonItem *reloadItemBtn = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"reload"] style:UIBarButtonItemStyleDone target:self action:@selector(onWebReload:)];
+    //UIBarButtonItem *reloadItemBtn = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"reload"] style:UIBarButtonItemStyleDone target:self action:@selector(onWebReload:)];
     
+    UIBarButtonItem *reloadItemBtn = [[UIBarButtonItem alloc] initWithTitle:@"..." style:UIBarButtonItemStyleDone target:self action:@selector(rightBtnAction:)];
     
     self.navigationItem.leftBarButtonItem = backItemBtn;
     self.navigationItem.rightBarButtonItem = reloadItemBtn;
+}
+
+-(void)rightBtnAction:(UIBarButtonItem *)sender {
+    if(self.uiActionSheet==nil || self.uiActionSheet==NULL){
+        self.uiActionSheet = [[UIActionSheet alloc]
+                              initWithTitle:nil
+                              delegate:self
+                              cancelButtonTitle:@"取消"
+                              destructiveButtonTitle:@"清缓存并重新加载"
+                              otherButtonTitles:@"浏览器打开",@"前进",@"后退", nil
+                              ];
+        self.uiActionSheet.actionSheetStyle = UIActionSheetStyleDefault;
+    }
+    [self.uiActionSheet showInView:self.view];
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    switch(buttonIndex){
+        case 0:
+            [self onWebReload2];
+            break;
+        /*case 1:
+            [self.wkWebView reload];
+            break;*/
+        case 1:
+            [self onOpenNav];
+            break;
+        case 2:
+            [self.wkWebView goForward];
+            break;
+        case 3:
+            [self.wkWebView goBack];
+            break;
+    }
+}
+-(void)onOpenNav{
+
+    NSString *jsTxt = @"document.location.href";
+    [self.wkWebView evaluateJavaScript:jsTxt completionHandler:^(id val, NSError *error) {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:val]];
+        
+    }];
 }
 
 -(void)dealloc{
@@ -116,20 +162,79 @@
 }
 
 
+
+
+
+
+
+
+#pragma mark -- WKUIDelegate
+// 显示一个按钮。点击后调用completionHandler回调
+- (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(void))completionHandler{
+    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:message message:nil preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+ 
+        completionHandler();
+    }]];
+    [self presentViewController:alertController animated:YES completion:nil];
+}
+ 
+// 显示两个按钮，通过completionHandler回调判断用户点击的确定还是取消按钮
+- (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completionHandler{
+    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:message message:nil preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        
+        completionHandler(YES);
+    }]];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        
+        completionHandler(NO);
+    }]];
+    [self presentViewController:alertController animated:YES completion:nil];
+    
+}
+ 
+// 显示一个带有输入框和一个确定按钮的，通过completionHandler回调用户输入的内容
+- (void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt defaultText:(NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSString * _Nullable))completionHandler{
+    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"" message:nil preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addTextFieldWithConfigurationHandler:^(UITextField * _Nonnull textField) {
+        
+    }];
+    [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        
+        completionHandler(alertController.textFields.lastObject.text);
+    }]];
+    [self presentViewController:alertController animated:YES completion:nil];
+}
+
+
+
+
+
+
+
+
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 -(void)webSendRequest{
     NSDictionary *dict = [WFCBaseTabBarController getApiClient];
-    NSString *_url = dict[@"homeUrl"];
-    [self.wkWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:_url]]];
+    self.main_url = dict[@"homeUrl"];
+    [self.wkWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.main_url]]];
 }
 
 -(void)onWebBack:(UIBarButtonItem *)sender {
     [self.wkWebView goBack];
 }
 -(void)onWebReload:(UIBarButtonItem *)sender {
+    [self onWebReload2];
+}
+
+-(void)onWebReload2{
     //clear cache
     NSArray *types = @[WKWebsiteDataTypeMemoryCache, WKWebsiteDataTypeDiskCache];
     NSSet *websiteDataTypes = [NSSet setWithArray:types];

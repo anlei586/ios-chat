@@ -24,7 +24,7 @@
     self.digestBackgrouView.clipsToBounds = YES;
     self.digestBackgrouView.layer.masksToBounds = YES;
     self.digestBackgrouView.layer.cornerRadius = 8.f;
-    self.messageTextView.placeholder = WFCString(@"LeaveMessage");
+//    self.messageTextView.placeholder = WFCString(@"LeaveMessage");
     self.messageTextView.layer.masksToBounds = YES;
     self.messageTextView.layer.cornerRadius = 8.f;
     self.messageTextView.contentInset = UIEdgeInsetsMake(2, 8, 2, 2);
