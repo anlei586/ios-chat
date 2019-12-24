@@ -30,7 +30,7 @@
 "MyChannels"="我的频道";
 "AddChannel"="添加频道";
 "SubscribeChannel"="订阅频道";
-"CreateChannel"="新建频道";
+"CreateChannel"="提示：至少需要2个好友";//"新建频道";
 "SubscribedChannels"="订阅的频道";
 "SearchChannels"="搜索频道";
 "SendMessage"="发送消息";

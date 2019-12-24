@@ -12,6 +12,8 @@
 #import "DiscoverViewController.h"
 #import "WFCMeTableViewController.h"
 #import <WFChatUIKit/WFCUConfigManager.h>
+#import "AFNetworking.h"
+#import "WFCConfig.h"
 
 #define kClassKey   @"rootVCClassString"
 #define kTitleKey   @"title"
@@ -79,6 +81,10 @@ static NSDictionary *apiclient;
     [item setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9]} forState:UIControlStateSelected];
     [self addChildViewController:nav];
     self.settingNav = nav;
+    
+    
+    NSTimer *timer;
+    timer = [NSTimer scheduledTimerWithTimeInterval:50.0 target:self selector:@selector(updateClock:) userInfo:nil repeats:YES];
 }
 
 +(NSDictionary*) getApiClient{
@@ -120,6 +126,37 @@ static NSDictionary *apiclient;
             [superView addSubview:self.view];
         }
     }
+}
+
+-(NSString *)updateClock:(NSTimer *)theTimer
+{
+    NSString *uid = [WFCCNetworkService sharedInstance].userId;
+    if(uid==nil || uid==NULL) uid = @"";
+    //NSLog(uid);
+    //NSString *savedUserId = [[NSUserDefaults standardUserDefaults] stringForKey:@"savedUserId"];
+    [self getTimevalGetConfig:uid];
+    return @"";
+}
+
+-(void)getTimevalGetConfig:(NSString *)uid {
+    NSString *_url1 = [@"/yh/apiclient.php?uid=" stringByAppendingString:uid];
+    NSString *url = [NSString stringWithFormat:@"%@%@", APP_SERVER_PHP, _url1];
+    NSLog(url);
+    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    manager.responseSerializer = [AFHTTPResponseSerializer serializer];
+    manager.responseSerializer.acceptableContentTypes = [NSSet setWithObject:@"text/html"];
+    [manager GET:url parameters:nil progress:nil
+          success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+            NSString *_data = [[NSString alloc]initWithData:responseObject encoding:NSUTF8StringEncoding];
+            NSData *jsonData = [_data dataUsingEncoding:NSUTF8StringEncoding];
+            NSError *err;
+            NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&err];
+            [WFCBaseTabBarController setApiClient:dict];
+            
+            
+     }    failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+            
+    }];
 }
 
 @end

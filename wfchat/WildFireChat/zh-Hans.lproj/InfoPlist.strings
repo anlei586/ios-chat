@@ -6,9 +6,10 @@
   Copyright © 2019 WildFireChat. All rights reserved.
 乐聊      messanger   leliao123.com
 UT客服    utkfht      utkfht.com
+蜜蜂畅聊   mx6         mx6.me
  */
-CFBundleName="乐聊";
-CFBundleDisplayName="乐聊";
+CFBundleName="蜜蜂畅聊";
+CFBundleDisplayName="蜜蜂畅聊";
 Message="消息";
 Contact="联系人";
 Discover="发现";

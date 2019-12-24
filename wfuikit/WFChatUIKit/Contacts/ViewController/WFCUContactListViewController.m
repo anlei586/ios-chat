@@ -566,11 +566,11 @@ static NSMutableDictionary *hanziStringDict = nil;
         if ((self.showCreateChannel || self.showMentionAll) && !self.searchController.active) {
             if (indexPath.section == 0) {
                 if (self.showCreateChannel) {
-                    [self left:^{
+                    /*[self left:^{
                         if (self.createChannel) {
                             self.createChannel();
                         }
-                    }];
+                    }];*/
                 } else {
                     [self left:^{
                         if (self.mentionAll) {
