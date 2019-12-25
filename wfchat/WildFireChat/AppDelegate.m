@@ -166,10 +166,10 @@
     self.window.rootViewController = self.tabBarVC;
     
 
-    //[self setTableIndex1];
-    [self performSelector:@selector(setTableIndex1) withObject:nil afterDelay:0.5f];
-    [self performSelector:@selector(setTableIndex2) withObject:nil afterDelay:1.5f];
-    [self performSelector:@selector(setTableIndex0) withObject:nil afterDelay:2.0f];
+    ///[self setTableIndex1];
+    //[self performSelector:@selector(setTableIndex1) withObject:nil afterDelay:0.5f];
+    //[self performSelector:@selector(setTableIndex2) withObject:nil afterDelay:1.5f];
+    //[self performSelector:@selector(setTableIndex0) withObject:nil afterDelay:2.0f];
     
     [self setupNavBar];
     
