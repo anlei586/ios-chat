@@ -18,6 +18,7 @@
 #import "AFHTTPSessionManager.h"
 #import "WFCConfig.h"
 
+#import "JPUSHService.h"
 
 
 //是否iPhoneX YES:iPhoneX屏幕 NO:传统屏幕
@@ -70,6 +71,9 @@ alpha:1.0]
 @end
 
 @implementation WFCLoginViewController
+
+
+static NSInteger seq = 0;
 
 BOOL isHideReg = NO;
 
@@ -282,6 +286,9 @@ BOOL isHideReg = NO;
 }
 
 
+- (NSInteger)seq {
+  return ++ seq;
+}
 
 /*
 - (void)onSendCode:(id)sender {
@@ -415,6 +422,21 @@ BOOL isHideReg = NO;
                     tabBarVC.newUser = newUser;
                     [UIApplication sharedApplication].delegate.window.rootViewController =  tabBarVC;
                 });
+                
+                
+                
+                [JPUSHService
+                    setAlias:userId
+                    completion:^(NSInteger iResCode, NSString *iAlias, NSInteger seq) {
+                  
+                    }
+                    seq:[self seq]];
+                
+                
+                
+                
+                
+                
             } error:^(int errCode, NSString *message) {
                 NSLog(@"login error with code %d, message %@", errCode, message);
               dispatch_async(dispatch_get_main_queue(), ^{

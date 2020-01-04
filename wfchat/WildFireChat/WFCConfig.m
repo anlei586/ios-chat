@@ -23,3 +23,7 @@ NSString *APP_SERVER_PHP = @"";//@"http://110.34.181.127:81";
 NSString *ICE_ADDRESS = @"turn:turn.wildfirechat.cn:3478";
 NSString *ICE_USERNAME = @"wfchat";
 NSString *ICE_PASSWORD = @"wfchat";
+
+NSString *jg_appKey = @"19358de08d97a900412a868c";
+NSString *jg_channel = @"default_developer";
+

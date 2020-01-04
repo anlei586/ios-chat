@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0F0BF11223C0C72000BDD987 /* jcore-ios-2.1.8.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F0BF11123C0C72000BDD987 /* jcore-ios-2.1.8.a */; };
+		0F0BF11423C0C73200BDD987 /* jpush-ios-3.2.8.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F0BF11323C0C73200BDD987 /* jpush-ios-3.2.8.a */; };
+		0F0BF11623C0C93400BDD987 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F0BF11523C0C93400BDD987 /* CFNetwork.framework */; };
+		0F0BF11823C0C95100BDD987 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F0BF11723C0C95100BDD987 /* CoreFoundation.framework */; };
+		0F0BF11A23C0CFEE00BDD987 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F0BF11923C0CFEE00BDD987 /* CoreGraphics.framework */; };
+		0F0BF11C23C0D00600BDD987 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F0BF11B23C0D00600BDD987 /* Foundation.framework */; };
+		0F0BF11E23C0D0F000BDD987 /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F0BF11D23C0D0F000BDD987 /* AdSupport.framework */; };
+		0F0BF12023C0D12400BDD987 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F0BF11F23C0D12300BDD987 /* UIKit.framework */; };
+		0F0BF12223C0D16C00BDD987 /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F0BF12123C0D16C00BDD987 /* libresolv.tbd */; };
 		0F25BCC62374620C007F70F1 /* PCLoginConfirmViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F25BCC22374620C007F70F1 /* PCLoginConfirmViewController.m */; };
 		0F25BCC72374620C007F70F1 /* GroupInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F25BCC42374620C007F70F1 /* GroupInfoViewController.m */; };
 		0F57D90723A4DCE300D6041D /* definite.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 0F57D90623A4DCE300D6041D /* definite.mp3 */; };
@@ -104,6 +113,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0F0BF11023C0C6E500BDD987 /* JPUSHService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JPUSHService.h; path = "../../../../../Downloads/jpush-ios-3.2.8-release/Lib/JPUSHService.h"; sourceTree = "<group>"; };
+		0F0BF11123C0C72000BDD987 /* jcore-ios-2.1.8.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "jcore-ios-2.1.8.a"; path = "../../../../../Downloads/jpush-ios-3.2.8-release/Lib/jcore-ios-2.1.8.a"; sourceTree = "<group>"; };
+		0F0BF11323C0C73200BDD987 /* jpush-ios-3.2.8.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "jpush-ios-3.2.8.a"; path = "../../../../../Downloads/jpush-ios-3.2.8-release/Lib/jpush-ios-3.2.8.a"; sourceTree = "<group>"; };
+		0F0BF11523C0C93400BDD987 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		0F0BF11723C0C95100BDD987 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		0F0BF11923C0CFEE00BDD987 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		0F0BF11B23C0D00600BDD987 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		0F0BF11D23C0D0F000BDD987 /* AdSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdSupport.framework; path = System/Library/Frameworks/AdSupport.framework; sourceTree = SDKROOT; };
+		0F0BF11F23C0D12300BDD987 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		0F0BF12123C0D16C00BDD987 /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
 		0F25BCC22374620C007F70F1 /* PCLoginConfirmViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PCLoginConfirmViewController.m; sourceTree = "<group>"; };
 		0F25BCC32374620C007F70F1 /* GroupInfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GroupInfoViewController.h; sourceTree = "<group>"; };
 		0F25BCC42374620C007F70F1 /* GroupInfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GroupInfoViewController.m; sourceTree = "<group>"; };
@@ -271,21 +290,30 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0F0BF12223C0D16C00BDD987 /* libresolv.tbd in Frameworks */,
+				2F1B0DD121E19AF400139CB1 /* UserNotifications.framework in Frameworks */,
+				0F0BF12023C0D12400BDD987 /* UIKit.framework in Frameworks */,
+				0F0BF11E23C0D0F000BDD987 /* AdSupport.framework in Frameworks */,
+				0F0BF11C23C0D00600BDD987 /* Foundation.framework in Frameworks */,
+				0F0BF11A23C0CFEE00BDD987 /* CoreGraphics.framework in Frameworks */,
+				9051774C2243CD830020A2AC /* SystemConfiguration.framework in Frameworks */,
+				2F1B0DEE21E2161E00139CB1 /* CoreTelephony.framework in Frameworks */,
+				0F0BF11823C0C95100BDD987 /* CoreFoundation.framework in Frameworks */,
+				0F0BF11623C0C93400BDD987 /* CFNetwork.framework in Frameworks */,
 				905177522243CDA60020A2AC /* libc++.tbd in Frameworks */,
 				2BDCE7E32336278E0004212B /* CallKit.framework in Frameworks */,
 				905177502243CD9A0020A2AC /* libz.tbd in Frameworks */,
 				905177542243CEA30020A2AC /* Bugly.framework in Frameworks */,
 				0F5C0653236FD29500096899 /* CallKit.framework in Frameworks */,
 				9051774E2243CD8D0020A2AC /* Security.framework in Frameworks */,
-				9051774C2243CD830020A2AC /* SystemConfiguration.framework in Frameworks */,
 				2BDCE7E1233627450004212B /* PushKit.framework in Frameworks */,
-				2F1B0DEE21E2161E00139CB1 /* CoreTelephony.framework in Frameworks */,
 				2F1B0DD521E1E29400139CB1 /* AudioToolbox.framework in Frameworks */,
+				0F0BF11423C0C73200BDD987 /* jpush-ios-3.2.8.a in Frameworks */,
 				2F1B0DCF21E19AF400139CB1 /* UserNotificationsUI.framework in Frameworks */,
 				2F1B0DD021E19AF400139CB1 /* NotificationCenter.framework in Frameworks */,
-				2F1B0DD121E19AF400139CB1 /* UserNotifications.framework in Frameworks */,
 				2F550E29217F58AE00F56C26 /* WFChatUIKit.framework in Frameworks */,
 				2E56F6CB20AAEBA00063B4D6 /* WFChatClient.framework in Frameworks */,
+				0F0BF11223C0C72000BDD987 /* jcore-ios-2.1.8.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -345,6 +373,9 @@
 		2E1D1FF91FAF0AE600F4405D /* WildFireChat */ = {
 			isa = PBXGroup;
 			children = (
+				0F0BF11323C0C73200BDD987 /* jpush-ios-3.2.8.a */,
+				0F0BF11123C0C72000BDD987 /* jcore-ios-2.1.8.a */,
+				0F0BF11023C0C6E500BDD987 /* JPUSHService.h */,
 				2F518FF0235ED77700FA3D58 /* AppService */,
 				2F94F98422291577005BD461 /* LBXScan */,
 				2FF07F4621F82E7200A78A62 /* Me */,
@@ -380,6 +411,13 @@
 		2EAC88E61FB0A0D6004B34D1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0F0BF12123C0D16C00BDD987 /* libresolv.tbd */,
+				0F0BF11F23C0D12300BDD987 /* UIKit.framework */,
+				0F0BF11D23C0D0F000BDD987 /* AdSupport.framework */,
+				0F0BF11B23C0D00600BDD987 /* Foundation.framework */,
+				0F0BF11923C0CFEE00BDD987 /* CoreGraphics.framework */,
+				0F0BF11723C0C95100BDD987 /* CoreFoundation.framework */,
+				0F0BF11523C0C93400BDD987 /* CFNetwork.framework */,
 				0FB4BCB6239C072F00459E2B /* WFCUShareMessageView.xib */,
 				0F5C0652236FD29500096899 /* CallKit.framework */,
 				2BDCE7E22336278E0004212B /* CallKit.framework */,

@@ -20,4 +20,7 @@ extern NSString *ICE_ADDRESS;
 extern NSString *ICE_USERNAME;
 extern NSString *ICE_PASSWORD;
 
+extern NSString *jg_appKey;
+extern NSString *jg_channel;
+
 #endif /* Config_h */
