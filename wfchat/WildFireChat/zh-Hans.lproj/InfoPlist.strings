@@ -7,9 +7,10 @@
 乐聊      messanger   leliao123.com
 UT客服    utkfht      utkfht.com
 蜜蜂畅聊   mx6         mx6.me
+咪咪      mm790368      790368.com
  */
-CFBundleName="蜜蜂畅聊";
-CFBundleDisplayName="蜜蜂畅聊";
+CFBundleName="UT客服";
+CFBundleDisplayName="UT客服";
 Message="消息";
 Contact="联系人";
 Discover="发现";

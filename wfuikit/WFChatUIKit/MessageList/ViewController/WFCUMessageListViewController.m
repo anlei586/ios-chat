@@ -941,12 +941,18 @@
 #pragma mark - UICollectionViewDelegateFlowLayout
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
   
-  WFCUMessageModel *model = self.modelList[indexPath.row];
+    WFCUMessageModel *model = self.modelList[indexPath.row];
     Class cellCls = self.cellContentDict[@([[model.message.content class] getContentType])];
-  if (!cellCls) {
-    cellCls = self.cellContentDict[@([[WFCCUnknownMessageContent class] getContentType])];
-  }
-  return [cellCls sizeForCell:model withViewWidth:self.collectionView.frame.size.width];
+    /*
+    if([cellCls isEqual:[WFCUInformationCell class]]){
+        CGSize cgsize = CGSizeMake(0, 0);
+        return cgsize;
+    }
+    */
+    if (!cellCls) {
+        cellCls = self.cellContentDict[@([[WFCCUnknownMessageContent class] getContentType])];
+    }
+    return [cellCls sizeForCell:model withViewWidth:self.collectionView.frame.size.width];
 }
 
 #pragma mark - MessageCellDelegate

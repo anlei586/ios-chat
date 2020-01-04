@@ -21,7 +21,11 @@
     WFCCStickerMessageContent *imgContent = (WFCCStickerMessageContent *)msgModel.message.content;
     CGSize size = imgContent.size;
     
-    if (size.height > width || size.width > width) {
+    /*if (size.height > width || size.width > width) {
+        float scale = MIN(width/size.height, width/size.width);
+        size = CGSizeMake(size.width * scale, size.height * scale);
+    }*/
+    if (size.width > width) {
         float scale = MIN(width/size.height, width/size.width);
         size = CGSizeMake(size.width * scale, size.height * scale);
     }

@@ -9,6 +9,8 @@
 #import "WFCUInformationCell.h"
 #import <WFChatClient/WFCChatClient.h>
 #import "WFCUUtilities.h"
+#import "WFCUConfigManager.h"
+
 
 
 #define TEXT_TOP_PADDING 6
@@ -36,6 +38,15 @@
     CGSize size = [WFCUUtilities getTextDrawingSize:infoText font:[UIFont systemFontOfSize:14] constrainedSize:CGSizeMake(width - TEXT_LABEL_LEFT_PADDING - TEXT_LABEL_RIGHT_PADDING - TEXT_LEFT_PADDING - TEXT_RIGHT_PADDING, 8000)];
     size.height += TEXT_LABEL_TOP_PADDING + TEXT_LABEL_BUTTOM_PADDING + TEXT_TOP_PADDING + TEXT_BUTTOM_PADDING;
     size.height += height;
+    
+    
+    
+    NSDictionary *dc2 = [WFCUConfigManager getApiClient];
+    NSString *str = @"0";
+    if ([dc2[@"onfchatwinnoti"] isEqualToString:str]) {
+        return CGSizeMake(0, 0);///////////////////////////////
+    }
+    
     return CGSizeMake(width, size.height);
     
     return CGSizeZero;
@@ -60,6 +71,15 @@
     self.infoLabel.text = infoText;
     self.infoLabel.layoutMargins = UIEdgeInsetsMake(TEXT_TOP_PADDING, TEXT_LEFT_PADDING, TEXT_BUTTOM_PADDING, TEXT_RIGHT_PADDING);
     CGFloat timeLableEnd = 0;
+    
+    
+    NSDictionary *dc2 = [WFCUConfigManager getApiClient];
+    NSString *str = @"0";
+    if ([dc2[@"onfchatwinnoti"] isEqualToString:str]) {
+        self.timeLabel.hidden = YES;///////////////////////////////
+    }
+    
+    
     if (!self.timeLabel.hidden) {
         timeLableEnd = self.timeLabel.frame.size.height + self.timeLabel.frame.origin.y;
     }
@@ -83,8 +103,12 @@
         _infoLabel.layer.cornerRadius = 5.f;
         _infoLabel.textAlignment = NSTextAlignmentCenter;
         _infoLabel.backgroundColor = [UIColor colorWithRed:201/255.f green:201/255.f blue:201/255.f alpha:1.f];
-        
-        [self.contentView addSubview:_infoLabel];
+
+        NSDictionary *dc2 = [WFCUConfigManager getApiClient];
+        NSString *str = @"1";
+        if ([dc2[@"onfchatwinnoti"] isEqualToString:str]) {
+            [self.contentView addSubview:_infoLabel];///////////////////////////////
+        }
     }
     return _infoLabel; 
 }
