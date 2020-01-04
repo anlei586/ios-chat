@@ -9,11 +9,11 @@ UT客服    utkfht      utkfht.com
 蜜蜂畅聊   mx6         mx6.me
 咪咪      mm790368      790368.com
  */
-CFBundleName="UT客服";
-CFBundleDisplayName="UT客服";
+CFBundleName="咪咪";
+CFBundleDisplayName="咪咪";
 Message="消息";
 Contact="联系人";
-Discover="发现";
+Discover="投注";
 Settings="设置";
 Chatroom="聊天室";
 DevDocs="开发手册";

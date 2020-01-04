@@ -32,7 +32,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    self.title = @"发现";
+    self.title = LocalizedString(@"Discover");
     
     self.proBar = [[UIProgressView alloc] initWithFrame:CGRectMake(0, 64, self.view.bounds.size.width, 0)];
     self.proBar.tintColor = HexColor(0x45c01a);

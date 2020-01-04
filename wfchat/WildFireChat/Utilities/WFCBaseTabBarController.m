@@ -35,11 +35,11 @@ static NSDictionary *apiclient;
     [super viewDidLoad];
     
     UIViewController *vc = [DiscoverViewController new];
-    vc.title = @"发现";
+    vc.title = LocalizedString(@"Discover");
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
     UITabBarItem *item = nav.tabBarItem;
     item = nav.tabBarItem;
-    item.title = @"发现";
+    item.title = LocalizedString(@"Discover");
     item.image = [UIImage imageNamed:@"tabbar_discover"];
     item.selectedImage = [[UIImage imageNamed:@"tabbar_discover_cover"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     [item setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9]} forState:UIControlStateSelected];
@@ -48,10 +48,10 @@ static NSDictionary *apiclient;
     self.firstNav = nav;
     
     WFCUConversationTableViewController *vc1 = [WFCUConversationTableViewController new];
-    vc1.title = @"消息";
+    vc1.title = LocalizedString(@"Message");
     nav = [[UINavigationController alloc] initWithRootViewController:vc1];
     item = nav.tabBarItem;
-    item.title = @"消息";
+    item.title = LocalizedString(@"Message");
 
     item.image = [UIImage imageNamed:@"tabbar_chat"];
     item.selectedImage = [[UIImage imageNamed:@"tabbar_chat_cover"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
