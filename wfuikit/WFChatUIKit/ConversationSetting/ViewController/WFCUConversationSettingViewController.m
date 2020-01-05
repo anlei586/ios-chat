@@ -702,20 +702,33 @@
   } else if ([self isSaveGroupCell:indexPath]) {
     
   } else if ([self isGroupNameCardCell:indexPath]) {
-    WFCUGeneralModifyViewController *gmvc = [[WFCUGeneralModifyViewController alloc] init];
-    WFCCGroupMember *groupMember = [[WFCCIMService sharedWFCIMService] getGroupMember:self.conversation.target memberId:[WFCCNetworkService sharedInstance].userId];
-    gmvc.defaultValue = groupMember.alias;
-    gmvc.titleText = WFCString(@"ModifyMyGroupNameCard");
-    gmvc.canEmpty = NO;
-    gmvc.tryModify = ^(NSString *newValue, void (^result)(BOOL success)) {
-      [[WFCCIMService sharedWFCIMService] modifyGroupAlias:self.conversation.target alias:newValue notifyLines:@[@(0)] notifyContent:nil success:^{
-        result(YES);
-      } error:^(int error_code) {
-        result(NO);
-      }];
-    };
-    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:gmvc];
-    [self.navigationController presentViewController:nav animated:YES completion:nil];
+      
+      NSDictionary *dict = [WFCUConfigManager getApiClient];
+      NSString *_onfadduser = dict[@"onfgroupuname"];
+      int _onf = [_onfadduser intValue];
+      BOOL fuzzy = NO;
+      if(_onf==1){
+          fuzzy = YES;
+      }
+      if(fuzzy){
+            WFCUGeneralModifyViewController *gmvc = [[WFCUGeneralModifyViewController alloc] init];
+            WFCCGroupMember *groupMember = [[WFCCIMService sharedWFCIMService] getGroupMember:self.conversation.target memberId:[WFCCNetworkService sharedInstance].userId];
+            gmvc.defaultValue = groupMember.alias;
+            gmvc.titleText = WFCString(@"ModifyMyGroupNameCard");
+            gmvc.canEmpty = NO;
+            gmvc.tryModify = ^(NSString *newValue, void (^result)(BOOL success)) {
+              [[WFCCIMService sharedWFCIMService] modifyGroupAlias:self.conversation.target alias:newValue notifyLines:@[@(0)] notifyContent:nil success:^{
+                result(YES);
+              } error:^(int error_code) {
+                result(NO);
+              }];
+            };
+            UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:gmvc];
+            [self.navigationController presentViewController:nav animated:YES completion:nil];
+      }else{
+          [self alert:@"管理员已经禁止此功能"];
+      }
+      
   } else if([self isShowNameCardCell:indexPath]) {
     
   } else if ([self isClearMessageCell:indexPath]) {
@@ -753,6 +766,11 @@
       vc.isManager = [self isGroupManager];
       [self.navigationController pushViewController:vc animated:YES];
   }
+}
+
+-(void)alert:(NSString*) text{
+    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:text delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+    [alert show];
 }
 
 

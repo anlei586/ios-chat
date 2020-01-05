@@ -24,6 +24,5 @@ NSString *ICE_ADDRESS = @"turn:turn.wildfirechat.cn:3478";
 NSString *ICE_USERNAME = @"wfchat";
 NSString *ICE_PASSWORD = @"wfchat";
 
-NSString *jg_appKey = @"19358de08d97a900412a868c";
 NSString *jg_channel = @"default_developer";
-
+NSString *jg_appKey = @"6aecb32d50716ae781d90a90";

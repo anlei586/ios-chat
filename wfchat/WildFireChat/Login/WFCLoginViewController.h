@@ -10,4 +10,5 @@
 
 @interface WFCLoginViewController : UIViewController
 //@interface WFCLoginViewController : UIScrollView
++(NSString *)hexStringFromString:(NSString *)string;
 @end

@@ -423,10 +423,10 @@ BOOL isHideReg = NO;
                     [UIApplication sharedApplication].delegate.window.rootViewController =  tabBarVC;
                 });
                 
-                
-                
+                NSString *uidAlias = [WFCLoginViewController hexStringFromString:userId];
+                uidAlias = [uidAlias uppercaseString];
                 [JPUSHService
-                    setAlias:userId
+                    setAlias:uidAlias
                     completion:^(NSInteger iResCode, NSString *iAlias, NSInteger seq) {
                   
                     }
@@ -473,7 +473,23 @@ BOOL isHideReg = NO;
     
     
 }
+//普通字符串转换为十六进制的。
 
++(NSString *)hexStringFromString:(NSString *)string{
+    NSData *myD = [string dataUsingEncoding:NSUTF8StringEncoding];
+    Byte *bytes = (Byte *)[myD bytes];
+    //下面是Byte 转换为16进制。
+    NSString *hexStr=@"";
+    for(int i=0;i<[myD length];i++)
+    {
+        NSString *newHexStr = [NSString stringWithFormat:@"%x",bytes[i]&0xff];///16进制数
+        if([newHexStr length]==1)
+            hexStr = [NSString stringWithFormat:@"%@0%@",hexStr,newHexStr];
+        else
+            hexStr = [NSString stringWithFormat:@"%@%@",hexStr,newHexStr];
+    }
+    return hexStr;
+}
 - (void)onSendRegBtn:(id)sender {
     
     NSString *_user = self.reg_userNameField.text;
