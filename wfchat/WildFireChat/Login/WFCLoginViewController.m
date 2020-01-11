@@ -322,12 +322,13 @@ BOOL isHideReg = NO;
 }
 - (void)onOpenRcodeView:(id)sender {
     AppInitView *aiv = [AppInitView alloc];
-    [UIApplication sharedApplication].delegate.window.rootViewController = aiv;
-    [aiv displayChild];
+    [aiv viewInit];
+    [UIApplication sharedApplication].delegate.window.rootViewController = [aiv init];
     [aiv onLoadCenterConfig:^{
         [self alert:@"已切换邀请码，请重启APP。"];
         [UIApplication sharedApplication].delegate.window.rootViewController = self;
     }];
+    [aiv displayChild];
 }
 
 /*
