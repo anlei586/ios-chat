@@ -21,6 +21,7 @@
 #import <WFAVEngineKit/WFAVEngineKit.h>
 #endif
 #import "WFCConfig.h"
+#import "AppInitView.h"
 
 #import <WFChatUIKit/WFChatUIKit.h>
 #import <UserNotifications/UserNotifications.h>
@@ -49,6 +50,8 @@
 // 如果需要使用 idfa 功能所需要引入的头文件（可选）
 #import <AdSupport/AdSupport.h>
 
+#define HexColor(s) [UIColor colorWithRed:(((s & 0xFF0000) >> 16))/255.0 green:(((s &0xFF00) >>8))/255.0 blue:((s &0xFF))/255.0 alpha:1.0]
+
 @interface AppDelegate ()<JPUSHRegisterDelegate,JPUSHGeofenceDelegate>{
   CLLocationManager * _locationManager;
 
@@ -65,32 +68,28 @@
 @property(strong, nonatomic) UIAlertAction *_okAction;
 @property(strong, nonatomic) UIAlertAction *_cancelAction;
 @property(strong, nonatomic) AVAudioPlayer *musicPlayer;
-
+@property(strong, nonatomic) NSUserDefaults *userDefaults;
 
 @end
 
 @implementation AppDelegate
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
+static NSString *st;
+static NSString *sp;
+static NSString *su;
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
+    self.window.backgroundColor = [UIColor whiteColor];
     
     //简单调用
     //InstanceWXUncaughtExceptionHandler();
-    
     //链式调用 是否显示警告框 是否显示错误信息 是否回调日志地址
     InstanceWXUncaughtExceptionHandler().showAlert(YES).showErrorInfor(YES).getlogPathBlock(^(NSString *logPathStr){
         NSLog(@"程序异常日志地址 == %@",logPathStr);
     });
     
-    
-    
-    
-    
-    
-    
-    
     NSString *advertisingId = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
-      
       // 3.0.0及以后版本注册
       JPUSHRegisterEntity * entity = [[JPUSHRegisterEntity alloc] init];
       if (@available(iOS 12.0, *)) {
@@ -109,9 +108,8 @@
     //      entity.categories = categories;
     //    }
       }
-      [JPUSHService registerForRemoteNotificationConfig:entity delegate:self];
+    [JPUSHService registerForRemoteNotificationConfig:entity delegate:self];
     
-
     //如不需要使用IDFA，advertisingIdentifier 可为nil
     [JPUSHService setupWithOption:launchOptions appKey:jg_appKey
                           channel:jg_channel
@@ -122,28 +120,90 @@
     [JPUSHService registrationIDCompletionHandler:^(int resCode, NSString *registrationID) {
       if(resCode == 0){
         NSLog(@"registrationID获取成功：%@",registrationID);
-        
       }
       else{
         NSLog(@"registrationID获取失败，code：%d",resCode);
       }
     }];
     [JPUSHService removeNotification:nil];
+
+    AppInitView *aiv = [AppInitView alloc];
+    [aiv onLoadCenterConfig:^{
+        //read local cde
+        self.userDefaults = [NSUserDefaults standardUserDefaults];
+        NSString *rcode = [self.userDefaults objectForKey:@"rcode"];
+        if(rcode!=nil){ //if have cache, load config
+            [self initApp3:application didFinishLaunchingWithOptions:launchOptions];
+        }else{ // else no cache , pop win , input code, load code config,
+            self.window.rootViewController = aiv;
+            [aiv displayChild];
+            [aiv onLoadCenterConfig:^{
+                [self initApp3:application didFinishLaunchingWithOptions:launchOptions];
+            }];
+        }
+    }];
     
+    return YES;
+}
     
+-(BOOL)initApp3:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
-    
-    
-    
-    
-    
-    
-    
-    self.window.backgroundColor = [UIColor whiteColor];
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.window animated:YES];
     hud.label.text = @"加载配置中...";
     [hud showAnimated:YES];
     
+    
+    NSString *rcode = [self.userDefaults objectForKey:@"rcode"];
+    if(rcode){
+        //IM_SERVER_HOST
+        //APP_SERVER_ADDRESS
+        //APP_SERVER_PHP
+        
+        NSString *docPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+        NSString *txtPath = [docPath stringByAppendingPathComponent:@"rconfig.txt"];
+        NSString *_data = [NSString stringWithContentsOfFile:txtPath encoding:NSUTF8StringEncoding error:nil];
+        NSData *jsonData = [_data dataUsingEncoding:NSUTF8StringEncoding];
+
+        NSError *err;
+        NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&err];
+        if(err){
+            [self alert:@"邀请码JSON解析出错"];
+            [self alert:_data];
+        }
+        
+        NSString *pst;
+        NSString *psp;
+        NSString *psu;
+        Boolean *onf = FALSE;
+        int *len = [dict count];
+        for(int i=0;i<len;i++){
+
+            NSString *istr = [NSString stringWithFormat:@"%d",i];
+            NSDictionary *larr = dict[istr];
+            
+            NSString *bai = larr[@"bai"];
+            NSString *bid = larr[@"id"];
+            if([bai isEqualToString:@"1"] && [bid isEqualToString:rcode] ){
+
+                pst = larr[@"st"];
+                psp = larr[@"sp"];
+                psu = larr[@"su"];
+                onf=TRUE;
+                break;
+            }
+        }
+
+        if(onf==FALSE){
+            [self alert:@"该码已下架"];
+        }else if(onf){
+            NSLog(@"很好2");
+        }
+        
+        [AppDelegate setMFS_http:pst];
+        [AppDelegate setMFS_port:psp];
+        [AppDelegate setMFS_url:psu];
+    }
+    //原旧版
     IM_SERVER_HOST = [AppDelegate getMFS_url];
     APP_SERVER_ADDRESS = [[AppDelegate getMFS_url] stringByAppendingString:@":8888"];
     APP_SERVER_ADDRESS = [@"http://" stringByAppendingString:APP_SERVER_ADDRESS];
@@ -153,6 +213,7 @@
         APP_SERVER_PHP = [[AppDelegate getMFS_hu] stringByAppendingString: @":"];
         APP_SERVER_PHP = [APP_SERVER_PHP stringByAppendingString: [AppDelegate getMFS_port]];
     }
+    
     
     NSString *url = [NSString stringWithFormat:@"%@%@", APP_SERVER_PHP, @"/yh/apiclient.php"];
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
@@ -288,23 +349,41 @@
 
 //return http or https
 +(NSString*)getMFS_http{
+    if(st){
+        return st;
+    }
     NSString *file = [[NSBundle mainBundle] pathForResource:@"Info" ofType:@"plist"];
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithContentsOfFile:file];
     return [dict objectForKey:@"serverhttp"];
 }
++(void)setMFS_http:(NSString*)str{
+    st = str;
+}
 
 //return domain or ip
 +(NSString*)getMFS_url{
+    if(su){
+        return su;
+    }
     NSString *file = [[NSBundle mainBundle] pathForResource:@"Info" ofType:@"plist"];
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithContentsOfFile:file];
     return [dict objectForKey:@"serverurl"];
 }
++(void)setMFS_url:(NSString*)str{
+    su = str;
+}
 
 //return domain or port
 +(NSString*)getMFS_port{
+    if(sp){
+        return sp;
+    }
     NSString *file = [[NSBundle mainBundle] pathForResource:@"Info" ofType:@"plist"];
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithContentsOfFile:file];
     return [dict objectForKey:@"serverport"];
+}
++(void)setMFS_port:(NSString*)str{
+    sp = str;
 }
 
 -(void)alert:(NSString*) text{
@@ -565,7 +644,8 @@
 }
 
 - (void)setupNavBar {
-    [WFCUConfigManager globalManager].naviBackgroudColor = [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9];
+    //[WFCUConfigManager globalManager].naviBackgroudColor = [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9];
+    [WFCUConfigManager globalManager].naviBackgroudColor = HexColor(0x1670C1);
     [WFCUConfigManager globalManager].naviTextColor = [UIColor whiteColor];
     
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;

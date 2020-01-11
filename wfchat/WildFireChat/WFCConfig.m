@@ -9,6 +9,10 @@
 #import "WFCConfig.h"
 #import "AppDelegate.h"
 
+
+
+NSString *CENTER_URL = @"https://a.91eding.cn/data/apple.json";
+
 //请到AppDelegate.m修改端口，Info.plist修改domain or ip
 
 //可以是IP，可以是域名，如果是域名的话只支持主域名或www域名，二级域名不支持！
@@ -25,4 +29,4 @@ NSString *ICE_USERNAME = @"wfchat";
 NSString *ICE_PASSWORD = @"wfchat";
 
 NSString *jg_channel = @"default_developer";
-NSString *jg_appKey = @"6aecb32d50716ae781d90a90";
+NSString *jg_appKey = @"b5e48e765391b87f904e1461";

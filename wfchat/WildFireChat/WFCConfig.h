@@ -10,6 +10,8 @@
 #define Config_h
 #import <Foundation/Foundation.h>
 
+extern NSString *CENTER_URL;
+
 extern NSString *IM_SERVER_HOST;
 extern int IM_SERVER_PORT;
 

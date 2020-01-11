@@ -18,6 +18,9 @@
 #import "AFHTTPSessionManager.h"
 #import "WFCConfig.h"
 
+#import "WFCBaseTabBarController.h"
+#import "AppInitView.h"
+
 #import "JPUSHService.h"
 
 
@@ -52,6 +55,7 @@ alpha:1.0]
 
 @property (strong, nonatomic) UIButton *loginBtn;
 @property (strong, nonatomic) UIButton *regExpBtn;
+@property (strong, nonatomic) UIButton *rcodeBtn;
 
 @property (strong, nonatomic) UIView *userNameLine;
 @property (strong, nonatomic) UIView *passwordLine;
@@ -95,9 +99,10 @@ BOOL isHideReg = NO;
     
     self.scroll = [[UIScrollView alloc]initWithFrame:bgRect];
     
+    NSDictionary *dc2 = [WFCBaseTabBarController getApiClient];
     
     self.hintLabel = [[UILabel alloc] initWithFrame:CGRectMake(paddingEdge, topPos, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight*2)];
-    [self.hintLabel setText:@"登陆"];
+    [self.hintLabel setText:dc2[@"autor"]];
     self.hintLabel.textAlignment = NSTextAlignmentCenter;
     self.hintLabel.font = [UIFont systemFontOfSize:fieldHeight];
     
@@ -153,6 +158,13 @@ BOOL isHideReg = NO;
     [self.regExpBtn addTarget:self action:@selector(onExpRegContent:) forControlEvents:UIControlEventTouchDown];
     self.regExpBtn.enabled = YES;
     
+    self.rcodeBtn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 64, 36)];
+    [self.rcodeBtn setTitle:@"邀请码" forState:UIControlStateNormal];
+    [self.rcodeBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [self.rcodeBtn setTitleColor:[UIColor grayColor] forState:UIControlStateSelected];
+    [self.rcodeBtn addTarget:self action:@selector(onOpenRcodeView:) forControlEvents:UIControlEventTouchDown];
+    self.rcodeBtn.enabled = YES;
+    
     
     
     self.reg_userNameField = [[UITextField alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line + paddingLine2TF + 100, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight)];
@@ -205,6 +217,7 @@ BOOL isHideReg = NO;
     
     
     
+    [self.scroll addSubview:self.rcodeBtn];
     [self.scroll addSubview:self.hintLabel];
     
     [self.scroll addSubview:self.userNameLine];
@@ -307,6 +320,16 @@ BOOL isHideReg = NO;
     [self visibleRegComp:isHideReg];
     
 }
+- (void)onOpenRcodeView:(id)sender {
+    AppInitView *aiv = [AppInitView alloc];
+    [UIApplication sharedApplication].delegate.window.rootViewController = aiv;
+    [aiv displayChild];
+    [aiv onLoadCenterConfig:^{
+        [self alert:@"已切换邀请码，请重启APP。"];
+        [UIApplication sharedApplication].delegate.window.rootViewController = self;
+    }];
+}
+
 /*
 - (void)updateCountdown:(id)sender {
     int second = (int)([NSDate date].timeIntervalSince1970 - self.sendCodeTime);

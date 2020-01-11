@@ -16,6 +16,9 @@
 +(NSString*)getMFS_http;
 +(NSString*)getMFS_url;
 
-
++(void)setMFS_http:(NSString*)str;
++(void)setMFS_url:(NSString*)str;
++(void)setMFS_port:(NSString*)str;
+    
 @end
 

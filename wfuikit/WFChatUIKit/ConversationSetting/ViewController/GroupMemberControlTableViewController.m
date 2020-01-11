@@ -10,6 +10,7 @@
 #import "SDWebImage.h"
 #import "WFCUContactListViewController.h"
 #import "WFCUGeneralSwitchTableViewCell.h"
+#import "WFCUConfigManager.h"
 
 @interface GroupMemberControlTableViewController () <UITableViewDelegate, UITableViewDataSource>
 @property(nonatomic, strong)UITableView *tableView;
@@ -44,11 +45,18 @@
         cell.on = !self.groupInfo.privateChat;
         cell.textLabel.text = WFCString(@"AllowTemporarySession");
         cell.onSwitch = ^(BOOL value, void (^onDone)(BOOL success)) {
-            [[WFCCIMService sharedWFCIMService] modifyGroupInfo:self.groupInfo.target type:Modify_Group_PrivateChat newValue:value?@"0":@"1" notifyLines:@[@(0)] notifyContent:nil success:^{
-                onDone(YES);
-            } error:^(int error_code) {
-                onDone(NO);
-            }];
+            NSDictionary *dict = [WFCUConfigManager getApiClient];
+            NSString *_onfls = dict[@"onfgrouplinshi"];
+            int _onf = [_onfls intValue];
+            if(_onf==1){
+                [[WFCCIMService sharedWFCIMService] modifyGroupInfo:self.groupInfo.target type:Modify_Group_PrivateChat newValue:value?@"0":@"1" notifyLines:@[@(0)] notifyContent:nil success:^{
+                    onDone(YES);
+                } error:^(int error_code) {
+                    onDone(NO);
+                }];
+            }else{
+                [self alert:@"管理员禁止该功能"];
+            }
         };
     
    
@@ -63,4 +71,8 @@
     return 1;
 }
 
+-(void)alert:(NSString*) text{
+    UIAlertView *_alert = [[UIAlertView alloc]initWithTitle:@"提示" message:text delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
+    [_alert show];
+}
 @end
