@@ -29,7 +29,9 @@ NSInteger *isExec = 0;
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    CGRect bgRect = self.view.bounds;
+}
+-(void) viewInit{
+    CGRect bgRect = [UIScreen mainScreen].bounds;
     CGFloat paddingEdge = 40;
     
     CGFloat paddingTF2Line = 12;
@@ -88,6 +90,7 @@ NSInteger *isExec = 0;
 }
 
 -(void) onLoadCenterConfig:(void(^)())testBlock{
+    
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     hud.label.text = @"加载邀请码配置中...";
     [hud showAnimated:YES];

@@ -135,11 +135,13 @@ static NSString *su;
         if(rcode!=nil){ //if have cache, load config
             [self initApp3:application didFinishLaunchingWithOptions:launchOptions];
         }else{ // else no cache , pop win , input code, load code config,
-            self.window.rootViewController = aiv;
-            [aiv displayChild];
+
+            [aiv viewInit];
+            self.window.rootViewController = [aiv init];
             [aiv onLoadCenterConfig:^{
                 [self initApp3:application didFinishLaunchingWithOptions:launchOptions];
             }];
+            [aiv displayChild];
         }
     }];
     
