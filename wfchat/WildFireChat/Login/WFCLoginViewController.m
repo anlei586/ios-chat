@@ -94,14 +94,14 @@ BOOL isHideReg = NO;
     CGFloat sendCodeBtnwidth = 120;
     CGFloat paddingField2Code = 8;
     
-    CGFloat topPos = kStatusBarAndNavigationBarHeight + 5;
+    CGFloat topPos = kStatusBarAndNavigationBarHeight + 0;
     CGFloat fieldHeight = 25;
     
     self.scroll = [[UIScrollView alloc]initWithFrame:bgRect];
     
     NSDictionary *dc2 = [WFCBaseTabBarController getApiClient];
     
-    self.hintLabel = [[UILabel alloc] initWithFrame:CGRectMake(paddingEdge, topPos, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight*2)];
+    self.hintLabel = [[UILabel alloc] initWithFrame:CGRectMake(paddingEdge, topPos-20, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight*2)];
     [self.hintLabel setText:dc2[@"autor"]];
     self.hintLabel.textAlignment = NSTextAlignmentCenter;
     self.hintLabel.font = [UIFont systemFontOfSize:fieldHeight];
@@ -241,9 +241,9 @@ BOOL isHideReg = NO;
     
     [self.view addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(resetKeyboard:)]];
     
-    self.privacyLabel = [[UILabel alloc] initWithFrame:CGRectMake(16, self.view.bounds.size.height - 28 - kTabbarSafeBottomMargin, self.view.bounds.size.width-32, 28)];
+    self.privacyLabel = [[UILabel alloc] initWithFrame:CGRectMake(16, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line + paddingLine2TF + 290, self.view.bounds.size.width-32, 28)];
     self.privacyLabel.textAlignment = NSTextAlignmentCenter;
-    NSMutableAttributedString *text = [[NSMutableAttributedString alloc] initWithString:@"登陆即代表你已同意《野火IM用户协议》和《野火IM隐私政策》" attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:10],NSForegroundColorAttributeName : [UIColor darkGrayColor]}];
+    NSMutableAttributedString *text = [[NSMutableAttributedString alloc] initWithString:@"登陆即代表你已同意《野鸭IM用户协议》和《野鸭IM隐私政策》" attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:10],NSForegroundColorAttributeName : [UIColor darkGrayColor]}];
     [text setAttributes:@{NSFontAttributeName : [UIFont systemFontOfSize:10],
                           NSForegroundColorAttributeName : [UIColor blueColor]} range:NSMakeRange(9, 10)];
     [text setAttributes:@{NSFontAttributeName : [UIFont systemFontOfSize:10],
@@ -256,7 +256,7 @@ BOOL isHideReg = NO;
         [ws.navigationController pushViewController:pvc animated:YES];
     }];
     
-    //[self.scroll addSubview:self.privacyLabel];
+    [self.scroll addSubview:self.privacyLabel];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -318,7 +318,11 @@ BOOL isHideReg = NO;
 - (void)onExpRegContent:(id)sender {
     isHideReg = !isHideReg;
     [self visibleRegComp:isHideReg];
-    
+    CGPoint bottomOffset = CGPointMake(0, -75);
+    if(isHideReg){
+        bottomOffset = CGPointMake(0, self.scroll.contentSize.height-self.scroll.bounds.size.height);
+    }
+    [self.scroll setContentOffset:bottomOffset animated:YES];
 }
 - (void)onOpenRcodeView:(id)sender {
     AppInitView *aiv = [AppInitView alloc];
