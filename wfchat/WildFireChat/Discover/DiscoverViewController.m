@@ -13,6 +13,8 @@
 #import <WebKit/WebKit.h>
 #import "WFCBaseTabBarController.h"
 
+#import <WFChatClient/WFCChatClient.h>
+
 #define HexColor(s) [UIColor colorWithRed:(((s & 0xFF0000) >> 16))/255.0 green:(((s &0xFF00) >>8))/255.0 blue:((s &0xFF))/255.0 alpha:1.0]
 
 @interface DiscoverViewController () <UITableViewDataSource, UITableViewDelegate>
@@ -224,6 +226,13 @@
 -(void)webSendRequest{
     NSDictionary *dict = [WFCBaseTabBarController getApiClient];
     self.main_url = dict[@"homeUrl"];
+    
+    NSString *uid = [WFCCNetworkService sharedInstance].userId;
+    if(uid==nil || uid==NULL) uid = @"";
+    
+    self.main_url = [self.main_url stringByAppendingString: @"?uid="];
+    self.main_url = [self.main_url stringByAppendingString: uid];
+    
     [self.wkWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.main_url]]];
 }
 
