@@ -9,9 +9,9 @@
 #import "WFCConfig.h"
 #import "AppDelegate.h"
 
-
-
-NSString *CENTER_URL = @"https://a.91eding.cn/data/apple.json";
+NSInteger *RCODE_ONF = 0;
+NSString *RCODE_IDK = @"1011";
+NSString *CENTER_URL = @"https://apple.6b6.me/apple.json";
 
 //请到AppDelegate.m修改端口，Info.plist修改domain or ip
 

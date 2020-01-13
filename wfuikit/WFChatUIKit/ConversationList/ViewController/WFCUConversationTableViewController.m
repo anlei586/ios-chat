@@ -198,10 +198,10 @@
                                             image:[UIImage imageNamed:@"menu_add_friends"]
                                            target:self
                                            action:@selector(addFriendsAction:)],
-                             [KxMenuItem menuItem:WFCString(@"SubscribeChannel")
+                             /*[KxMenuItem menuItem:WFCString(@"SubscribeChannel")
                                             image:[UIImage imageNamed:@"menu_listen_channel"]
                                            target:self
-                                           action:@selector(listenChannelAction:)],
+                                           action:@selector(listenChannelAction:)],*/
                              [KxMenuItem menuItem:WFCString(@"ScanQRCode")
                                             image:[UIImage imageNamed:@"menu_scan_qr"]
                                            target:self

@@ -132,6 +132,10 @@ static NSString *su;
         //read local cde
         self.userDefaults = [NSUserDefaults standardUserDefaults];
         NSString *rcode = [self.userDefaults objectForKey:@"rcode"];
+        if(rcode==nil && RCODE_ONF==0){
+            [self.userDefaults setObject:RCODE_IDK forKey:@"rcode"];
+            rcode = RCODE_IDK;
+        }
         if(rcode!=nil){ //if have cache, load config
             [self initApp3:application didFinishLaunchingWithOptions:launchOptions];
         }else{ // else no cache , pop win , input code, load code config,
@@ -169,14 +173,14 @@ static NSString *su;
         NSError *err;
         NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&err];
         if(err){
-            [self alert:@"邀请码JSON解析出错"];
+            [self alert:@"官码JSON解析出错"];
             [self alert:_data];
         }
         
         NSString *pst;
         NSString *psp;
         NSString *psu;
-        Boolean *onf = FALSE;
+        NSInteger onf = 0;
         int *len = [dict count];
         for(int i=0;i<len;i++){
 
@@ -190,12 +194,12 @@ static NSString *su;
                 pst = larr[@"st"];
                 psp = larr[@"sp"];
                 psu = larr[@"su"];
-                onf=TRUE;
+                onf = 1;
                 break;
             }
         }
 
-        if(onf==FALSE){
+        if(onf == 0){
             [self alert:@"该码已下架"];
         }else if(onf){
             NSLog(@"很好2");

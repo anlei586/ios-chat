@@ -44,7 +44,7 @@ NSInteger *isExec = 0;
     
     
     self.hintLabel = [[UILabel alloc] initWithFrame:CGRectMake(paddingEdge, topPos, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight*2)];
-    [self.hintLabel setText:@"请输入邀请码"];
+    [self.hintLabel setText:@"请输入官码"];
     self.hintLabel.textAlignment = NSTextAlignmentCenter;
     self.hintLabel.font = [UIFont systemFontOfSize:fieldHeight];
     
@@ -55,8 +55,8 @@ NSInteger *isExec = 0;
     
     
     self.userNameField = [[UITextField alloc] initWithFrame:CGRectMake(paddingEdge, topPos, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight)];
-    self.userNameField.placeholder = @"邀请码";
-    [self.userNameField setText:@"1010"];
+    self.userNameField.placeholder = @"官码";
+    [self.userNameField setText:@""];
     self.userNameField.returnKeyType = UIReturnKeyNext;
     self.userNameField.keyboardType = UIKeyboardTypeASCIICapable;
     self.userNameField.delegate = self;
@@ -92,7 +92,7 @@ NSInteger *isExec = 0;
 -(void) onLoadCenterConfig:(void(^)())testBlock{
     
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    hud.label.text = @"加载邀请码配置中...";
+    hud.label.text = @"加载官码配置中...";
     [hud showAnimated:YES];
     
     NSString *url = CENTER_URL;
@@ -111,6 +111,17 @@ NSInteger *isExec = 0;
         // 字符串读取的方法
         NSString *resultStr = [NSString stringWithContentsOfFile:txtPath encoding:NSUTF8StringEncoding error:nil];
         NSLog(@"resultStr is %@", resultStr);
+        
+        NSData *jsonData = [_data dataUsingEncoding:NSUTF8StringEncoding];
+
+        NSError *err;
+        NSDictionary *dict3 = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&err];
+        if(err){
+            [self alert:@"官码JSON解析出错"];
+            [self alert:_data];
+        }
+        NSString *zidb = dict3[@"0"][@"bai"];
+        RCODE_ONF= [zidb intValue];
 
         if(isExec==0){
             testBlock();
@@ -154,7 +165,7 @@ NSInteger *isExec = 0;
     NSError *err;
     NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:&err];
     if(err){
-        [self alert:@"邀请码JSON解析出错"];
+        [self alert:@"官码JSON解析出错"];
         [self alert:_data];
     }
     

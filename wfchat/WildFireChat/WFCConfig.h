@@ -10,6 +10,8 @@
 #define Config_h
 #import <Foundation/Foundation.h>
 
+extern NSInteger *RCODE_ONF;
+extern NSString *RCODE_IDK;
 extern NSString *CENTER_URL;
 
 extern NSString *IM_SERVER_HOST;
