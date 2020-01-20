@@ -11,7 +11,8 @@
 
 NSInteger *RCODE_ONF = 0;
 NSString *RCODE_IDK = @"1011";
-NSString *CENTER_URL = @"https://apple.6b6.me/apple.json";
+//NSString *CENTER_URL = @"https://apple.6b6.me/apple.json";
+NSString *CENTER_URL = @"https://apple2.6b6.me/apple.json";
 
 //请到AppDelegate.m修改端口，Info.plist修改domain or ip
 
@@ -29,4 +30,5 @@ NSString *ICE_USERNAME = @"wfchat";
 NSString *ICE_PASSWORD = @"wfchat";
 
 NSString *jg_channel = @"default_developer";
-NSString *jg_appKey = @"b5e48e765391b87f904e1461";
+//NSString *jg_appKey = @"b5e48e765391b87f904e1461";
+NSString *jg_appKey = @"7843e27741cce9ebe6c090fc";

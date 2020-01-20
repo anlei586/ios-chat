@@ -6,8 +6,8 @@ UT客服    utkfht      utkfht.com          12c3bf69289e16db0d17594f
 咪咪      mm790368      790368.com        19358de08d97a900412a868c
  
  */
-CFBundleName="野鸭IM";
-CFBundleDisplayName="野鸭IM";
+CFBundleName="蜜蜂信封";
+CFBundleDisplayName="蜜蜂信封";
 Message="消息";
 Contact="联系人";
 Discover="大厅";

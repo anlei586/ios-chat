@@ -127,6 +127,13 @@ static NSString *su;
     }];
     [JPUSHService removeNotification:nil];
 
+    
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.window animated:YES];
+    hud.label.text = @"加载配置中...";
+    [hud showAnimated:YES];
+    
+    
+    
     AppInitView *aiv = [AppInitView alloc];
     [aiv onLoadCenterConfig:^{
         //read local cde
@@ -137,6 +144,7 @@ static NSString *su;
             rcode = RCODE_IDK;
         }
         if(rcode!=nil){ //if have cache, load config
+            [hud hideAnimated:YES];
             [self initApp3:application didFinishLaunchingWithOptions:launchOptions];
         }else{ // else no cache , pop win , input code, load code config,
 
@@ -146,6 +154,7 @@ static NSString *su;
                 [self initApp3:application didFinishLaunchingWithOptions:launchOptions];
             }];
             [aiv displayChild];
+            [hud hideAnimated:YES];
         }
     }];
     
@@ -651,7 +660,8 @@ static NSString *su;
 
 - (void)setupNavBar {
     //[WFCUConfigManager globalManager].naviBackgroudColor = [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9];
-    [WFCUConfigManager globalManager].naviBackgroudColor = HexColor(0x1670C1);
+    //[WFCUConfigManager globalManager].naviBackgroudColor = HexColor(0x1670C1);
+    [WFCUConfigManager globalManager].naviBackgroudColor = HexColor(0x39abf2);
     [WFCUConfigManager globalManager].naviTextColor = [UIColor whiteColor];
     
     [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;

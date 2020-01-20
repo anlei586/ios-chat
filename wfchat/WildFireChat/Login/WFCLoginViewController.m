@@ -243,7 +243,7 @@ BOOL isHideReg = NO;
     
     self.privacyLabel = [[UILabel alloc] initWithFrame:CGRectMake(16, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line + paddingLine2TF + 290, self.view.bounds.size.width-32, 28)];
     self.privacyLabel.textAlignment = NSTextAlignmentCenter;
-    NSMutableAttributedString *text = [[NSMutableAttributedString alloc] initWithString:@"登陆即代表你已同意《野鸭IM用户协议》和《野鸭IM隐私政策》" attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:10],NSForegroundColorAttributeName : [UIColor darkGrayColor]}];
+    NSMutableAttributedString *text = [[NSMutableAttributedString alloc] initWithString:@"登陆即代表你已同意《蜜蜂信封用户协议》和《蜜蜂信封隐私政策》" attributes:@{NSFontAttributeName : [UIFont systemFontOfSize:10],NSForegroundColorAttributeName : [UIColor darkGrayColor]}];
     [text setAttributes:@{NSFontAttributeName : [UIFont systemFontOfSize:10],
                           NSForegroundColorAttributeName : [UIColor blueColor]} range:NSMakeRange(9, 10)];
     [text setAttributes:@{NSFontAttributeName : [UIFont systemFontOfSize:10],
