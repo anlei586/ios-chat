@@ -21,6 +21,8 @@
 #import <WFChatClient/WFCChatClient.h>
 #import "WFCUContactListViewController.h"
 
+#import "WFCUConfigManager.h"
+#import "WFCUBrowserViewController.h"
 
 #define CHAT_INPUT_BAR_PADDING 8
 #define CHAT_INPUT_BAR_ICON_SIZE (CHAT_INPUT_BAR_HEIGHT - CHAT_INPUT_BAR_PADDING - CHAT_INPUT_BAR_PADDING)
@@ -984,6 +986,48 @@
         };
         [[self.delegate requireNavi] presentViewController:navi animated:YES completion:nil];
         [self notifyTyping:4];
+    } else if(itemTag == 6) {
+        
+        int *cline = self.conversation.line;
+        WFCCConversationType *type = self.conversation.type;
+        NSString *ctarget=self.conversation.target;
+        
+        NSString *ctype = @"";
+        if(type==Single_Type){
+            ctype = @"Single";
+        }else if(type==Group_Type){
+            ctype = @"Group";
+        }
+        
+        NSString *clientId = [[WFCCNetworkService sharedInstance] getClientId];
+        NSString *userId =[[WFCCNetworkService sharedInstance] userId];
+        
+        NSDictionary *dict = [WFCUConfigManager getApiClient];
+        NSString *url = dict[@"sendredpack"];
+        
+        
+        url = [NSString stringWithFormat:@"%@%@", url, @"?cid="];
+        url = [NSString stringWithFormat:@"%@%@", url, clientId];
+        url = [NSString stringWithFormat:@"%@%@", url, @"&uid="];
+        url = [NSString stringWithFormat:@"%@%@", url, userId];
+        url = [NSString stringWithFormat:@"%@%@", url, @"&ctype="];
+        url = [NSString stringWithFormat:@"%@%@", url, ctype];
+        url = [NSString stringWithFormat:@"%@%@", url, @"&ctarget="];
+        url = [NSString stringWithFormat:@"%@%@", url, ctarget];
+        url = [NSString stringWithFormat:@"%@%@", url, @"&cline="];
+        url = [NSString stringWithFormat:@"%@%@", url, cline];
+        
+        
+        WFCUBrowserViewController *bvc = [[WFCUBrowserViewController alloc] init];
+        bvc.url = url;
+        
+        UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:bvc];
+        [navi presentViewController:nav animated:NO completion:^{
+            [bvc removeRightItem];
+        }];
+        
+        
+        [self notifyTyping:6];
     }
 }
 - (void)checkAndAlertCameraAccessRight {

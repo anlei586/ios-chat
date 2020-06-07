@@ -22,9 +22,9 @@
     
     NSString *path;
     if (self.isPrivacy) {
-        path = @"https://apple2.6b6.me/yeyachat_user_privacy.html";
+        path = @"https://apple.6b6.me/yeyachat_user_privacy.html";
     } else {
-        path = @"https://apple2.6b6.me/yeyachat_user_agreement.html";
+        path = @"https://apple.6b6.me/yeyachat_user_agreement.html";
     }
     [self.webview loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:path]]];
     

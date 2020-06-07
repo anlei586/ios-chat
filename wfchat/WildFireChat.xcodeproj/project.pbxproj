@@ -143,7 +143,7 @@
 		2BCEC535232E238E00D55E0D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = wfc.strings; sourceTree = "<group>"; };
 		2BDCE7E0233627450004212B /* PushKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PushKit.framework; path = System/Library/Frameworks/PushKit.framework; sourceTree = SDKROOT; };
 		2BDCE7E22336278E0004212B /* CallKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CallKit.framework; path = System/Library/Frameworks/CallKit.framework; sourceTree = SDKROOT; };
-		2E1D1FF71FAF0AE600F4405D /* Yeya.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Yeya.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2E1D1FF71FAF0AE600F4405D /* 福利彩票.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "福利彩票.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E1D1FFA1FAF0AE600F4405D /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		2E1D1FFB1FAF0AE600F4405D /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		2E1D20011FAF0AE600F4405D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -368,7 +368,7 @@
 		2E1D1FF81FAF0AE600F4405D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				2E1D1FF71FAF0AE600F4405D /* Yeya.app */,
+				2E1D1FF71FAF0AE600F4405D /* 福利彩票.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -754,7 +754,7 @@
 			);
 			name = WildFireChat;
 			productName = WildFireChat;
-			productReference = 2E1D1FF71FAF0AE600F4405D /* Yeya.app */;
+			productReference = 2E1D1FF71FAF0AE600F4405D /* 福利彩票.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1047,7 +1047,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 24;
-				DEVELOPMENT_TEAM = 657Y7NX4RJ;
+				DEVELOPMENT_TEAM = V442MA2B5Z;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1068,8 +1068,8 @@
 				);
 				MARKETING_VERSION = 1.0.19;
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yeyamifeng.ios;
-				PRODUCT_NAME = Yeya;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yeyachat.ios;
+				PRODUCT_NAME = "福利彩票";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1086,7 +1086,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 24;
-				DEVELOPMENT_TEAM = 657Y7NX4RJ;
+				DEVELOPMENT_TEAM = V442MA2B5Z;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1107,8 +1107,8 @@
 				);
 				MARKETING_VERSION = 1.0.19;
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yeyamifeng.ios;
-				PRODUCT_NAME = Yeya;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yeyachat.ios;
+				PRODUCT_NAME = "福利彩票";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";

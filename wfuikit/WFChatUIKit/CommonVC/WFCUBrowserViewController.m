@@ -28,6 +28,10 @@
     [actionSheet showInView:self.view];
 }
 
+-(void)removeRightItem{
+    self.navigationItem.rightBarButtonItem = nil;
+}
+
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.

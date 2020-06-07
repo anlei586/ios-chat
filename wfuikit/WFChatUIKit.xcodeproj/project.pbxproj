@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0F16154D248BCF3B000AF12D /* WFCURedpackCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F16154C248BCF3B000AF12D /* WFCURedpackCell.m */; };
+		0F161553248BEFE8000AF12D /* WFCURedpackCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F16154B248BCF24000AF12D /* WFCURedpackCell.h */; };
 		2BCEC52C232E10DF00D55E0D /* wfc.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2BCEC52E232E10DF00D55E0D /* wfc.strings */; };
 		2BD671A42336E821007A9FEC /* WFCUConfigManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2BD671A22336E821007A9FEC /* WFCUConfigManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2BD671A52336E821007A9FEC /* WFCUConfigManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 2BD671A32336E821007A9FEC /* WFCUConfigManager.m */; };
@@ -351,6 +353,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0F16154B248BCF24000AF12D /* WFCURedpackCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WFCURedpackCell.h; sourceTree = "<group>"; };
+		0F16154C248BCF3B000AF12D /* WFCURedpackCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WFCURedpackCell.m; sourceTree = "<group>"; };
 		2BCEC52D232E10DF00D55E0D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/wfc.strings; sourceTree = "<group>"; };
 		2BCEC52F232E10E900D55E0D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/wfc.strings"; sourceTree = "<group>"; };
 		2BD671A22336E821007A9FEC /* WFCUConfigManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WFCUConfigManager.h; sourceTree = "<group>"; };
@@ -844,6 +848,8 @@
 				2F550EC9217F5CC000F56C26 /* WFCUStickerCell.m */,
 				2F550ECA217F5CC000F56C26 /* WFCUMessageCell.m */,
 				2F550ECB217F5CC000F56C26 /* WFCUVideoCell.h */,
+				0F16154B248BCF24000AF12D /* WFCURedpackCell.h */,
+				0F16154C248BCF3B000AF12D /* WFCURedpackCell.m */,
 			);
 			path = Cell;
 			sourceTree = "<group>";
@@ -1715,6 +1721,7 @@
 				90414AFC21AF5A93008EF915 /* WFCUConversationSearchTableViewCell.h in Headers */,
 				2F55115A217F5CC200F56C26 /* SDPhotoBrowserConfig.h in Headers */,
 				2F55110C217F5CC200F56C26 /* FullScreenView.h in Headers */,
+				0F161553248BEFE8000AF12D /* WFCURedpackCell.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1975,6 +1982,7 @@
 				2F551151217F5CC200F56C26 /* KZVideoConfig.m in Sources */,
 				2F5510F3217F5CC200F56C26 /* CCHMapClusterOperation.m in Sources */,
 				2F5511F0217F5CC300F56C26 /* BubbleTipView.m in Sources */,
+				0F16154D248BCF3B000AF12D /* WFCURedpackCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

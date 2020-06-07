@@ -30,5 +30,5 @@ NSString *ICE_USERNAME = @"wfchat";
 NSString *ICE_PASSWORD = @"wfchat";
 
 NSString *jg_channel = @"default_developer";
-//NSString *jg_appKey = @"b5e48e765391b87f904e1461";
-NSString *jg_appKey = @"7843e27741cce9ebe6c090fc";
+NSString *jg_appKey = @"b5e48e765391b87f904e1461";
+//NSString *jg_appKey = @"7843e27741cce9ebe6c090fc";

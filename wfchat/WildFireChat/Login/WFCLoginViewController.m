@@ -157,14 +157,14 @@ BOOL isHideReg = NO;
     [self.regExpBtn setTitleColor:[UIColor grayColor] forState:UIControlStateSelected];
     [self.regExpBtn addTarget:self action:@selector(onExpRegContent:) forControlEvents:UIControlEventTouchDown];
     self.regExpBtn.enabled = YES;
-    /*
+    
     self.rcodeBtn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 64, 36)];
-    [self.rcodeBtn setTitle:@"官码" forState:UIControlStateNormal];
+    //[self.rcodeBtn setTitle:@"官码" forState:UIControlStateNormal];
     [self.rcodeBtn setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
     [self.rcodeBtn setTitleColor:[UIColor grayColor] forState:UIControlStateSelected];
     [self.rcodeBtn addTarget:self action:@selector(onOpenRcodeView:) forControlEvents:UIControlEventTouchDown];
     self.rcodeBtn.enabled = YES;
-    */
+    
     
     
     self.reg_userNameField = [[UITextField alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF + fieldHeight + paddingTF2Line + paddingLine2TF + 100, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight)];
@@ -256,7 +256,7 @@ BOOL isHideReg = NO;
         [ws.navigationController pushViewController:pvc animated:YES];
     }];
     
-    [self.scroll addSubview:self.privacyLabel];
+    //[self.scroll addSubview:self.privacyLabel];
 }
 
 - (void)didReceiveMemoryWarning {

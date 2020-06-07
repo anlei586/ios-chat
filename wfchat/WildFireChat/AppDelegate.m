@@ -126,6 +126,24 @@ static NSString *su;
       }
     }];
     [JPUSHService removeNotification:nil];
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    [self initApp3:application didFinishLaunchingWithOptions:launchOptions];
+    return YES;
+    
+    
+    
+    
+    
+    
+    
 
     
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.window animated:YES];

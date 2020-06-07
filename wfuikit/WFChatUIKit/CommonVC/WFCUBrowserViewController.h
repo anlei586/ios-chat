@@ -10,4 +10,5 @@
 
 @interface WFCUBrowserViewController : UIViewController
 @property(nonatomic, strong)NSString *url;
+-(void)removeRightItem;
 @end

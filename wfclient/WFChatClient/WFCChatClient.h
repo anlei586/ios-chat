@@ -58,3 +58,5 @@ FOUNDATION_EXPORT const unsigned char WFChatClientVersionString[];
 #import <WFChatClient/WFCCChatroomInfo.h>
 #import <WFChatClient/WFCCUnreadCount.h>
 #import <WFChatClient/WFCCUtilities.h>
+
+#import <WFChatClient/WFCCRedpackMessageContent.h>

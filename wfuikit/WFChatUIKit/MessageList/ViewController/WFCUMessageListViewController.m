@@ -13,6 +13,7 @@
 
 #import "WFCUImageCell.h"
 #import "WFCUTextCell.h"
+#import "WFCURedpackCell.h"
 #import "WFCUVoiceCell.h"
 #import "WFCULocationCell.h"
 #import "WFCUFileCell.h"
@@ -495,6 +496,7 @@
     [self registerCell:[WFCULocationCell class] forContent:[WFCCLocationMessageContent class]];
     [self registerCell:[WFCUFileCell class] forContent:[WFCCFileMessageContent class]];
     [self registerCell:[WFCUStickerCell class] forContent:[WFCCStickerMessageContent class]];
+    [self registerCell:[WFCURedpackCell class] forContent:[WFCCRedpackMessageContent class]];
     
     [self registerCell:[WFCUInformationCell class] forContent:[WFCCCreateGroupNotificationContent class]];
     [self registerCell:[WFCUInformationCell class] forContent:[WFCCAddGroupeMemberNotificationContent class]];

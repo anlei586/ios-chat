@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0F161552248BEEB0000AF12D /* WFCCRedpackMessageContent.h in Headers */ = {isa = PBXBuildFile; fileRef = 0FAE3A9B248BB13300B8EFE6 /* WFCCRedpackMessageContent.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0FAE3A9A248BB10500B8EFE6 /* WFCCRedpackMessageContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 0FAE3A99248BB10400B8EFE6 /* WFCCRedpackMessageContent.m */; };
 		2B5FD8792375A55800C41A72 /* WFCCPTextMessageContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 2B5FD8772375A55800C41A72 /* WFCCPTextMessageContent.m */; };
 		2B5FD87A2375A55800C41A72 /* WFCCPTextMessageContent.h in Headers */ = {isa = PBXBuildFile; fileRef = 2B5FD8782375A55800C41A72 /* WFCCPTextMessageContent.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2E6B50A01FAE98E6006B6E31 /* WFCChatClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 2E6B509E1FAE98E6006B6E31 /* WFCChatClient.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -120,6 +122,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0FAE3A99248BB10400B8EFE6 /* WFCCRedpackMessageContent.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WFCCRedpackMessageContent.m; sourceTree = "<group>"; };
+		0FAE3A9B248BB13300B8EFE6 /* WFCCRedpackMessageContent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WFCCRedpackMessageContent.h; sourceTree = "<group>"; };
 		2B5FD8772375A55800C41A72 /* WFCCPTextMessageContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WFCCPTextMessageContent.m; sourceTree = "<group>"; };
 		2B5FD8782375A55800C41A72 /* WFCCPTextMessageContent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WFCCPTextMessageContent.h; sourceTree = "<group>"; };
 		2E6B509B1FAE98E6006B6E31 /* WFChatClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = WFChatClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -360,6 +364,8 @@
 				2F48C9C3214D16240092B167 /* WFCCRecallMessageContent.m */,
 				90E4D1DD1FFB0AE200B9A4E4 /* WFCCLocationMessageContent.h */,
 				90E4D1DE1FFB0AE200B9A4E4 /* WFCCLocationMessageContent.m */,
+				0FAE3A9B248BB13300B8EFE6 /* WFCCRedpackMessageContent.h */,
+				0FAE3A99248BB10400B8EFE6 /* WFCCRedpackMessageContent.m */,
 				2E6B50E31FAE9B10006B6E31 /* WFCCTransferGroupOwnerNotificationContent.h */,
 				2E6B50E41FAE9B10006B6E31 /* WFCCTransferGroupOwnerNotificationContent.m */,
 				90B044451FEFD6BA00AFE79B /* WFCCUnknownMessageContent.h */,
@@ -491,6 +497,7 @@
 				2E6B510F1FAE9B10006B6E31 /* WFCCTransferGroupOwnerNotificationContent.h in Headers */,
 				2E6B51171FAE9B10006B6E31 /* WFCCConversationSearchInfo.h in Headers */,
 				2E6B51111FAE9B10006B6E31 /* WFCCUtilities.h in Headers */,
+				0F161552248BEEB0000AF12D /* WFCCRedpackMessageContent.h in Headers */,
 				2E6B50C61FAE9B08006B6E31 /* WFCCNetworkService.h in Headers */,
 				2E6B50C41FAE9B08006B6E31 /* WFCCIMService.h in Headers */,
 				2E6B50B31FAE990D006B6E31 /* wav_amr.h in Headers */,
@@ -640,6 +647,7 @@
 				2E6B51021FAE9B10006B6E31 /* WFCCMediaMessageContent.m in Sources */,
 				2FF2A45D22C4DBD1006A6D4C /* WFCCGroupMuteNotificationContent.m in Sources */,
 				2F8742DD219C4FED00F65EBA /* WFCCUnreadCount.m in Sources */,
+				0FAE3A9A248BB10500B8EFE6 /* WFCCRedpackMessageContent.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
