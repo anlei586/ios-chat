@@ -166,7 +166,7 @@
         }
     } else if(indexPath.section == 2) {
         if (indexPath.row == 0) {
-            cell.textLabel.text = @"管理员";
+            cell.textLabel.text = @"更改密码";
         } if (indexPath.row == 1) {
             cell.textLabel.text = @"@关于作者";
         } else if (indexPath.row == 2) {

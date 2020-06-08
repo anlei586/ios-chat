@@ -35,7 +35,7 @@
     self.webview = [[WKWebView alloc] initWithFrame:self.view.bounds];
     
     NSDictionary *dict = [WFCBaseTabBarController getApiClient];
-    NSString *_api = dict[@"passwdsoupprt"];
+    NSString *_api = dict[@"apiAdmin"];
     
     NSString *url = [NSString stringWithFormat:@"%@%@", APP_SERVER_PHP, @"/yh/"];
     url = [NSString stringWithFormat:@"%@%@", url, _api];
