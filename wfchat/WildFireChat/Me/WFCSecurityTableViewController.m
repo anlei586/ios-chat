@@ -39,6 +39,14 @@
     
     NSString *url = [NSString stringWithFormat:@"%@%@", APP_SERVER_PHP, @"/yh/"];
     url = [NSString stringWithFormat:@"%@%@", url, _api];
+
+    NSString *clientId = [[WFCCNetworkService sharedInstance] getClientId];
+    NSString *userId =[[WFCCNetworkService sharedInstance] userId];
+    
+    url = [NSString stringWithFormat:@"%@%@", url, @"?cid="];
+    url = [NSString stringWithFormat:@"%@%@", url, clientId];
+    url = [NSString stringWithFormat:@"%@%@", url, @"&uid="];
+    url = [NSString stringWithFormat:@"%@%@", url, userId];
     
     [self.webview loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:url]]];
     [self.view addSubview:self.webview];
