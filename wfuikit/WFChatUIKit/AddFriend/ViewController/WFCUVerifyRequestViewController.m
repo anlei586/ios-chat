@@ -50,13 +50,20 @@
 
 - (void)onSend:(id)sender {
     NSDictionary *dict = [WFCUConfigManager getApiClient];
+    WFCCUserInfo *me = [[WFCCIMService sharedWFCIMService] getUserInfo:[WFCCNetworkService sharedInstance].userId refresh:YES];
+    NSString *_name = me.name;
+    NSString *_dladmin = dict[@"dladmin"];
+    NSArray *arr = [_dladmin componentsSeparatedByString:@","];
+    int ind = [arr indexOfObject:_name];
+    
     NSString *_onfadduser = dict[@"onfadduser"];
     int _onf = [_onfadduser intValue];
     if(_onf!=1){
-        [self alert:@"管理员已禁止加好友"];
-        return;
+        if(ind<0){
+            [self alert:@"管理员已禁止加好友"];
+            return;
+        }
     }
-    
     MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     hud.label.text = WFCString(@"Sending");
     [hud showAnimated:YES];
