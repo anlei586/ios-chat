@@ -15,7 +15,6 @@ extern NSString *RCODE_IDK;
 extern NSString *CENTER_URL;
 
 extern NSString *IM_SERVER_HOST;
-extern int IM_SERVER_PORT;
 
 extern NSString *APP_SERVER_ADDRESS;
 extern NSString *APP_SERVER_PHP;
@@ -26,5 +25,9 @@ extern NSString *ICE_PASSWORD;
 
 extern NSString *jg_appKey;
 extern NSString *jg_channel;
+
+//用户协议和隐私政策，上线前请替换成您自己的内容
+extern NSString *USER_PRIVACY_URL = @"https://apple.6b6.me/yeyachat_user_privacy.html";
+extern NSString *USER_AGREEMENT_URL = @"https://apple.6b6.me/yeyachat_user_agreement.html";
 
 #endif /* Config_h */

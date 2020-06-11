@@ -16,7 +16,7 @@
 @property(nonatomic, strong) NSTimer *activeTimer;
 @property(nonatomic, copy) void (^touchedBlock)(WFAVCallSession *callSession);
 @property(nonatomic, strong) CTCallCenter *callCenter;
-
+@property(nonatomic, strong) NSString *focusUserId;
 @end
 
 static WFCUFloatingWindow *staticWindow = nil;
@@ -26,12 +26,13 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
 
 @implementation WFCUFloatingWindow
 
-+ (void)startCallFloatingWindow:(WFAVCallSession *)callSession
++ (void)startCallFloatingWindow:(WFAVCallSession *)callSession focusUser:(NSString *)focusUserId
               withTouchedBlock:(void (^)(WFAVCallSession *callSession))touchedBlock {
     staticWindow = [[WFCUFloatingWindow alloc] init];
     staticWindow.callSession = callSession;
     [staticWindow.callSession setDelegate:staticWindow];
     staticWindow.touchedBlock = touchedBlock;
+    staticWindow.focusUserId = focusUserId;
     [staticWindow initWindow];
 }
 
@@ -50,8 +51,8 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
     [self updateWindow];
     [self registerTelephonyEvent];
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(onOrientationChanged:)
-                                                 name:UIApplicationDidChangeStatusBarOrientationNotification
+                                             selector:@selector(onDeviceOrientationDidChange:)
+                                                 name:UIDeviceOrientationDidChangeNotification
                                                object:nil];
     [self addProximityMonitoringObserver];
 }
@@ -66,7 +67,7 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
     };
 }
 
-- (void)onOrientationChanged:(NSNotification *)notification {
+- (void)onDeviceOrientationDidChange:(NSNotification *)notification {
     [self updateWindow];
 }
 
@@ -100,6 +101,23 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
     }
 }
 
+//1.决定当前界面是否开启自动转屏，如果返回NO，后面两个方法也不会被调用，只是会支持默认的方向
+- (BOOL)shouldAutorotate {
+      return YES;
+}
+
+//2.返回支持的旋转方向
+//iPad设备上，默认返回值UIInterfaceOrientationMaskAllButUpSideDwon
+//iPad设备上，默认返回值是UIInterfaceOrientationMaskAll
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations{
+     return UIDeviceOrientationLandscapeLeft | UIDeviceOrientationLandscapeRight | UIDeviceOrientationPortrait;
+}
+
+//3.返回进入界面默认显示方向
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
+     return UIInterfaceOrientationPortrait;
+}
+
 - (void)updateWindow {
     CGFloat posX = [[[NSUserDefaults standardUserDefaults] objectForKey:kFloatingWindowPosX] floatValue];
     CGFloat posY = [[[NSUserDefaults standardUserDefaults] objectForKey:kFloatingWindowPosY] floatValue];
@@ -109,16 +127,14 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
     posX = (posX + 30) > screenBounds.size.width ? (screenBounds.size.width - 30) : posX;
     posY = (posY + 48) > screenBounds.size.height ? (screenBounds.size.height - 48) : posY;
 
-    if ([UIDevice currentDevice].orientation == UIDeviceOrientationLandscapeLeft &&
-        [self isSupportOrientation:UIInterfaceOrientationLandscapeLeft]) {
+    if ([UIDevice currentDevice].orientation == UIDeviceOrientationLandscapeLeft) {
         self.window.transform = CGAffineTransformMakeRotation(M_PI / 2);
         self.window.frame = CGRectMake(posX, posY, 64, 96);
         self.floatingButton.frame = CGRectMake(0, 0, 96, 64);
         if ([self isVideoViewEnabledSession]) {
             self.videoView.frame = CGRectMake(0, 0, 96, 64);
         }
-    } else if ([UIDevice currentDevice].orientation == UIDeviceOrientationLandscapeRight &&
-               [self isSupportOrientation:UIInterfaceOrientationLandscapeRight]) {
+    } else if ([UIDevice currentDevice].orientation == UIDeviceOrientationLandscapeRight) {
         self.window.transform = CGAffineTransformMakeRotation(-M_PI / 2);
         self.window.frame = CGRectMake(posX, posY, 64, 96);
         self.floatingButton.frame = CGRectMake(0, 0, 96, 64);
@@ -126,8 +142,7 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
             self.videoView.frame = CGRectMake(0, 0, 96, 64);
         }
     } else {
-        if ([UIDevice currentDevice].orientation == UIDeviceOrientationPortraitUpsideDown &&
-            [self isSupportOrientation:UIInterfaceOrientationPortraitUpsideDown]) {
+        if ([UIDevice currentDevice].orientation == UIDeviceOrientationPortraitUpsideDown) {
             self.window.transform = CGAffineTransformMakeRotation(M_PI);
         } else {
             self.window.transform = CGAffineTransformMakeRotation(0);
@@ -141,9 +156,14 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
     }
 
     if ([self isVideoViewEnabledSession]) {
-        if (self.callSession.state == kWFAVEngineStateConnected) {
-            [self.callSession setupRemoteVideoView:self.videoView scalingType:kWFAVVideoScalingTypeAspectBalanced];
-            [self.callSession setupLocalVideoView:nil scalingType:kWFAVVideoScalingTypeAspectBalanced];
+        if (self.callSession.state == kWFAVEngineStateOutgoing) {
+            [self.callSession setupLocalVideoView:self.videoView scalingType:kWFAVVideoScalingTypeAspectBalanced];
+        } else if (self.callSession.state == kWFAVEngineStateConnected) {
+            if ([self.focusUserId isEqualToString:[WFCCNetworkService sharedInstance].userId]) {
+                [self.callSession setupLocalVideoView:self.videoView scalingType:kWFAVVideoScalingTypeAspectBalanced];
+            } else {
+                [self.callSession setupRemoteVideoView:self.videoView scalingType:kWFAVVideoScalingTypeAspectBalanced forUser:self.focusUserId];
+            }
         } else if (self.callSession.state == kWFAVEngineStateIdle) {
             UILabel *videoStopTips =
                 [[UILabel alloc] initWithFrame:CGRectMake(0, self.videoView.frame.size.height / 2 - 10,
@@ -154,11 +174,13 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
             [self.videoView addSubview:videoStopTips];
         }
     } else {
-        if (self.callSession.state == kWFAVEngineStateConnected) {
+        if (self.callSession.state == kWFAVEngineStateIdle) {
             [self.floatingButton setBackgroundColor:[UIColor clearColor]];
-        } else if (self.callSession.state == kWFAVEngineStateIdle) {
             [self.floatingButton setTitle:WFCString(@"Ended")
                                  forState:UIControlStateNormal];
+        } else {
+            [self.floatingButton setImage:[UIImage imageNamed:@"floatingaudio"]
+            forState:UIControlStateNormal];
         }
     }
 }
@@ -210,7 +232,7 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
 - (UIButton *)floatingButton {
     if (!_floatingButton) {
         _floatingButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        if (false /*self.callSession.mediaType == Audio*/) {
+        if (self.callSession.isAudioOnly) {
             [_floatingButton setImage:[UIImage imageNamed:@"floatingaudio"]
                              forState:UIControlStateNormal];
         } else {
@@ -232,28 +254,19 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
     return _floatingButton;
 }
 
-- (BOOL)isSupportOrientation:(UIInterfaceOrientation)orientation {
-    UIInterfaceOrientationMask mask =
-        [[UIApplication sharedApplication] supportedInterfaceOrientationsForWindow:self.window];
-    return mask & (1 << orientation);
-}
-
 - (void)handlePanGestures:(UIPanGestureRecognizer *)paramSender {
     if (paramSender.state != UIGestureRecognizerStateEnded && paramSender.state != UIGestureRecognizerStateFailed) {
         CGPoint location = [paramSender locationInView:[UIApplication sharedApplication].windows[0]];
 
-        if ([UIDevice currentDevice].orientation == UIDeviceOrientationLandscapeLeft &&
-            [self isSupportOrientation:UIInterfaceOrientationLandscapeLeft]) {
+        if ([UIDevice currentDevice].orientation == UIDeviceOrientationLandscapeLeft) {
             CGFloat tmp = location.x;
             location.x = [UIScreen mainScreen].bounds.size.height - location.y;
             location.y = tmp;
-        } else if ([UIDevice currentDevice].orientation == UIDeviceOrientationLandscapeRight &&
-                   [self isSupportOrientation:UIInterfaceOrientationLandscapeRight]) {
+        } else if ([UIDevice currentDevice].orientation == UIDeviceOrientationLandscapeRight) {
             CGFloat tmp = location.x;
             location.x = location.y;
             location.y = [UIScreen mainScreen].bounds.size.width - tmp;
-        } else if ([UIDevice currentDevice].orientation == UIDeviceOrientationPortraitUpsideDown &&
-                   [self isSupportOrientation:UIInterfaceOrientationPortraitUpsideDown]) {
+        } else if ([UIDevice currentDevice].orientation == UIDeviceOrientationPortraitUpsideDown) {
             CGFloat tmp = location.x;
             location.x = [UIScreen mainScreen].bounds.size.height - location.y;
             location.y = [UIScreen mainScreen].bounds.size.width - tmp;
@@ -272,7 +285,7 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
 
         CGRect screenBounds = [UIScreen mainScreen].bounds;
         BOOL isLandscape = screenBounds.size.width > screenBounds.size.height;
-        if (isLandscape && [self isSupportOrientation:(UIInterfaceOrientation)[UIDevice currentDevice].orientation]) {
+        if (isLandscape) {
             if (frame.origin.y + frame.size.height > [UIScreen mainScreen].bounds.size.width) {
                 frame.origin.y = [UIScreen mainScreen].bounds.size.width - 2 - frame.size.height;
             }
@@ -346,11 +359,7 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
 }
 
 - (BOOL)isVideoViewEnabledSession {
-    if (YES/*self.callSession.mediaType == video && !self.callSession.isMultiCall*/) {
-        return YES;
-    } else {
-        return NO;
-    }
+    return !self.callSession.isAudioOnly;
 }
 
 #pragma mark - WFAVCallSessionDelegate
@@ -375,6 +384,17 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
     
 }
 
+- (void)didParticipantJoined:(NSString *)userId {
+    
+}
+
+- (void)didParticipantConnected:(NSString *)userId {
+    
+}
+
+- (void)didParticipantLeft:(NSString *)userId withReason:(WFAVCallEndReason)reason {
+    
+}
 - (void)didError:(NSError *)error {
     
 }
@@ -387,10 +407,16 @@ static NSString *kFloatingWindowPosY = @"kFloatingWindowPosY";
     
 }
 
-- (void)didReceiveRemoteVideoTrack:(RTCVideoTrack *)remoteVideoTrack {
+- (void)didReceiveRemoteVideoTrack:(RTCVideoTrack *)remoteVideoTrack fromUser:(NSString *)userId {
     
 }
 
+- (void)didVideoMuted:(BOOL)videoMuted fromUser:(NSString *)userId {
+    
+}
+- (void)didReportAudioVolume:(NSInteger)volume ofUser:(NSString *)userId {
+    
+}
 - (void)didChangeMode:(BOOL)isAudioOnly {
     [self.videoView removeFromSuperview];
     [self initWindow];

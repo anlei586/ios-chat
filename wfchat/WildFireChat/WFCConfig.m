@@ -25,6 +25,7 @@ int IM_SERVER_PORT = 80;
 NSString *APP_SERVER_ADDRESS = @"";//@"http://110.34.181.127:8888";
 NSString *APP_SERVER_PHP = @"";//@"http://110.34.181.127:81";
 
+
 NSString *ICE_ADDRESS = @"turn:turn.wildfirechat.cn:3478";
 NSString *ICE_USERNAME = @"wfchat";
 NSString *ICE_PASSWORD = @"wfchat";
@@ -32,3 +33,8 @@ NSString *ICE_PASSWORD = @"wfchat";
 NSString *jg_channel = @"default_developer";
 NSString *jg_appKey = @"b5e48e765391b87f904e1461";
 //NSString *jg_appKey = @"7843e27741cce9ebe6c090fc";
+
+//用户协议和隐私政策，上线前请替换成您自己的内容
+NSString *USER_PRIVACY_URL = @"https://www.wildfirechat.cn/wildfirechat_user_privacy.html";
+NSString *USER_AGREEMENT_URL = @"https://www.wildfirechat.cn/wildfirechat_user_agreement.html";
+

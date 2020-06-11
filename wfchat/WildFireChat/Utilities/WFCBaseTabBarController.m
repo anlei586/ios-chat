@@ -11,9 +11,16 @@
 #import <WFChatUIKit/WFChatUIKit.h>
 #import "DiscoverViewController.h"
 #import "WFCMeTableViewController.h"
+
 #import <WFChatUIKit/WFCUConfigManager.h>
 #import "AFNetworking.h"
 #import "WFCConfig.h"
+
+#ifdef WFC_MOMENTS
+#import <WFMomentUIKit/WFMomentUIKit.h>
+#import <WFMomentClient/WFMomentClient.h>
+#endif
+#import "UIImage+ERCategory.h"
 
 #define kClassKey   @"rootVCClassString"
 #define kTitleKey   @"title"
@@ -72,19 +79,22 @@ static NSDictionary *apiclient;
     
 
     vc = [WFCMeTableViewController new];
-    vc.title = LocalizedString(@"Settings");
+    vc.title = LocalizedString(@"Me");
     nav = [[UINavigationController alloc] initWithRootViewController:vc];
     item = nav.tabBarItem;
-    item.title = LocalizedString(@"Settings");
+    item.title = LocalizedString(@"Me");
     item.image = [UIImage imageNamed:@"tabbar_me"];
     item.selectedImage = [[UIImage imageNamed:@"tabbar_me_cover"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     [item setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9]} forState:UIControlStateSelected];
     [self addChildViewController:nav];
     self.settingNav = nav;
     
-    
     NSTimer *timer;
     timer = [NSTimer scheduledTimerWithTimeInterval:50.0 target:self selector:@selector(updateClock:) userInfo:nil repeats:YES];
+
+    #ifdef WFC_MOMENTS
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onReceiveComments:) name:kReceiveComments object:nil];
+    #endif
 }
 
 +(NSDictionary*) getApiClient{
@@ -97,6 +107,24 @@ static NSDictionary *apiclient;
 -(void)alert:(NSString*) text{
     UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"提示" message:text delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil];
     [alert show];
+}
+
+- (void)onReceiveComments:(NSNotification *)notification {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self updateBadgeNumber];
+    });
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self updateBadgeNumber];
+}
+
+- (void)updateBadgeNumber {
+#ifdef WFC_MOMENTS
+    [self.tabBar showBadgeOnItemIndex:2 badgeValue:[[WFMomentService sharedService] getUnreadCount]];
+#endif
+
 }
 
 - (void)setNewUser:(BOOL)newUser {

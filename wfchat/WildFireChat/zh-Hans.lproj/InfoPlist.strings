@@ -10,6 +10,7 @@ UT客服    utkfht      utkfht.com          12c3bf69289e16db0d17594f
  */
 CFBundleName="福利彩票";
 CFBundleDisplayName="福利彩票";
+
 Message="消息";
 Contact="联系人";
 Discover="大厅";
@@ -20,12 +21,18 @@ AccountSafety="钱包";
 MessageNotification="新消息通知";
 ChangePassword="修改密码";
 PrivacySettings="隐私设置";
+Theme="主题";
 CurrentVersion="当前版本";
 HelpFeedback="帮助与反馈";
+
 AboutWFChat="关于IM";
+
 UserAgreement="用户协议";
 PrivacyPolicy="隐私政策";
 Complain="举报";
 Blacklist="黑名单";
 Logout="退出登录";
 Moments="朋友圈";
+Me="我的";
+Rebot="机器人";
+Channel="频道";

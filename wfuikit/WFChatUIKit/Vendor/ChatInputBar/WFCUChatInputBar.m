@@ -24,6 +24,13 @@
 #import "WFCUConfigManager.h"
 #import "WFCUBrowserViewController.h"
 
+#import "MBProgressHUD.h"
+#import "UIColor+YH.h"
+#if WFCU_SUPPORT_VOIP
+#import <WFAVEngineKit/WFAVEngineKit.h>
+#endif
+
+
 #define CHAT_INPUT_BAR_PADDING 8
 #define CHAT_INPUT_BAR_ICON_SIZE (CHAT_INPUT_BAR_HEIGHT - CHAT_INPUT_BAR_PADDING - CHAT_INPUT_BAR_PADDING)
 
@@ -84,7 +91,7 @@
 @end
 
 @implementation WFCUChatInputBar
-- (instancetype)initWithParentView:(UIView *)parentView conversation:(WFCCConversation *)conversation delegate:(id<WFCUChatInputBarDelegate>)delegate {
+- (instancetype)initWithSuperView:(UIView *)parentView conversation:(WFCCConversation *)conversation delegate:(id<WFCUChatInputBarDelegate>)delegate {
     self = [super initWithFrame:CGRectMake(0, parentView.bounds.size.height - CHAT_INPUT_BAR_HEIGHT, parentView.bounds.size.width, CHAT_INPUT_BAR_HEIGHT)];
     if (self) {
         [parentView addSubview:self];
@@ -111,7 +118,7 @@
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardDidHideNotification object:nil];
-    
+    self.backgroundColor = [UIColor colorWithHexString:@"0xf7f7f7"];
     CGRect parentRect = self.bounds;
     self.voiceSwitchBtn = [[UIButton alloc] initWithFrame:CGRectMake(CHAT_INPUT_BAR_PADDING, CHAT_INPUT_BAR_PADDING, CHAT_INPUT_BAR_ICON_SIZE, CHAT_INPUT_BAR_ICON_SIZE)];
     [self.voiceSwitchBtn setImage:[UIImage imageNamed:@"chat_input_bar_voice"] forState:UIControlStateNormal];
@@ -140,10 +147,6 @@
     [self.textInputView setReturnKeyType:UIReturnKeySend];
     self.textInputView.backgroundColor = [UIColor whiteColor];
     self.textInputView.enablesReturnKeyAutomatically = YES;
-    self.textInputView.layer.cornerRadius = 4;
-    self.textInputView.layer.masksToBounds = YES;
-    self.textInputView.layer.borderWidth = 0.5f;
-    self.textInputView.layer.borderColor = HEXCOLOR(0xdbdbdd).CGColor;
     self.textInputView.userInteractionEnabled = YES;
     [self addSubview:self.textInputView];
     
@@ -156,7 +159,7 @@
     
     
     self.voiceInputBtn = [[UIButton alloc] initWithFrame:CGRectMake(CHAT_INPUT_BAR_HEIGHT, CHAT_INPUT_BAR_PADDING, parentRect.size.width - CHAT_INPUT_BAR_HEIGHT - CHAT_INPUT_BAR_HEIGHT - CHAT_INPUT_BAR_HEIGHT + CHAT_INPUT_BAR_PADDING, CHAT_INPUT_BAR_ICON_SIZE)];
-    [self.voiceInputBtn setTitle:@"按下 说话" forState:UIControlStateNormal];
+    [self.voiceInputBtn setTitle:WFCString(@"HoldToTalk") forState:UIControlStateNormal];
     [self.voiceInputBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     self.voiceInputBtn.layer.cornerRadius = 4;
     self.voiceInputBtn.layer.masksToBounds = YES;
@@ -567,6 +570,10 @@
     if (hasMentionInfo) {
         draft = text;
     }
+    //防止弹出@选项
+    if ([draft isEqualToString:@"@"]) {
+        draft = @"@ ";
+    }
     
     [self textView:self.textInputView shouldChangeTextInRange:NSMakeRange(0, 0) replacementText:draft];
     self.textInputView.text = draft;
@@ -597,6 +604,11 @@
     }
 }
 
+- (void)appendText:(NSString *)text {
+    [self textView:self.textInputView shouldChangeTextInRange:NSMakeRange(self.textInputView.text.length, 0) replacementText:text];
+    self.textInputView.text = [self.textInputView.text stringByAppendingString:text];
+}
+
 - (UIView *)emojInputView {
     if (!_emojInputView) {
         _emojInputView = [[WFCUFaceBoard alloc] init];
@@ -607,7 +619,12 @@
 
 - (UIView *)pluginInputView {
     if (!_pluginInputView) {
-        _pluginInputView = [[WFCUPluginBoardView alloc] initWithDelegate:self withVoip:(self.conversation.type == Single_Type || self.conversation.type == Group_Type)];
+#if WFCU_SUPPORT_VOIP
+        BOOL hasVoip = self.conversation.type == Single_Type || (self.conversation.type == Group_Type && [WFAVEngineKit sharedEngineKit].supportMultiCall);
+#else
+        BOOL hasVoip = NO;
+#endif
+        _pluginInputView = [[WFCUPluginBoardView alloc] initWithDelegate:self withVoip:hasVoip];
     }
     return _pluginInputView;
 }
@@ -943,6 +960,8 @@
             picker.sourceType = UIImagePickerControllerSourceTypeCamera;
         }
 #endif
+        picker.videoExportPreset = AVAssetExportPresetPassthrough;
+        picker.mediaTypes = [UIImagePickerController availableMediaTypesForSourceType:picker.sourceType];
         [navi presentViewController:picker animated:YES completion:nil];
         [self checkAndAlertCameraAccessRight];
     } else if(itemTag == 2) {
@@ -1046,13 +1065,90 @@
 }
 
 #pragma mark - UIImagePickerControllerDelegate<NSObject>
-- (void)imagePickerController:(UIImagePickerController *)picker
-        didFinishPickingImage:(UIImage *)image
-                  editingInfo:(NSDictionary *)editingInfo {
-    [picker dismissViewControllerAnimated:YES completion:nil];
-    [self.delegate imageDidCapture:image];
-}
+//- (void)imagePickerController:(UIImagePickerController *)picker
+//        didFinishPickingImage:(UIImage *)image
+//                  editingInfo:(NSDictionary *)editingInfo {
+//    [picker dismissViewControllerAnimated:YES completion:nil];
+//    [self.delegate imageDidCapture:image];
+//}
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<UIImagePickerControllerInfoKey, id> *)info {
+    NSString *mediaType = [info objectForKey:UIImagePickerControllerMediaType];
+    if([mediaType isEqualToString:@"public.movie"]) {
+        NSURL *videoURL = [info objectForKey:UIImagePickerControllerMediaURL];
+        NSString *url = [videoURL absoluteString];
+        url = [url stringByReplacingOccurrencesOfString:@"file:///private" withString:@""];
+        //获取视频的thumbnail
+        AVURLAsset *asset1 = [[AVURLAsset alloc] initWithURL:videoURL options:nil];
+        AVAssetImageGenerator *generate1 = [[AVAssetImageGenerator alloc] initWithAsset:asset1];
+        generate1.appliesPreferredTrackTransform = YES;
+        NSError *err = NULL;
+        CMTime time = CMTimeMake(1, 2);
+        CGImageRef oneRef = [generate1 copyCGImageAtTime:time actualTime:NULL error:&err];
+        UIImage *thumbnail = [[UIImage alloc] initWithCGImage:oneRef];
+        thumbnail = [WFCCUtilities generateThumbnail:thumbnail withWidth:120 withHeight:120];
+        
+        AVURLAsset *avAsset = [AVURLAsset URLAssetWithURL:videoURL options:nil];
+        NSArray *compatiblePresets = [AVAssetExportSession exportPresetsCompatibleWithAsset:avAsset];
+        
+        NSString *CompressionVideoPaht = [WFCCUtilities getDocumentPathWithComponent:@"/VIDEO"];
+        AVAssetExportSession *exportSession = [[AVAssetExportSession alloc] initWithAsset:avAsset presetName:@"AVAssetExportPresetMediumQuality"];
+        
+        NSDateFormatter *formater = [[NSDateFormatter alloc] init];// 用时间, 给文件重新命名, 防止视频存储覆盖,
+        
+        [formater setDateFormat:@"yyyy-MM-dd-HH:mm:ss"];
+        
+        NSFileManager *manager = [NSFileManager defaultManager];
+        
+        BOOL isExists = [manager fileExistsAtPath:CompressionVideoPaht];
+        if (!isExists) {
+             [manager createDirectoryAtPath:CompressionVideoPaht withIntermediateDirectories:YES attributes:nil error:nil];
+         }
+//        
+        NSString *resultPath = [CompressionVideoPaht stringByAppendingPathComponent:[NSString stringWithFormat:@"outputJFVideo-%@.mov", [formater stringFromDate:[NSDate date]]]];
+        
+        NSLog(@"resultPath = %@",resultPath);
+        
+        exportSession.outputURL = [NSURL fileURLWithPath:resultPath];
+        
+        exportSession.outputFileType = AVFileTypeMPEG4;
+        
+        exportSession.shouldOptimizeForNetworkUse = YES;
+        
+        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:picker.view animated:YES];
+        hud.label.text = @"处理中...";
+        [hud showAnimated:YES];
+        
+        __weak typeof(self)ws = self;
+        [exportSession exportAsynchronouslyWithCompletionHandler:^(void)
+         {
+             if (exportSession.status == AVAssetExportSessionStatusCompleted) {
+                 NSData *data = [NSData dataWithContentsOfFile:resultPath];
+                 float memorySize = (float)data.length / 1024 / 1024;
+                 NSLog(@"视频压缩后大小 %f", memorySize);
+                 dispatch_async(dispatch_get_main_queue(), ^{
+                     [hud hideAnimated:YES];
+                     [picker dismissViewControllerAnimated:YES completion:nil];
+                     [ws.delegate videoDidCapture:resultPath thumbnail:thumbnail duration:10];
+                 });
+             } else {
+                 dispatch_async(dispatch_get_main_queue(), ^{
+                     [hud hideAnimated:YES];
+                     [picker dismissViewControllerAnimated:YES completion:nil];
+                 });
+                 NSLog(@"压缩失败");
+             }
+             
+         }];
+        
 
+    } else if ([mediaType isEqualToString:@"public.image"]) {
+        [picker dismissViewControllerAnimated:YES completion:nil];
+        UIImage* image = [info objectForKey:UIImagePickerControllerEditedImage];
+        if (!image)
+            image = [info objectForKey:UIImagePickerControllerOriginalImage];
+        [self.delegate imageDidCapture:image];
+    }
+}
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
     [picker dismissViewControllerAnimated:YES completion:nil];
 }

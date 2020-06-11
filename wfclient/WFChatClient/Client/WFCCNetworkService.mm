@@ -26,6 +26,8 @@
 
 const NSString *SDKVERSION = @"0.1";
 extern NSMutableArray* convertProtoMessageList(const std::list<mars::stn::TMessage> &messageList, BOOL reverse);
+extern NSMutableArray* convertProtoDeliveryList(const std::map<std::string, int64_t> &userReceived);
+extern NSMutableArray* convertProtoReadedList(const std::list<mars::stn::TReadEntry> &userReceived);
 
 NSString *kGroupInfoUpdated = @"kGroupInfoUpdated";
 NSString *kGroupMemberUpdated = @"kGroupMemberUpdated";
@@ -90,11 +92,32 @@ public:
         }
     }
     
-    void onRecallMessage(const std::string operatorId, long long messageUid) {
+    void onRecallMessage(const std::string &operatorId, long long messageUid) {
         if (m_delegate) {
             [m_delegate onRecallMessage:messageUid];
         }
     }
+    
+    void onDeleteMessage(long long messageUid) {
+        if (m_delegate) {
+            [m_delegate onDeleteMessage:messageUid];
+        }
+    }
+    
+    void onUserReceivedMessage(const std::map<std::string, int64_t> &userReceived) {
+        if (m_delegate && !userReceived.empty()) {
+            NSMutableArray *ds = convertProtoDeliveryList(userReceived);
+            [m_delegate onMessageDelivered:ds];
+        }
+    }
+    
+    void onUserReadedMessage(const std::list<mars::stn::TReadEntry> &userReceived) {
+        if (m_delegate && !userReceived.empty()) {
+            NSMutableArray *ds = convertProtoReadedList(userReceived);
+            [m_delegate onMessageReaded:ds];
+        }
+    }
+    
     id<ReceiveMessageDelegate> m_delegate;
 };
 
@@ -135,7 +158,7 @@ WFCCGroupInfo* convertGroupInfo(const mars::stn::TGroupInfo &tgi) {
     groupInfo.type = (WFCCGroupType)tgi.type;
     groupInfo.target = [NSString stringWithUTF8String:tgi.target.c_str()];
     groupInfo.name = [NSString stringWithUTF8String:tgi.name.c_str()];
-    groupInfo.extra = [NSData dataWithBytes:tgi.extra.c_str() length:tgi.extra.length()];
+    groupInfo.extra = [NSString stringWithUTF8String:tgi.extra.c_str()];;
     groupInfo.portrait = [NSString stringWithUTF8String:tgi.portrait.c_str()];
     groupInfo.owner = [NSString stringWithUTF8String:tgi.owner.c_str()];
     groupInfo.memberCount = tgi.memberCount;
@@ -270,7 +293,6 @@ public:
 @property (nonatomic, strong)NSString *passwd;
 
 @property(nonatomic, strong)NSString *serverHost;
-@property(nonatomic, assign)int serverPort;
 
 @property(nonatomic, assign)UIBackgroundTaskIdentifier bgTaskId;
 @property(nonatomic, strong)NSTimer *forceConnectTimer;
@@ -312,6 +334,28 @@ static WFCCNetworkService * sharedSingleton = nil;
     appender_close();
 }
 
++ (NSArray<NSString *> *)getLogFilesPath {
+    NSString* logPath = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0] stringByAppendingString:@"/log"];
+    
+    NSFileManager *myFileManager = [NSFileManager defaultManager];
+    NSDirectoryEnumerator *myDirectoryEnumerator = [myFileManager enumeratorAtPath:logPath];
+
+    BOOL isDir = NO;
+    BOOL isExist = NO;
+
+    NSMutableArray *output = [[NSMutableArray alloc] init];
+    for (NSString *path in myDirectoryEnumerator.allObjects) {
+        isExist = [myFileManager fileExistsAtPath:[NSString stringWithFormat:@"%@/%@", logPath, path] isDirectory:&isDir];
+        if (!isDir) {
+            if ([path containsString:@"Test_"]) {
+                [output addObject:[NSString stringWithFormat:@"%@/%@", logPath, path]];
+            }
+        }
+    }
+
+    return output;
+}
+
 - (void)onRecallMessage:(long long)messageUid {
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:kRecallMessages object:@(messageUid)];
@@ -320,22 +364,56 @@ static WFCCNetworkService * sharedSingleton = nil;
         }
     });
 }
-
+- (void)onDeleteMessage:(long long)messageUid {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:kDeleteMessages object:@(messageUid)];
+        if ([self.receiveMessageDelegate respondsToSelector:@selector(onDeleteMessage:)]) {
+            [self.receiveMessageDelegate onDeleteMessage:messageUid];
+        }
+    });
+}
 - (void)onReceiveMessage:(NSArray<WFCCMessage *> *)messages hasMore:(BOOL)hasMore {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSMutableArray *messageList = [messages mutableCopy];
         for (WFCCMessage *message in messages) {
             for (id<ReceiveMessageFilter> filter in self.messageFilterList) {
-                if ([filter onReceiveMessage:message]) {
-                    [messageList removeObject:message];
+                @try {
+                    if ([filter onReceiveMessage:message]) {
+                        [messageList removeObject:message];
+                        break;
+                    }
+                } @catch (NSException *exception) {
+                    NSLog(@"%@", exception);
                     break;
                 }
+                
             }
         }
         
-        [[NSNotificationCenter defaultCenter] postNotificationName:kReceiveMessages object:messages];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kReceiveMessages object:messageList];
         [self.receiveMessageDelegate onReceiveMessage:messageList hasMore:hasMore];
     });
+}
+
+- (void)onMessageReaded:(NSArray<WFCCReadReport *> *)readeds {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMessageReaded object:readeds];
+        
+        if ([self.receiveMessageDelegate respondsToSelector:@selector(onMessageReaded:)]) {
+            [self.receiveMessageDelegate onMessageReaded:readeds];
+        }
+    });
+}
+
+- (void)onMessageDelivered:(NSArray<WFCCDeliveryReport *> *)delivereds {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMessageDelivered object:delivereds];
+        
+        if ([self.receiveMessageDelegate respondsToSelector:@selector(onMessageDelivered:)]) {
+            [self.receiveMessageDelegate onMessageDelivered:delivereds];
+        }
+    });
+    
 }
 
 - (void)addReceiveMessageFilter:(id<ReceiveMessageFilter>)filter {
@@ -365,7 +443,7 @@ static WFCCNetworkService * sharedSingleton = nil;
 - (void)onConnectionStatusChanged:(ConnectionStatus)status {
   if (!_logined || kConnectionStatusRejected == status) {
     dispatch_async(dispatch_get_global_queue(0, DISPATCH_QUEUE_PRIORITY_DEFAULT), ^{
-      [self disconnect:YES];
+      [self disconnect:YES clearSession:YES];
     });
     return;
   }
@@ -484,7 +562,12 @@ static WFCCNetworkService * sharedSingleton = nil;
 - (void)suspend {
   if(_bgTaskId != UIBackgroundTaskInvalid) {
       self.backgroudRunTime += 3;
-      if (mars::stn::GetTaskCount() > 0 && self.backgroudRunTime < 60) {
+      BOOL inCall = NO;
+      Class cls = NSClassFromString(@"WFAVEngineKit");
+      if (cls && [cls respondsToSelector:@selector(isCallActive)] && [cls performSelector:@selector(isCallActive)]) {
+          inCall = YES;
+      }
+      if ((mars::stn::GetTaskCount() > 0 && self.backgroudRunTime < 60) || (inCall && self.backgroudRunTime < 1800)) {
           [self checkBackGroundTask];
       } else {
     mars::stn::Reset();
@@ -530,7 +613,7 @@ static WFCCNetworkService * sharedSingleton = nil;
 }
 
 - (void)onAppTerminate {
-  
+    mars::stn::AppWillTerminate();
 }
 
 - (void)dealloc {
@@ -550,8 +633,8 @@ static WFCCNetworkService * sharedSingleton = nil;
   mars::stn::setRefreshSettingCallback(new GSCB(self));
   mars::baseevent::OnCreate();
 }
-- (BOOL)connect:(NSString *)host port:(int)port {
-    bool newDB = mars::stn::Connect([host UTF8String], port);
+- (BOOL)connect:(NSString *)host {
+    bool newDB = mars::stn::Connect([host UTF8String]);
     
   dispatch_async(dispatch_get_main_queue(), ^{
     if ([UIApplication sharedApplication].applicationState == UIApplicationStateBackground) {
@@ -611,6 +694,16 @@ static WFCCNetworkService * sharedSingleton = nil;
 }
 
 - (BOOL)connect:(NSString *)userId token:(NSString *)token {
+    if (_logined) {
+        for (int i = 0; i < 10; i++) {
+            xerror2(TSF"Error: 使用错误，已经connect过了，不能再次connect。如果切换用户请先disconnect，再connect。请修正改错误");
+        }
+#if DEBUG
+        exit(-1);
+#endif
+        return NO;
+    }
+    
   _logined = YES;
     mars::app::AppCallBack::Instance()->SetAccountUserName([userId UTF8String]);
     [self createMars];
@@ -623,29 +716,38 @@ static WFCCNetworkService * sharedSingleton = nil;
     self.currentConnectionStatus = kConnectionStatusConnecting;
     [[WFCCNetworkStatus sharedInstance] Start:[WFCCNetworkService sharedInstance]];
     
-    return [self connect:self.serverHost port:self.serverPort];
+    return [self connect:self.serverHost];
 }
 
-- (void)disconnect:(BOOL)clearSession {
-  _logined = NO;
+- (void)disconnect:(BOOL)disablePush clearSession:(BOOL)clearSession {
+    _logined = NO;
     self.userId = nil;
     dispatch_async(dispatch_get_main_queue(), ^{
         self.currentConnectionStatus = kConnectionStatusLogout;
     });
     [[WFCCNetworkStatus sharedInstance] Stop];
+    int flag = 0;
+    if (clearSession) {
+        flag = 8;
+    } else if(disablePush) {
+        flag = 1;
+    }
+    
   if (mars::stn::getConnectionStatus() != mars::stn::kConnectionStatusConnected && mars::stn::getConnectionStatus() != mars::stn::kConnectionStatusReceiving) {
-    mars::stn::Disconnect(clearSession ? 8 : 0);
+    mars::stn::Disconnect(flag);
     [self destroyMars];
   } else {
-    mars::stn::Disconnect(clearSession ? 8 : 0);
+    mars::stn::Disconnect(flag);
   }
 }
 
-- (void)setServerAddress:(NSString *)host port:(uint)port {
+- (void)setServerAddress:(NSString *)host {
     self.serverHost = host;
-    self.serverPort = port;
 }
 
+- (NSString *)getHost {
+    return [NSString stringWithUTF8String:mars::stn::GetHost().c_str()];
+}
 
 - (void)destroyMars {
   [[WFCCNetworkStatus sharedInstance] Stop];
@@ -755,6 +857,7 @@ static WFCCNetworkService * sharedSingleton = nil;
         mars::baseevent::OnNetworkChange();
     }
 }
+
 
 @end
 

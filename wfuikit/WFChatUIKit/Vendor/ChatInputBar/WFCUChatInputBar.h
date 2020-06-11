@@ -64,7 +64,7 @@ typedef NS_ENUM(NSInteger, ChatInputBarStatus) {
 @class WFCCConversation;
 
 @interface WFCUChatInputBar : UIView
-- (instancetype)initWithParentView:(UIView *)parentView conversation:(WFCCConversation *)conversation delegate:(id<WFCUChatInputBarDelegate>)delegate;
+- (instancetype)initWithSuperView:(UIView *)parentView conversation:(WFCCConversation *)conversation delegate:(id<WFCUChatInputBarDelegate>)delegate;
 @property(nonatomic, assign)ChatInputBarStatus inputBarStatus;
 - (void)resetInputBarStatue;
 @property(nonatomic, strong)NSString *draft;
@@ -72,4 +72,5 @@ typedef NS_ENUM(NSInteger, ChatInputBarStatus) {
 - (BOOL)appendMention:(NSString *)userId name:(NSString *)userName;
 - (void)paste:(id)sender;
 - (void)willAppear;
+- (void)appendText:(NSString *)text;
 @end

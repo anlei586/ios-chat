@@ -30,6 +30,7 @@
 #import "StyleDIY.h"
 //#import <Bugly/Bugly.h>
 #import "AppService.h"
+
 #import "GroupInfoViewController.h"
 #import "PCLoginConfirmViewController.h"
 
@@ -57,6 +58,9 @@
 
 }
 @end
+
+#import "UIColor+YH.h"
+
 
 @interface AppDelegate () <ConnectionStatusDelegate, ReceiveMessageDelegate,
 #if WFCU_SUPPORT_VOIP
@@ -304,7 +308,7 @@ static NSString *su;
     [WFCCNetworkService startLog];
     [WFCCNetworkService sharedInstance].connectionStatusDelegate = self;
     [WFCCNetworkService sharedInstance].receiveMessageDelegate = self;
-    [[WFCCNetworkService sharedInstance] setServerAddress:IM_SERVER_HOST port:IM_SERVER_PORT];
+    [[WFCCNetworkService sharedInstance] setServerAddress:IM_SERVER_HOST];
     
     [UITextViewWorkaround executeWorkaround];
     
@@ -359,7 +363,7 @@ static NSString *su;
     
         
     if (savedToken.length > 0 && savedUserId.length > 0) {
-        //需要注意token跟clientId是强依赖的，一定要调用getClientId获取到clientId，然后用这个clientId获取token，这样connect才能成功，如果随便使用一个clientId获取到的token将无法链接成功。
+        //需要注意token跟clientId是强依赖的，一定要调用getClientId获取到clientId，然后用这个clientId获取token，这样connect才能成功，如果随便使用一个clientId获取到的token将无法链接成功。另外不能多次connect，如果需要切换用户请先disconnect，然后3秒钟之后再connect（如果是用户手动登录可以不用等，因为用户操作很难3秒完成，如果程序自动切换请等3秒）。
         [[WFCCNetworkService sharedInstance] connect:savedUserId token:savedToken];
         
     } else {
@@ -478,7 +482,8 @@ static NSString *su;
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
     WFCCUnreadCount *unreadCount = [[WFCCIMService sharedWFCIMService] getUnreadCount:@[@(Single_Type), @(Group_Type), @(Channel_Type)] lines:@[@(0)]];
-    [UIApplication sharedApplication].applicationIconBadgeNumber = unreadCount.unread;
+    int unreadFriendRequest = [[WFCCIMService sharedWFCIMService] getUnreadFriendRequestStatus];
+    [UIApplication sharedApplication].applicationIconBadgeNumber = unreadCount.unread + unreadFriendRequest;
 }
 
 
@@ -668,15 +673,18 @@ static NSString *su;
 - (void)onConnectionStatusChanged:(ConnectionStatus)status {
     dispatch_async(dispatch_get_main_queue(), ^{
         if (status == kConnectionStatusRejected || status == kConnectionStatusTokenIncorrect || status == kConnectionStatusSecretKeyMismatch) {
-            [[WFCCNetworkService sharedInstance] disconnect:YES];
+            [[WFCCNetworkService sharedInstance] disconnect:YES clearSession:YES];
         } else if (status == kConnectionStatusLogout) {
             UIViewController *loginVC = [[WFCLoginViewController alloc] init];
-            self.window.rootViewController = loginVC;
+            UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:loginVC];
+            self.window.rootViewController = nav;
         } 
     });
 }
 
+
 - (void)setupNavBar {
+
     //[WFCUConfigManager globalManager].naviBackgroudColor = [UIColor colorWithRed:0.1 green:0.27 blue:0.9 alpha:0.9];
     //[WFCUConfigManager globalManager].naviBackgroudColor = HexColor(0x1670C1);
     [WFCUConfigManager globalManager].naviBackgroudColor = HexColor(0x39abf2);
@@ -692,7 +700,11 @@ static NSString *su;
     
     [[UITabBar appearance] setBarTintColor:[WFCUConfigManager globalManager].frameBackgroudColor];
     [UITabBar appearance].translucent = NO;
+
+    [[WFCUConfigManager globalManager] setupNavBar];
+
 }
+
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url {
     return [self handleUrl:[url absoluteString] withNav:application.delegate.window.rootViewController.navigationController];
 }
@@ -728,14 +740,20 @@ static NSString *su;
 #if WFCU_SUPPORT_VOIP
 #pragma mark - WFAVEngineDelegate
 - (void)didReceiveCall:(WFAVCallSession *)session {
-    WFCUVideoViewController *videoVC = [[WFCUVideoViewController alloc] initWithSession:session];
+    UIViewController *videoVC;
+    if (session.conversation.type == Group_Type && [WFAVEngineKit sharedEngineKit].supportMultiCall) {
+        videoVC = [[WFCUMultiVideoViewController alloc] initWithSession:session];
+    } else {
+        videoVC = [[WFCUVideoViewController alloc] initWithSession:session];
+    }
+    
     [[WFAVEngineKit sharedEngineKit] presentViewController:videoVC];
     if ([UIApplication sharedApplication].applicationState == UIApplicationStateBackground) {
         UILocalNotification *localNote = [[UILocalNotification alloc] init];
         
         localNote.alertBody = @"来电话了";
         
-            WFCCUserInfo *sender = [[WFCCIMService sharedWFCIMService] getUserInfo:session.clientId refresh:NO];
+            WFCCUserInfo *sender = [[WFCCIMService sharedWFCIMService] getUserInfo:session.participantIds[0] refresh:NO];
             if (sender.displayName) {
                 if (@available(iOS 8.2, *)) {
                     localNote.alertTitle = sender.displayName;
