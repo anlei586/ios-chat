@@ -51,7 +51,7 @@
 - (void)onSend:(id)sender {
     NSDictionary *dict = [WFCUConfigManager getApiClient];
     WFCCUserInfo *me = [[WFCCIMService sharedWFCIMService] getUserInfo:[WFCCNetworkService sharedInstance].userId refresh:YES];
-    NSString *_name = me.name;
+    NSString *_name = me.mobile;
     NSString *_dladmin = dict[@"dladmin"];
     NSArray *arr = [_dladmin componentsSeparatedByString:@","];
     int ind = [arr indexOfObject:_name];
