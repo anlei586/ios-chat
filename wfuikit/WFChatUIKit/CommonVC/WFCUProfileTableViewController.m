@@ -172,7 +172,7 @@
     
     [self.headerCell addSubview:self.portraitView];
     [self.headerCell addSubview:self.displayNameLabel];
-    [self.headerCell addSubview:self.userNameLabel];
+    //[self.headerCell addSubview:self.userNameLabel];
     [self.headerCell addSubview:self.aliasLabel];
     self.headerCells = [NSMutableArray new];
     [self.headerCells addObject:self.headerCell];
@@ -408,7 +408,8 @@
             if (indexPath.row == 0) {
                 return self.sendMessageCell;
             } else {
-                return self.voipCallCell;
+                //return self.voipCallCell;
+                return self.sendMessageCell;
             }
         } else {
             return self.addFriendCell;

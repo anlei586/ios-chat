@@ -27,7 +27,7 @@ extern NSString *jg_appKey;
 extern NSString *jg_channel;
 
 //用户协议和隐私政策，上线前请替换成您自己的内容
-extern NSString *USER_PRIVACY_URL = @"https://apple.6b6.me/yeyachat_user_privacy.html";
-extern NSString *USER_AGREEMENT_URL = @"https://apple.6b6.me/yeyachat_user_agreement.html";
+extern NSString *USER_PRIVACY_URL;
+extern NSString *USER_AGREEMENT_URL;
 
 #endif /* Config_h */

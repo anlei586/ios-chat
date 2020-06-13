@@ -159,9 +159,6 @@
         }
         
         [[WFCCIMService sharedWFCIMService] searchUser:searchString
-
-                                                 fuzzy:fuzzy
-
                                             searchType:SearchUserType_Name_Mobile
                                                   page:0
 

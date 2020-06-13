@@ -95,13 +95,15 @@ BOOL isHideReg = NO;
     CGFloat inputHeight = 40;
     CGFloat hintHeight = 26;
     CGFloat topPos = kStatusBarAndNavigationBarHeight + 45;
+    CGFloat paddingTF2Line = 20;
+    CGFloat paddingLine2TF = 20;
     
     self.hintLabel = [[UILabel alloc] initWithFrame:CGRectMake(paddingEdge, topPos, bgRect.size.width - paddingEdge - paddingEdge, hintHeight)];
     [self.hintLabel setText:@"手机号登录"];
     self.hintLabel.textAlignment = NSTextAlignmentLeft;
     self.hintLabel.font = [UIFont pingFangSCWithWeight:FontWeightStyleRegular size:hintHeight];
     
-    CGFloat topPos = kStatusBarAndNavigationBarHeight + 0;
+    topPos = kStatusBarAndNavigationBarHeight + 0;
     CGFloat fieldHeight = 25;
     
     self.scroll = [[UIScrollView alloc]initWithFrame:bgRect];
@@ -122,7 +124,7 @@ BOOL isHideReg = NO;
     userNameLabel.text = @"手机号";
     userNameLabel.font = [UIFont pingFangSCWithWeight:FontWeightStyleRegular size:17];
     
-    self.userNameLine = [[UIView alloc] initWithFrame:CGRectMake(0, inputHeight - 1, userNameContainer.frame.size.width, 1.f)];
+    self.userNameLine = [[UIView alloc] initWithFrame:CGRectMake(paddingEdge, topPos + fieldHeight + 4, userNameContainer.frame.size.width, 1.f)];
     self.userNameLine.backgroundColor = [UIColor colorWithHexString:@"0xd4d4d4"];
     
     
@@ -135,17 +137,19 @@ BOOL isHideReg = NO;
     self.userNameField.clearButtonMode = UITextFieldViewModeWhileEditing;
     [self.userNameField addTarget:self action:@selector(textDidChange:) forControlEvents:UIControlEventEditingChanged];
     
-    topPos += inputHeight + 1;
+    
 
     UIView *passwordContainer  = [[UIView alloc] initWithFrame:CGRectMake(paddingEdge, topPos, bgRect.size.width - paddingEdge * 2, inputHeight)];
     UILabel *passwordLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 52, inputHeight - 1)];
     passwordLabel.text = @"验证码";
     passwordLabel.font = [UIFont pingFangSCWithWeight:FontWeightStyleRegular size:17];
     
+    //topPos += inputHeight + 1;
     
-    self.passwordLine = [[UIView alloc] initWithFrame:CGRectMake(0, inputHeight - 1, passwordContainer.frame.size.width, 1.f)];
+    self.passwordLine = [[UIView alloc] initWithFrame:CGRectMake(paddingEdge, topPos + fieldHeight*3.6, passwordContainer.frame.size.width, 1.f)];
     self.passwordLine.backgroundColor = [UIColor colorWithHexString:@"0xd4d4d4"];
     
+
     self.passwordField = [[UITextField alloc] initWithFrame:CGRectMake(paddingEdge, topPos + paddingTF2Line + fieldHeight + paddingLine2TF, bgRect.size.width - paddingEdge - paddingEdge, fieldHeight)];
     self.passwordField.placeholder = @"密码(6位字母或数字)";
 

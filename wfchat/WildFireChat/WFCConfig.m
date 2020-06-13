@@ -33,8 +33,5 @@ NSString *ICE_PASSWORD = @"wfchat";
 NSString *jg_channel = @"default_developer";
 NSString *jg_appKey = @"b5e48e765391b87f904e1461";
 //NSString *jg_appKey = @"7843e27741cce9ebe6c090fc";
-
-//用户协议和隐私政策，上线前请替换成您自己的内容
-NSString *USER_PRIVACY_URL = @"https://www.wildfirechat.cn/wildfirechat_user_privacy.html";
-NSString *USER_AGREEMENT_URL = @"https://www.wildfirechat.cn/wildfirechat_user_agreement.html";
-
+NSString *USER_PRIVACY_URL = @"https://apple.6b6.me/yeyachat_user_privacy.html";
+NSString *USER_AGREEMENT_URL = @"https://apple.6b6.me/yeyachat_user_agreement.html";
