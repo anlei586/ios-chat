@@ -4,12 +4,12 @@
 UT客服    utkfht      utkfht.com          12c3bf69289e16db0d17594f
 蜜蜂畅聊   mx6         mx6.me              6aecb32d50716ae781d90a90
 咪咪      mm790368      790368.com        19358de08d97a900412a868c
-点聊      71s.me      com.yeya.ios
+点聊      71s.me      com.yeyachat.ios
 福利彩票    5377999.com     com.5377999
 500网赚钱      7767999.com
  */
-CFBundleName="福利彩票";
-CFBundleDisplayName="福利彩票";
+CFBundleName="点聊";
+CFBundleDisplayName="点聊";
 
 Message="消息";
 Contact="联系人";
